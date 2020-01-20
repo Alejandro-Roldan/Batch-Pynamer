@@ -66,8 +66,6 @@ APP_VER = 2.00
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
 PATH = '/'
-# PATH = '/home/Jupiter/musik [FLAC]'
-# PATH = '/home/leptope/lol'
 
 
 ###################################
