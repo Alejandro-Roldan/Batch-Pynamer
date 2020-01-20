@@ -61,7 +61,7 @@ from tkinter import ttk
 '''
 ###################################
 
-APP_NAME = 'Batch Renamer'
+APP_NAME = 'Batch-Renamer-py'
 APP_VER = 2.00
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
