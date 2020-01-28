@@ -77,9 +77,7 @@ APP_NAME = 'Batch Renamer'
 APP_VER = 2.05
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
-# PATH = '/'
-PATH = '/home/Jupiter/musik [FLAC]'
-# PATH = '/home/leptope/lol'
+PATH = '/'
 
 
 ###################################
