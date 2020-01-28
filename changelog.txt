@@ -1,0 +1,46 @@
+V. 02.05:
+	- Now it's possible to change MP3s metadata too
+	- Fixed bug that didn't let you open the extended regular expressions window
+	- Changed the visuals of the extended regular expression window so it's consistent with the rest of the program
+	- Extended the treeviews to fill the whole horizontal space
+	- Metadata modules are now optional to run the program. If they are not installed you are still able to use the rest of the functionalities
+	- Untabbed comments where necessary so they don't hide when automatic code foding (a bit of a failure though, still folds the bullet points inside the comments)
+
+V. 02:
+	- Added a scrollbar for the metadata entries widget so when a file has many entries it doesnt make a bigger window
+	- Got rid of "from tkinter import *" for a better "import tkinter as tk"
+	- Removed extra imports that weren't being used
+	- Changed spinboxes from tk to ttk so they use the same color pallette as the rest of the program
+	- Extended the info bar across the whole window horizontally
+
+V. 01.02:
+	- Added an info bar at the bottom to show number of items and number of selected items plus a last action message
+	- Optimized the number of for loops that the program goes trough
+	- Cleaner code, separated in more functions
+
+V. 01.01:
+	- Created an entry list that stays in the ui constantly
+	- Organized the widgets in a more packed way
+
+V. 01:
+	- Fixed bug where the metadata image wouldn't show
+	- First mostly Totally working version
+	- Cleaner code
+
+V. b.1.0.3:
+	- Clean and organize the classes for an easier use and more object oriented
+	- Added permanent image display size
+	- Added entry for the new image to replace
+	- Added label to show metadata image size or if there is no image or different images in diferent selected files
+
+V. a.0.2:
+	- Reorganize the functions and methods
+	- Create the Metadata structure and class
+	- Added metadata entries list
+	- Added metadata image
+	
+V. a.0.1:
+	- First basic running version of the program
+	- All the rename widget created
+	- Treeview and file selection created
+	- Final Rename button created and working
