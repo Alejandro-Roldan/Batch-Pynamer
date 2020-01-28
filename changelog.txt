@@ -8,6 +8,8 @@ V. 02.05:
 
 V. 02:
 	- Added a scrollbar for the metadata entries widget so when a file has many entries it doesnt make a bigger window
+	- Added an entry at the top of the treeviews to see the path of the active folder and being able to acess any folder writing its path and hiting return
+	- Added a button to refresh the folder treeview at will
 	- Got rid of "from tkinter import *" for a better "import tkinter as tk"
 	- Removed extra imports that weren't being used
 	- Changed spinboxes from tk to ttk so they use the same color pallette as the rest of the program
