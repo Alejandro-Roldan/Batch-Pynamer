@@ -101,10 +101,7 @@ COMMAND_CONF = configparser.ConfigParser()
 COMMAND_CONF.read(COMMAND_CONF_FILE)
 
 
-# PATH = '/'
-# PATH = '/home/Jupiter'
-PATH = '/home/Jupiter/musik [FLAC]'
-# PATH = '/home/leptope/lol'
+PATH = '/'
 
 
 ###################################
