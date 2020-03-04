@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import time
 import os
 import shutil
 import pathlib
