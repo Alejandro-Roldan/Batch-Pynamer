@@ -1,3 +1,23 @@
+V. 02.07:
+	- Added Menu Bar
+	- Added File menu
+	- Added Selection Menu
+	- Added Comands support (saving, loading, chain commands and applying directly)
+	- Added About menu button
+	- When you Apply a command it doesn't lose the entries configuration that you had
+	- Added Undo Name Changes functionality
+	- Added Error Pop Up window
+	- Added several error handlings when there is no selection and corresponding info msgs
+	- Added code comments
+
+V. 02.06:
+	- Fixed bug where the spinbox that should begin at 1 would initialize at 0. I have solved it for my program by adding a line right after creation that sets them to 1, but it's something that the tkinter developers should fix themselves. Now I remember that's why I used tk.spinbox instead of ttk.spinbox
+	- Made the metadata tab extend across the whole horizontal space
+	- Made the labels in the metadata entry list not exceed a certain size
+	- Added Info Bar Message when you refresh the folder navigation treeview
+	- Added Info Bar Message when you copy a file path with right click over it
+	- Added code comments
+
 V. 02.05:
 	- Now it's possible to change MP3s metadata too
 	- Fixed bug that didn't let you open the extended regular expressions window
@@ -7,7 +27,7 @@ V. 02.05:
 	- Untabbed comments where necessary so they don't hide when automatic code foding (a bit of a failure though, still folds the bullet points inside the comments)
 
 V. 02:
-	- Added a scrollbar for the metadata entries widget so when a file has many entries it doesnt make a bigger window
+	- Added a scrollbar for the metadata entries widget so when a file has many entries it doesn't make a bigger window
 	- Added an entry at the top of the treeviews to see the path of the active folder and being able to acess any folder writing its path and hiting return
 	- Added a button to refresh the folder treeview at will
 	- Got rid of "from tkinter import *" for a better "import tkinter as tk"
