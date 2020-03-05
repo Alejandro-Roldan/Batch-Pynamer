@@ -10,4 +10,6 @@ Dependencies for the metadata:
   - mutagen
   
   - PIL
-![Alt text](BatchRenamerpy-Metadata_Screen.png?raw=true "Title")
+
+![Alt text](BatchRenamerpy-Rename_Screen.png?raw=true "Program Screenshot for the Rename Tab")
+![Alt text](BatchRenamerpy-Metadata_Screen.png?raw=true "Program Screenshot for the Metadata Tab")
