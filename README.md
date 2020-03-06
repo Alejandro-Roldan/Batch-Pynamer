@@ -14,14 +14,19 @@ Program Screenshots
 
 Dependencies
 ------------
-* Python ('>=3.7')
+* Python (`>=3.7`)
 
 ### Optional Dependencies
 
 For the metadata:
 
 * mutagen 
-* PIL
+* Pillow
+
+You can install them using pip
+```
+pip install *packagename*
+```
 
 
 Installing
