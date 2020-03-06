@@ -8,8 +8,8 @@ Probably the only changes needed to make it run on windows is change the PATH co
 
 Program Screenshots
 -------------------
-![screenshot](BatchRenamerpy-Rename_Screen.png?raw=true "Program Screenshot for the Rename Tab")
-![screenshot](BatchRenamerpy-Metadata_Screen.png?raw=true "Program Screenshot for the Metadata Tab")
+![screenshot](/doc/BatchRenamerpy-Rename_Screen.png?raw=true "Program Screenshot for the Rename Tab")
+![screenshot](/doc/BatchRenamerpy-Metadata_Screen.png?raw=true "Program Screenshot for the Metadata Tab")
 
 
 Dependencies
