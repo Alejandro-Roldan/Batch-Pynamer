@@ -22,9 +22,10 @@ try:
     # Change import name for code clarity
     from mutagen.flac import Picture as FlacPicture
 
-    from mutagen.easyid3 import EasyID3
+    from mutagen.easyid3 import EasyID3, EasyID3KeyError
     from mutagen.id3 import ID3, APIC
     from mutagen.mp3 import MP3
+
 
     from io import BytesIO
     import PIL
@@ -106,7 +107,13 @@ COMMAND_CONF = configparser.ConfigParser()
 COMMAND_CONF.read(COMMAND_CONF_FILE)
 
 
-PATH = '/'
+# PATH = '/'
+# PATH = '/home/Jupiter'
+PATH = '/home/Jupiter/Music'
+# PATH = '/home/Mars/Music'
+# PATH = '/home/leptope/lol'
+# PATH = '/home/leptope/Music'
+
 
 ###################################
 '''
@@ -131,7 +138,7 @@ class VerticalScrolledFrame(ttk.Frame):
                             self, bd=0,
                             background='gray85',
                             highlightthickness=0,
-                            yscrollcommand=vscrollbar.set
+                            yscrollcommand=vscrollbar.set,
                             )
         canvas.pack(side='left', fill='both', expand='true')
         vscrollbar.config(command=canvas.yview)
@@ -383,7 +390,7 @@ class Top_Menu:
         # Save current variable values entries as command
         self.command_menu.add_command(
                                         label='Save Field States to Command',
-                                        command=lambda: Save_Command_Name_Window(root)
+                                        command=Save_Command_Name_Window
                                         )
 
         # Load selected command
@@ -949,9 +956,6 @@ class Reg_Exp:    # (1)
         # Variable defs
         self.match_reg = tk.StringVar()
         self.replace_with = tk.StringVar()
-
-        # self.match_reg = var_field_dict['match_reg']
-        # self.replace_with = var_field_dict['replace_with']
 
         # Match, entry
         ttk.Label(self.lf, text="Match").grid(column=0, row=0, sticky='w')
@@ -2926,12 +2930,47 @@ METADATA CLASSES
 
 class Metadata_ListEntries:
     def __init__(self, master, *args, **kwargs):
-        self.frame = VerticalScrolledFrame(master)
+        self.frame = ttk.Frame(master)
         self.frame.grid(column=0, row=0, sticky='nsw')
+
+        self.frame.grid(sticky='n'+'s')
+        self.frame.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(1, weight=1)
+
+        self.field_frame = VerticalScrolledFrame(self.frame)
+        # self.field_frame = VerticalScrolledFrame(master)
+        self.field_frame.grid(
+                                column=0, row=0, columnspan=3,
+                                pady=3, sticky='nsw'
+                                )
+
+        self.new_tag_name = tk.StringVar()
+
+        ttk.Label(self.frame, text='New Tag Name').grid(
+                                                        column=0,
+                                                        row=1,
+                                                        )
+        self.new_tag_name_entry = ttk.Entry(
+                                            self.frame,
+                                            textvariable=self.new_tag_name,
+                                            # anchor='w'
+                                            )
+        self.new_tag_name_entry.grid(column=1, row=1, sticky='w'+'e')
+        # Add new tag, button
+        self.add_field_button = ttk.Button(
+                                            self.frame,
+                                            width=5,
+                                            text="Add",
+                                            command=self.createMetadataTag
+                                            )
+        self.add_field_button.grid(column=2, row=1, sticky='se')
 
         self.metaDictReset()
 
         self.metadataEntriesCreate()
+
+    def newTagNameGet(self, *args, **kwargs):
+        return self.new_tag_name.get()
 
     def metaDictTextGet(self, key, *args, **kwargs):
         return self.meta_dict[key].get()
@@ -3003,7 +3042,7 @@ class Metadata_ListEntries:
         Reset the entry list by deleting all widgets inside
         the entry widget
         '''
-        for child in self.frame.interior.winfo_children():
+        for child in self.field_frame.interior.winfo_children():
             child.destroy()
 
     def metadataSelect(self, *args, **kwargs):
@@ -3017,19 +3056,46 @@ class Metadata_ListEntries:
         self.metadataEntriesCreate()
         
     def metadataEntriesCreate(self, *args, **kwargs):
+        ''' Create the metadata list entries with their values'''
         n = 0
         for key in self.meta_dict:
-            ttk.Label(self.frame.interior, text=key, width=25, anchor='e').grid(
-                                                        column=0,
-                                                        row=n,
-                                                        )
+            ttk.Label(
+                        self.field_frame.interior,
+                        text=key, width=25, anchor='e'
+                        ).grid(column=0, row=n)
+
             ttk.Entry(
-                        self.frame.interior,
+                        self.field_frame.interior,
                         width=55,
                         textvariable=self.meta_dict[key]
                         ).grid(column=1, row=n, sticky='e')
 
             n += 1
+
+    def createMetadataTag(self, *args, **kwargs):
+        '''
+            Adds a new tag to the metadata tags entries list if the tag
+            name is not empty.
+        '''
+        tag_name = self.newTagNameGet()
+
+        if tag_name:
+            self.meta_dict[tag_name] = tk.StringVar()
+            n = len(self.meta_dict)
+
+            ttk.Label(
+                        self.field_frame.interior,
+                        text=tag_name, width=25, anchor='e'
+                        ).grid(column=0, row=n)
+            ttk.Entry(
+                        self.field_frame.interior,
+                        width=55,
+                        textvariable=self.meta_dict[tag_name]
+                        ).grid(column=1, row=n, sticky='e')
+
+        else:
+            msg = 'No name for the new tag. Please type a name'
+            inf_bar.lastActionRefresh(msg)
 
 
 class Metadata_Img:
@@ -3202,7 +3268,16 @@ class Apply_Changes:
         # if there is more than one value for the field, skip it
         if ';' not in value:
             if value:
-                meta_audio[key] = value
+                # Tags can have any name in vorbis comment (flac metadata) but
+                # not in ID3 (mp3 metadata), so if you try adding a tag with a
+                # name thats not accepted in ID3 it'll raise and error
+                try:
+                    meta_audio[key] = value
+                except EasyID3KeyError as e:
+                    # print('Undefined Tag name "{}" with value "{}"
+                    # for ID3. Skipped'.format(key, value))
+                    print('Undefined Tag name "{}" for ID3. Skipped'.format(key))
+
             # Delete empty values only when they exist in the metadata
             # of the file
             elif not value and key in meta_audio:
@@ -3393,8 +3468,8 @@ CONFIG, LOGS & COMMAND FILES
 ###################################
 
 class Save_Command_Name_Window:
-    def __init__(self, master, *args, **kwargs):
-        self.frame = tk.Toplevel(master, bg='gray85')
+    def __init__(self, *args, **kwargs):
+        self.frame = tk.Toplevel(root, bg='gray85')
         self.frame.title('Choose Name for Command')
         self.frame.attributes('-type', 'dialog')
 

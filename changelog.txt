@@ -1,6 +1,8 @@
 V. 03:
 	- Added the function to format the tracknumber metadata field to remove anything after "/" (inclusive) and add 0s left pading to have 2 digits
 	- Added File Menu Function to format the tracknumber
+	- Added ability to create new metadata tags
+	- Added Error Handling for ID3 when the tag doesn't have an valid name
 	- Ordered functions in new groups that make more sense
 
 V. 02.08:
@@ -36,11 +38,11 @@ V. 02.05:
 	- Changed the visuals of the extended regular expression window so it's consistent with the rest of the program
 	- Extended the treeviews to fill the whole horizontal space
 	- Metadata modules are now optional to run the program. If they are not installed you are still able to use the rest of the functionalities
-	- Untabbed comments where necessary so they don't hide when automatic code foding (a bit of a failure though, still folds the bullet points inside the comments)
+	- Untabbed comments where necessary so they don't hide when automatic code folding (a bit of a failure though, still folds the bullet points inside the comments)
 
 V. 02:
 	- Added a scrollbar for the metadata entries widget so when a file has many entries it doesn't make a bigger window
-	- Added an entry at the top of the treeviews to see the path of the active folder and being able to acess any folder writing its path and hiting return
+	- Added an entry at the top of the treeviews to see the path of the active folder and being able to access any folder writing its path and hiting return
 	- Added a button to refresh the folder treeview at will
 	- Got rid of "from tkinter import *" for a better "import tkinter as tk"
 	- Removed extra imports that weren't being used
