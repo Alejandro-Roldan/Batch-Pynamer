@@ -1,3 +1,14 @@
+V. 03:
+	- Added the function to format the tracknumber metadata field to remove anything after "/" (inclusive) and add 0s left pading to have 2 digits
+	- Added File Menu Function to format the tracknumber
+	- Ordered functions in new groups that make more sense
+
+V. 02.08:
+	- Changed the configuration folder path to have a "/" at the end
+	- Fixed bug where the file menu option "Refresh Tree" would just empty the tree instead of refreshing it
+	- Fixed bug where you wouldn't be able to use the rename application without the metadata imports caused by the options in the menu bar
+	- Created Error class for trying to rename to an already existing file name
+
 V. 02.07:
 	- Changed Naming convention for the main file to just be BatchRenamerpy.py
 	- Added Menu Bar

@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import os
 import shutil
 import pathlib
 import configparser
 
-import webbrowser   # to open the About menu
+import webbrowser   # for the About menu
 
 import string
 import unicodedata
@@ -16,7 +16,7 @@ from tkinter import ttk
 
 # All previous imports are basic python libraries
 
-# Import for the metadata optional
+# Import for the metadata, optional
 try:
     from mutagen.flac import FLAC
     # Change import name for code clarity
@@ -27,12 +27,12 @@ try:
     from mutagen.mp3 import MP3
 
     from io import BytesIO
-    import PIL.ImageTk
     import PIL
+    import PIL.ImageTk
 
     METADATA_IMPORT = True
 
-except ImportError as e:
+except ImportError:
     METADATA_IMPORT = False
 
 
@@ -40,7 +40,10 @@ except ImportError as e:
 '''
     INDEX:
         - Vertical Scrollable Frame
+        - Error Frame
+        - Last Rename
 
+        - Menubar
         - Tree System Navigation
         - File Folder Navigation
         - Directory entry for File Folder Navigation
@@ -63,13 +66,15 @@ except ImportError as e:
         - Metadata image frame
         - Metadata changes applier frame
 
+        - Config, logs & commands classes and functions
+
         - General functions
 
         - Main function
 
     KNOWN BUGS:
         ttk.Spinbox starts from 0 even if its minimal value (from_) is set up
-        to other number higher than that. SOLVED but its a buf from tkinter
+        to other number higher than that. SOLVED but its a bug from tkinter
         not my part
 '''
 ###############################################################################
@@ -82,26 +87,31 @@ GLOBAL CONSTANTS
 ###################################
 
 APP_NAME = 'Batch Renamer'
-APP_VER = 2.07
+APP_VER = 2.08
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
 
 PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Renamer-py'
 
 
-CONFIG_FOLDER_PATH = os.path.expanduser('~/.config/batchrenamepy')
+CONFIG_FOLDER_PATH = os.path.expanduser('~/.config/batchrenamepy/')
 
 
 # Multi Purpose  configparser object
 CONFIGPARSER_OBJECT = configparser.ConfigParser()
 
 # Configparser object for loading the commands
-COMMAND_CONF_FILE = CONFIG_FOLDER_PATH + '/' + 'commands.conf'
+COMMAND_CONF_FILE = CONFIG_FOLDER_PATH + 'commands.conf'
 COMMAND_CONF = configparser.ConfigParser()
 COMMAND_CONF.read(COMMAND_CONF_FILE)
 
 
-PATH = '/'
+# PATH = '/'
+# PATH = '/home/Jupiter'
+# PATH = '/home/Jupiter/Music'
+# PATH = '/home/Mars/Music'
+PATH = '/home/leptope/lol'
+# PATH = '/home/leptope/Music'
 
 
 ###################################
@@ -123,8 +133,12 @@ class VerticalScrolledFrame(ttk.Frame):
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = ttk.Scrollbar(self, orient='vertical')
         vscrollbar.pack(fill='y', side='right', expand='false')
-        canvas = tk.Canvas(self, bd=0, background='gray85', highlightthickness=0,
-                        yscrollcommand=vscrollbar.set)
+        canvas = tk.Canvas(
+                            self, bd=0,
+                            background='gray85',
+                            highlightthickness=0,
+                            yscrollcommand=vscrollbar.set
+                            )
         canvas.pack(side='left', fill='both', expand='true')
         vscrollbar.config(command=canvas.yview)
 
@@ -154,6 +168,7 @@ class VerticalScrolledFrame(ttk.Frame):
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
 
+
 class Error_Frame:
     def __init__(self, master, error_desc='', *args, **kwargs):
         self.error_frame = tk.Toplevel(master, bg='gray85')
@@ -170,6 +185,7 @@ class Error_Frame:
                     text="Okay",
                     command=self.error_frame.destroy
                     ).grid(column=0, row=1)
+
 
 class Last_Rename:
     def __init__(self, *args, **kwargs):
@@ -197,6 +213,16 @@ class Last_Rename:
 
     def __str__(self, *args, **kwargs):
         return str(self.last_rename_list)
+
+
+class Error(Exception):
+    ''' Base class for other exceptions '''
+    pass
+
+
+class NamingError(Error):
+    ''' Raised when the new file name is already in use '''
+    pass
 
 
 
@@ -258,27 +284,35 @@ class Top_Menu:
         # Separator
         self.file_menu.add_separator()
         
-        # Apply Metadata Changes
-        self.file_menu.add_command(
-                                    label='Apply Metadata Changes',
-                                    command=nb.apply_changes.metaChangesCall,
-                                    # state='disabled'
-                                    )
+        # Create the metadata menu options only if the metadata modification
+        # is active (the dependencies have been exported)
+        if METADATA_IMPORT:
+            # Apply Metadata Changes
+            self.file_menu.add_command(
+                                        label='Apply Metadata Changes',
+                                        command=nb.apply_changes.metaChangesCall,
+                                        )
 
-        # Apply Image Metadata
-        self.file_menu.add_command(
-                                    label='Apply Image Metadata Change',
-                                    command=nb.apply_changes.imgChangesCall
-                                    )
+            # Apply Image Metadata
+            self.file_menu.add_command(
+                                        label='Apply Image Metadata Change',
+                                        command=nb.apply_changes.imgChangesCall
+                                        )
 
-        # Apply Both Image & Metadata Changes
-        self.file_menu.add_command(
-                                    label='Apply Both Image & Metadata Changes',
-                                    command=nb.apply_changes.allChangesCall
-                                    )
+            # Apply Both Image & Metadata Changes
+            self.file_menu.add_command(
+                                        label='Apply Both Image & Metadata Changes',
+                                        command=nb.apply_changes.allChangesCall
+                                        )
 
-        # Separator
-        self.file_menu.add_separator()
+            # Format tracknumber metadata field
+            self.file_menu.add_command(
+                                        label='Format "tracknumber"',
+                                        command=Format_Track_Num_Meta
+                                        )
+
+            # Separator
+            self.file_menu.add_separator()
         
         # Refresh Files
         self.file_menu.add_command(
@@ -289,7 +323,7 @@ class Top_Menu:
         # Refresh Tree
         self.file_menu.add_command(
                                     label='Refresh Tree',
-                                    command=folder_treeview.updateNode
+                                    command=dir_entry_frame.folderNavRefresh
                                     )
 
         # Separator
@@ -415,20 +449,24 @@ class Top_Menu:
         self.file_menu.entryconfigure(index=2, state='disable')
 
     def metadataEnable(self, *args, **kwargs):
-        self.file_menu.entryconfigure(index=4, state='active')
-        self.file_menu.entryconfigure(index=5, state='active')
-        self.file_menu.entryconfigure(index=6, state='active')
+        if METADATA_IMPORT:
+            self.file_menu.entryconfigure(index=4, state='active')
+            self.file_menu.entryconfigure(index=5, state='active')
+            self.file_menu.entryconfigure(index=6, state='active')
+            self.file_menu.entryconfigure(index=7, state='active')
 
     def metadataDisable(self, *args, **kwargs):
-        self.file_menu.entryconfigure(index=4, state='disable')
-        self.file_menu.entryconfigure(index=5, state='disable')
-        self.file_menu.entryconfigure(index=6, state='disable')
+        if METADATA_IMPORT:
+            self.file_menu.entryconfigure(index=4, state='disable')
+            self.file_menu.entryconfigure(index=5, state='disable')
+            self.file_menu.entryconfigure(index=6, state='disable')
+            self.file_menu.entryconfigure(index=7, state='disable')
 
     def selectedCommandGet(self, *args, **kwargs):
         return self.selected_command.get()
 
     def openProjectUrl(self, *args, **kwargs):
-        ''' Opend the Project Url when clicking in the about menu option '''
+        ''' Open the Project Url when clicking the about menu option '''
         webbrowser.open(PROJECT_URL)
 
 
@@ -609,7 +647,6 @@ class FileNavigator:
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
         # File Navigation bindings
-        # calls to update the new name column
         self.tree_folder.bind('<<TreeviewSelect>>', Populate_Fields)
         self.tree_folder.bind('<<TreeviewSelect>>', Call_For_Info_Bar, add='+')
         self.tree_folder.bind('<Button-3>', self.rightClickPathToClip)
@@ -806,7 +843,7 @@ class ChangesNotebook:
         else:
             metadata_import_error_msg = ('No metadata modules available. This '
             'program is able to edit metadata tags if you install the mutagen '
-            'and PIL libraries')
+            'and Pillow libraries')
             inf_bar.lastActionRefresh(metadata_import_error_msg)
 
         # Bindings
@@ -3215,7 +3252,7 @@ class Apply_Changes:
         '''
         # Set the corresponding mime type
         if img_path.endswith('png'):
-                mime_type = 'image/png'
+            mime_type = 'image/png'
         else:
             mime_type = 'image/jpg'
 
@@ -3293,6 +3330,65 @@ class Apply_Changes:
 
         # Show that its finish
         Finish_Show_Working(inf_msg='Metadata and Image Changed')
+
+
+def Meta_Audio(file, *args, **kwargs):
+    ''' Returns the metadata from the audio file '''
+    if file.endswith('flac'):
+        meta_audio = FLAC(file)
+    elif file.endswith('mp3'):
+        meta_audio = MP3(file, ID3=EasyID3)
+    else:
+        meta_audio = None
+
+    return meta_audio
+
+def Meta_Picture(file, *args, **kwargs):
+    '''
+    Gets the attached picture from the metadata, if there is one, if not
+    returns None.
+    '''
+    if file.endswith('flac'):
+        meta_picture = FLAC(file).pictures[0].data
+    elif file.endswith('mp3'):
+        meta_audio = ID3(file)
+        # Because the attached picture in mp3 files can have many names
+        # and the only common factor is having APIC in the key, check all keys
+        # and see if theres any that contains APIC
+        for tag in meta_audio:
+            if 'APIC' in tag:
+                meta_picture = meta_audio.get(tag).data
+
+                break
+            # If there isnt return None
+            else:
+                meta_picture = None
+    else:
+        meta_picture = None
+
+    return meta_picture
+
+def Format_Track_Num_Meta(*args, **kwargs):
+    Show_Working()
+
+    selection = fn_treeview.selectedItems()
+
+    for item in selection:
+        # Get the metadata
+        meta_audio = Meta_Audio(item)
+        # Specifically the tracknumber (which is a list so get the first item)
+        n = meta_audio['tracknumber'][0]
+
+        # Remove everything after "/" (inclusive)
+        n = n.partition('/')[0]
+        # Add left padding of 0s
+        n = n.rjust(2, '0')
+
+        # Set the tracknumber
+        meta_audio['tracknumber'] = n
+        meta_audio.save()
+
+    Finish_Show_Working(inf_msg='Changed "tracknumber" format')    
 
 
 
@@ -3555,42 +3651,6 @@ def Populate_Fields(*args, **kwargs):
 def noDuplicatesList(list_convert, *args, **kwargs):
     return list(dict.fromkeys(list_convert))
 
-def Meta_Audio(file, *args, **kwargs):
-    ''' Returns the metadata from the audio file '''
-    if file.endswith('flac'):
-        meta_audio = FLAC(file)
-    elif file.endswith('mp3'):
-        meta_audio = MP3(file, ID3=EasyID3)
-    else:
-        meta_audio = None
-
-    return meta_audio
-
-def Meta_Picture(file, *args, **kwargs):
-    '''
-    Gets the attached picture from the metadata, if there is one, if not
-    returns None.
-    '''
-    if file.endswith('flac'):
-        meta_picture = FLAC(file).pictures[0].data
-    elif file.endswith('mp3'):
-        meta_audio = ID3(file)
-        # Because the attached picture in mp3 files can have many names
-        # and the only common factor is having APIC in the key, check all keys
-        # and see if theres any that contains APIC
-        for tag in meta_audio:
-            if 'APIC' in tag:
-                meta_picture = meta_audio.get(tag).data
-
-                break
-            # If there isnt return None
-            else:
-                meta_picture = None
-    else:
-        meta_picture = None
-
-    return meta_picture
-
 def Show_Working(inf_msg='Working...', *args, **kwargs):
     '''
         Sets the cursor to watch and empties the info msg to show that
@@ -3675,9 +3735,18 @@ def System_Rename(file, new_path, *args, **kwargs):
         print('{} -> {}'.format(file, new_path))
 
     else:
+        # Error_Frame(root, error_desc="Couldn't Rename file. Path already exists")
         inf_bar.lastActionRefresh("Couldn't Rename file. Path already exists")
 
+        raise NamingError("Couldn't Rename file. Path already exists")
 
+
+
+###################################
+'''
+PROGRAM
+'''
+###################################
 
 '''
 PROGRAM INITIALIZATION
