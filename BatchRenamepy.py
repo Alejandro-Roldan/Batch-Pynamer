@@ -107,12 +107,7 @@ COMMAND_CONF = configparser.ConfigParser()
 COMMAND_CONF.read(COMMAND_CONF_FILE)
 
 
-# PATH = '/'
-# PATH = '/home/Jupiter'
-PATH = '/home/Jupiter/Music'
-# PATH = '/home/Mars/Music'
-# PATH = '/home/leptope/lol'
-# PATH = '/home/leptope/Music'
+PATH = '/'
 
 
 ###################################
