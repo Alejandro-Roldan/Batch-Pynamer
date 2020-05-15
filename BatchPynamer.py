@@ -113,13 +113,7 @@ COMMAND_CONF.read(COMMAND_CONF_FILE)
 try:
     PATH = sys.argv[1]
 except IndexError:
-    # PATH = os.path.expanduser('~')
-    # PATH = '/'
-    # PATH = '/home/Jupiter'
-    PATH = '/home/Jupiter/Music'
-    # PATH = '/home/Mars/Music'
-    # PATH = '/home/Jupiter/Musiclol'
-    # PATH = '/home/Jupiter/MusicTrial'
+    PATH = os.path.expanduser('~')
 
 
 ###################################
