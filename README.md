@@ -3,7 +3,7 @@ A purely python batch file renamer specially made to work on linux.
 
 It can also change audio files metadata for flac and mp3 files. If you don't have the metadata dependencies needed you can still use the rest of the program, which uses exclusively base python libraries.
 
-It can probably run on windows mostly without issue, but it hasn't been tested.
+It can probably run on Windows and Mac mostly without issue, but it hasn't been tested.
 
 
 Program Screenshots
