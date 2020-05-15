@@ -1,3 +1,18 @@
+V. 04:
+	- Changed project name to "Batch Pynamer"
+	- Added the ability to rename files using metadata values
+	- Added function to set the metadata's title and tracknumber from the filename (splits the filename at the first apparition of "-" and sets the first part to be the tracknumber and the second to be the title)
+	- Added File Menu Function to set the title and the tracknumber metadata
+	- Now when applying changes to the metadata it automatically reloads
+
+	To do:
+		- Add metadata changes for images and videos
+
+V. 03.05:
+	- Added the ability to open the program in a specific folder calling it with the folder as an argument
+	- Set up a default PATH constant to fallback
+	- Changed path.split('/') to os.path.basename() and os.path.dirname() accordingly (which also allows to use in windows)
+
 V. 03:
 	- Added the function to format the tracknumber metadata field to remove anything after "/" (inclusive) and add 0s left pading to have 2 digits
 	- Added File Menu Function to format the tracknumber
