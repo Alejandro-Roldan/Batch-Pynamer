@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
+import time
+
 import sys
 import os
-import shutil
 import pathlib
 import configparser
 
@@ -26,6 +27,9 @@ try:
     from mutagen.easyid3 import EasyID3, EasyID3KeyError
     from mutagen.id3 import ID3, APIC
     from mutagen.mp3 import MP3
+
+    from mutagen.mp4 import MP4, MP4Cover
+    from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 
 
     from io import BytesIO
@@ -88,24 +92,12 @@ GLOBAL CONSTANTS
 '''
 ###################################
 
+
 APP_NAME = 'Batch Pynamer'
-APP_VER = 4.00
+APP_VER = 5.00
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
-
-PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Renamer-py'
-
-
-CONFIG_FOLDER_PATH = os.path.expanduser('~/.config/batchrenamepy/')
-
-
-# Multi Purpose  configparser object
-CONFIGPARSER_OBJECT = configparser.ConfigParser()
-
-# Configparser object for loading the commands
-COMMAND_CONF_FILE = CONFIG_FOLDER_PATH + 'commands.conf'
-COMMAND_CONF = configparser.ConfigParser()
-COMMAND_CONF.read(COMMAND_CONF_FILE)
+PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
 
 
 # Get the path from the arguments in the program call or use a default path
@@ -114,6 +106,32 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    # PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+
+
+# Configuration folder path depending on OS
+if sys.platform == 'linux':
+    CONFIG_FOLDER_PATH = os.path.expanduser('~/.config/batchpynamer/')
+elif sys.platform == 'win32':
+    CONFIG_FOLDER_PATH = os.path.expanduser('~/AppData/Roaming/batchpynamer/')
+elif sys.platform == 'darwin':  # macOS
+    CONFIG_FOLDER_PATH = os.path.expanduser('~/Library/Preferences/batchpynamer/')
+else:
+    CONFIG_FOLDER_PATH = None
+
+# Configparser object for loading the commands
+if CONFIG_FOLDER_PATH:
+    COMMAND_CONF_FILE = CONFIG_FOLDER_PATH + 'commands.conf'
+    COMMAND_CONF = configparser.ConfigParser()
+    COMMAND_CONF.read(COMMAND_CONF_FILE)
+
 
 
 ###################################
@@ -245,11 +263,15 @@ class Top_Menu:
         self.selectionMenu()
         self.menubar.add_cascade(label="Selection", menu=self.selection_menu)
 
-        # self.displayMenu()
-        # self.menubar.add_cascade(label="Display Options", menu=self.display_menu)
+        self.displayMenu()
+        self.menubar.add_cascade(label="Display", menu=self.display_menu)
 
+        # Only create the command menu if there is a configuration folder
         self.commandMenu()
         self.menubar.add_cascade(label="Commands", menu=self.command_menu)
+        if not CONFIG_FOLDER_PATH:
+            self.menubar.entryconfigure(index=3, state='disable')
+
 
         self.menubar.add_command(label='About', command=self.openProjectUrl)
 
@@ -373,6 +395,9 @@ class Top_Menu:
 
     def displayMenu(self, *args, **kwargs):
         ''' Display Options Menu dropdown '''
+        # Variable defs
+        self.hide_files = tk.BooleanVar(value=True)
+
         # Create the menu
         self.display_menu = tk.Menu(
                                     self.menubar,
@@ -380,6 +405,17 @@ class Top_Menu:
                                     bg='gray75',
                                     foreground='black'
                                     )
+
+        self.display_menu.add_checkbutton(
+                                            label='Hide hidden folders',
+                                            variable=self.hide_files,
+                                            command=self.hiddenFilesSwitch
+                                            )
+
+        self.display_menu.add_checkbutton(
+                                            label='Show Files before Dirs',
+                                            command=Files_Fore_Dirs
+                                            )
 
     def commandMenu(self, *args, **kwargs):
         ''' Command Menu Dropdown '''
@@ -424,7 +460,10 @@ class Top_Menu:
                                             bg='gray75',
                                             foreground='black'
                                             )
-        self.updateCommandListMenu()
+
+        # Only try to load the commands if there is a path to the
+        # commands configuration file
+        if CONFIG_FOLDER_PATH: self.updateCommandListMenu()
 
         # Separator
         self.command_menu.add_separator()
@@ -445,6 +484,26 @@ class Top_Menu:
                                                 variable=self.selected_command,
                                                 value=command_name
                                                 )
+
+    def hideFilesGet(self, *args, **kwargs):
+        return self.hide_files.get()
+
+    def hiddenFilesSwitch(self, *args, **kwargs):
+        ''' Call to hide hidden files '''
+        global hidden_global
+        hidden_global = not hidden_global
+
+        hide = self.hideFilesGet()
+        if hide:
+            fn_treeview.hideHiddenFiles()
+            folder_treeview.hideHiddenFiles()
+            msg = 'Not showing hidden files'
+        else:
+            fn_treeview.showHiddenFiles()
+            folder_treeview.showHiddenFiles()
+            msg = 'Showing hidden files'
+
+        inf_bar.lastActionRefresh(msg)
 
     def renameEnable(self, *args, **kwargs):
         self.file_menu.entryconfigure(index=0, state='active')
@@ -493,6 +552,8 @@ class TreeNavigator:
         '''
         self.path = path
 
+        self.detached_items = []
+
         frame = ttk.Frame(master)
         frame.grid(row=1, column=0)
         # Directory navigator, treeview
@@ -534,28 +595,59 @@ class TreeNavigator:
         # Create a dict of what nodes exist. Used to load the placeholder nodes
         self.nodes = dict()
 
+        # Show Hidden Files before atempting to reset the widget
+        self.showHiddenFiles()
         # Delete all children and reset Treeview
         for child in self.tree_nav.get_children():
             self.tree_nav.delete(child)
 
         # Load folders and insert nodes
         directories, files = Load_Child(self.path)
-        for a in directories:
-            self.insertNode('', a, os.path.join(self.path, a))
+        for idx, item in enumerate(directories):
+            self.insertNode('', item, os.path.join(self.path, item), idx)
+
+        # Hide the hidden files depending on the global flag (this flag exists
+        # only for this one case)
+        if hidden_global: self.hideHiddenFiles()
 
     def selectedItem(self, *args, **kwargs):
         # Since this tree can only select 1 item at a time we just pass
         # the index instead of doing a for loop
         return self.tree_nav.selection()[0]
 
-    def insertNode(self, parent, text, abspath, *args, **kwargs):
+    def hideHiddenFiles(self):
+        '''
+            Checks the nodes with "hidden" tag, creates a list with those
+            items and then detaches them from the treeview.
+        '''
+        all_children = self.tree_nav.tag_has('hidden')
+        for path in all_children:
+            index = self.tree_nav.index(path)
+            parent = self.tree_nav.parent(path)
+            # Create list with the full path, its parent and the index number
+            self.detached_items.append([path, parent, index])
+
+        self.tree_nav.detach(*all_children)
+
+    def showHiddenFiles(self):
+        ''' Reattachs the previously hidden nodes '''
+        for path, parent, index in self.detached_items:
+            self.tree_nav.reattach(path, parent, index)
+        self.detached_items.clear()
+
+    def insertNode(self, parent, text, abspath, idx, *args, **kwargs):
         ''' Create nodes for the tree file navigation. '''
+        # For hidden folders use a tag to mark it
+        if text.startswith('.'): tag = 'hidden'
+        else: tag = 'unhidden'
+
         # uses the absolute path to the folder as the iid
         node = self.tree_nav.insert(
                                     parent=parent,
-                                    index='end',
+                                    index=idx,
                                     iid=abspath,
                                     text=text,
+                                    tag=tag,
                                     open=False
                                     )
         # make dirs openable without loading children
@@ -579,18 +671,22 @@ class TreeNavigator:
             if files:
                 # inserts only the directories
                 # because we dont want to show the files in this treeview
-                for item in directories:
+                for idx, item in enumerate(directories):
                     self.insertNode(
                                     node,
                                     item,
-                                    os.path.join(abspath, item)
+                                    os.path.join(abspath, item),
+                                    idx
                                     )
             else:   # for empty folders
                 self.insertNode(
                                 node,
                                 '(empty)',
-                                os.path.join(abspath, '(empty)')
+                                os.path.join(abspath, '(empty)', 0)
                                 )
+
+        # Hide hidden files if not set to show them
+        if menu_bar.hideFilesGet(): self.hideHiddenFiles()
 
     def openFolderTreeNav(self, *args, **kwargs):
         folder_path = self.selectedItem()
@@ -619,6 +715,8 @@ class FileNavigator:
         frame = ttk.Frame(master)
         frame.grid(row=1, column=1, sticky='w'+'e')
         frame.columnconfigure(2, weight=1)
+
+        self.detached_items = []
 
         # File selection, treeview
         self.tree_folder = ttk.Treeview(frame, selectmode='extended')
@@ -686,26 +784,48 @@ class FileNavigator:
         # Set inverted as the new selection
         self.selectionSet(inverted)
 
+    def hideHiddenFiles(self):
+        all_children = self.tree_folder.tag_has('hidden')
+        for path in all_children:
+            index = self.tree_folder.index(path)
+            parent = self.tree_folder.parent(path)
+            self.detached_items.append([path, parent, index])
 
-    def insertNode(self, text, abspath, *args, **kwargs):
+        self.tree_folder.detach(*all_children)
+
+    def showHiddenFiles(self):
+        for path, parent, index in self.detached_items:
+            self.tree_folder.reattach(path, parent, index)
+        self.detached_items.clear()
+
+    def insertNode(self, text, abspath, idx, *args, **kwargs):
         ''' Create nodes '''
+        # For hidden folders use a tag to mark it
+        if text.startswith('.'): tag = 'hidden'
+        else: tag = 'unhidden'
+
         # uses the absolute path to the folder as the iid
         node = self.tree_folder.insert(
                                         parent='',
-                                        index='end',
+                                        index=idx,
                                         iid=abspath,
                                         text=text,
                                         values=[text],
+                                        tag=tag,
                                         open=False
                                         )
 
     def openFolder(self, folder_path, *args, **kwargs):
         ''' Loads the treeview of the files inside the selected folder '''
+        self.showHiddenFiles()
         self.childrenDeleteAll()
         # load the directories and add them
         directories, files = Load_Child(folder_path)
-        for a in files:
-            self.insertNode(a, os.path.join(folder_path, a))
+
+        for idx, item in enumerate(files):
+            self.insertNode(item, os.path.join(folder_path, item), idx)
+
+        if menu_bar.hideFilesGet(): self.hideHiddenFiles()
 
     def childrenDeleteAll(self, *args, **kwargs):
         ''' Delete already existing nodes in the folder view '''
@@ -751,6 +871,8 @@ class FileNavigator:
         ''' Get the folder path and update the treeview '''
         folder_path = dir_entry_frame.folderDirGet()
         self.openFolder(folder_path)
+
+        inf_bar.lastActionRefresh('Refreshed File View')
 
     @staticmethod
     def Show_New_Name(*args, **kwargs):
@@ -845,12 +967,14 @@ class ChangesNotebook:
         self.nb.add(self.nb_rename, text='Rename')
         self.renameNbPage(self.nb_rename)
 
-        # Add the metadata page and call the widgets that go inside if only if
-        # the modules were installed and imported properly
+        # Add the metadata page
+        self.nb.add(self.nb_metadata, text='Metadata')
+        # Call the widgets that go inside only if the modules were
+        # installed and imported properly
         if METADATA_IMPORT:
-            self.nb.add(self.nb_metadata, text='Metadata')
             self.metadataNbPage(self.nb_metadata)
         else:
+            self.nb.tab(1, state='disable')
             metadata_import_error_msg = ('No metadata modules available. This '
             'program is able to edit metadata tags if you install the mutagen '
             'and Pillow libraries')
@@ -2767,6 +2891,9 @@ class Rename:
                                         command=self.applyCommandCall
                                         )
         self.load_command_button.grid(column=0, row=1, padx=1, pady=1, sticky='e')
+        # Disable the button if no path to where commands are stored
+        if not CONFIG_FOLDER_PATH:
+            self.load_command_button.config(state='disable')
 
         self.reset_button = ttk.Button(
                                         self.frame,
@@ -2880,6 +3007,7 @@ class Rename:
             # Show that it's in the process
             Show_Working()
 
+            print('Undo:')
             for name_pair in last_rename_list:
                 # Get the new path and the old path from the last
                 # changes paths pairs
@@ -2888,6 +3016,7 @@ class Rename:
 
                 # Apply a system rename
                 System_Rename(new_path, last_path)
+            print()
 
             # Update the folders treeviews
             Refresh_Treeviews()
@@ -3285,12 +3414,9 @@ class Apply_Changes:
                 # name thats not accepted in ID3 it'll raise and error
                 try:
                     meta_audio[key] = value
-                except EasyID3KeyError as e:
-                    # print('Undefined Tag name "{}" with value "{}"
-                    # for ID3. Skipped'.format(key, value))
-                    msg = 'Undefined Tag name "{}" for ID3. Skipped'.format(key)
+                except (EasyID3KeyError, EasyMP4KeyError) as e:
+                    msg = 'Undefined Tag name "{}" for ID3/MP4. Skipped'.format(key)
                     Error_Frame(msg)
-                    # print('Undefined Tag name "{}" for ID3. Skipped'.format(key))
 
             # Delete empty values only when they exist in the metadata
             # of the file
@@ -3312,15 +3438,15 @@ class Apply_Changes:
         # Show that its in the process
         Show_Working()
 
-        if img_path.endswith(('jpg', 'jpeg', 'png')) and os.path.exists(img_path):
+        if img_path.endswith(('.jpg', '.jpeg', '.png')) and os.path.exists(img_path):
             # Load the new image
-            img, apic = self.loadImage(img_path)
+            img, apic, mp4cover = self.loadImage(img_path)
             for item in selection:
                 # Load the item metadata and set the new picture.
-                if item.endswith('flac'):
+                if item.endswith('.flac'):
                     meta_audio = FLAC(item)
                     self.applyImgChangesFLAC(meta_audio, img)
-                elif item.endswith('mp3'):
+                elif item.endswith('.mp3'):
                     meta_audio = ID3(item)
                     self.applyImgChangesMP3(meta_audio, apic)
 
@@ -3336,7 +3462,7 @@ class Apply_Changes:
         the Picture object.
         '''
         # Set the corresponding mime type
-        if img_path.endswith('png'):
+        if img_path.endswith('.png'):
             mime_type = 'image/png'
         else:
             mime_type = 'image/jpg'
@@ -3425,6 +3551,8 @@ def Meta_Audio(file, *args, **kwargs):
         meta_audio = FLAC(file)
     elif file.endswith('.mp3'):
         meta_audio = MP3(file, ID3=EasyID3)
+    elif file.endswith('.mp4'):
+        meta_audio = EasyMP4(file)
     else:
         meta_audio = None
 
@@ -3435,6 +3563,7 @@ def Meta_Picture(file, *args, **kwargs):
     Gets the attached picture from the metadata, if there is one, if not
     returns None.
     '''
+    meta_picture = None
     if file.endswith('flac'):
         meta_picture = FLAC(file).pictures[0].data
     elif file.endswith('mp3'):
@@ -3445,13 +3574,7 @@ def Meta_Picture(file, *args, **kwargs):
         for tag in meta_audio:
             if 'APIC' in tag:
                 meta_picture = meta_audio.get(tag).data
-
                 break
-            # If there isnt return None
-            else:
-                meta_picture = None
-    else:
-        meta_picture = None
 
     return meta_picture
 
@@ -3605,7 +3728,7 @@ class Save_Command_Name_Window:
 
 
 def Create_Config_Folder(path, *args, **kwargs):
-    ''' Creates teh config folder if it doesn't exist already '''
+    ''' Creates the config folder if it doesn't exist already '''
     try:
         pathlib.Path(path).mkdir(parents=True, exist_ok=False)
     except FileExistsError as e:
@@ -3715,30 +3838,34 @@ def Load_Child(path, *args, **kwargs):
     '''
     Loads the directories inside the folder given by "path".
     Separates the output in files and directories.
-    If unable to open raise an exception.
+    Error handling if unable to open.
     '''
-    directories = []
-    files = []
+    order = files_fore_dirs
+
     try:
-        # separate dirs and files
-        for a in os.listdir(path):
-            # bug where it will get stuck in /home/Earth (NAS) when it cant
-            # access it
-            abs_path = os.path.join(path, a)
-            if os.path.isdir(abs_path):
-                directories.append(a)
+        files=[]
+        directories=[]
+
+        # os.scandir() faster than os.walk() and os.listdir(), also easier to
+        # check for file or dir
+        for entry in os.scandir(path):
+            if entry.is_file():
+                files.append(entry.name)
             else:
-                files.append(a)
+                directories.append(entry.name)
+            # Slightly faster to if-else than if-if or if-elif
+
+        # Sort alphabetically case-insensitive
+        files.sort(key=str.lower)
+        directories.sort(key=str.lower)
+        # Showing order
+        if order:
+            files = files + directories
+        else:
+            files = directories + files
+
     except OSError as e:
-        directories = ['Unable to Open']
-        files = []
-        pass
-
-    # sort dirs and files alphabetically
-    directories.sort()
-    files.sort()
-
-    files = directories + files
+        files = directories = ['Unable to Open']
 
     return directories, files
 
@@ -3768,6 +3895,24 @@ def Populate_Fields(*args, **kwargs):
         menu_bar.metadataEnable()
         # Disables the menu options for renaming
         menu_bar.renameDisable()
+
+def Files_Fore_Dirs(*args, **kwargs):
+    '''
+        Change from showing directories first to showing files first and
+        viceversa
+    '''
+    # Use of a global variable
+    global files_fore_dirs
+    # Change its value to the opposite
+    files_fore_dirs = not files_fore_dirs
+
+    # Reload the fileview
+    fn_treeview.refreshView()
+    if files_fore_dirs:
+        msg = 'Refreshed Treeview. Showing Files before Directories'
+    else:
+        msg = 'Refreshed Treeview. Showing Directories before Files'
+    inf_bar.lastActionRefresh(msg)
 
 def noDuplicatesList(list_convert, *args, **kwargs):
     return list(dict.fromkeys(list_convert))
@@ -3805,7 +3950,9 @@ def Refresh_Treeviews(*args, **kwargs):
     # Update the file view
     fn_treeview.refreshView()
     # Update the folder view
-    folder_treeview.updateNode()
+    dir_entry_frame.folderNavRefresh()
+
+    inf_bar.lastActionRefresh('Refreshed Both Treeviews')
 
 def New_Naming(name, sel_item, path, *args, **kwargs):
     '''
@@ -3870,26 +4017,32 @@ def Meta_Format(str_, path, *args, **kwargs):
             # (need to do this because if you want to use curly braces in the
             # string i would raise an error and would skip any actual editing)
             for field in field_list:
-                try:
-                    str_ = str_.replace(field, field.format(**metadata))
-                except KeyError:
-                    pass
+                str_ = str_.replace(field, field.format(**metadata))
 
     return str_
 
 def System_Rename(file, new_path, *args, **kwargs):
     ''' Changes the name of the files in the system '''
     if not os.path.exists(new_path):
-        shutil.move(file, new_path, copy_function=shutil.copystat)
-        last_rename.appendRenamePair(file, new_path)
+        try:
+            os.rename(file, new_path)
+            last_rename.appendRenamePair(file, new_path)
 
-        print('{} -> {}'.format(file, new_path))
+            print('{} -> {}'.format(file, new_path))
 
+        # Catch exceptions for invalid filenames
+        except (OSError, FileNotFoundError) as e:
+            msg = "Couldn't rename file {}.\nInvalid characters".format(file)
+            Error_Frame(error_desc=msg)
+            inf_bar.lastActionRefresh("Couldn't Rename file. Invalid characters")
+
+    # If path already exists don't write over it and skip it
     else:
-        # Error_Frame(error_desc="Couldn't Rename file. Path already exists")
+        msg = "Couldn't rename file {}.\nPath already exists".format(file)
+        Error_Frame(error_desc=msg)
         inf_bar.lastActionRefresh("Couldn't Rename file. Path already exists")
 
-        raise NamingError("Couldn't Rename file. Path already exists")
+        # raise NamingError("Couldn't Rename file. Path already exists")
 
 
 
@@ -3902,8 +4055,10 @@ PROGRAM
 '''
 PROGRAM INITIALIZATION
 '''
-Create_Config_Folder(CONFIG_FOLDER_PATH)
+if CONFIG_FOLDER_PATH: Create_Config_Folder(CONFIG_FOLDER_PATH)
 last_rename = Last_Rename()
+hidden_global = True
+files_fore_dirs = False
 
 
 '''

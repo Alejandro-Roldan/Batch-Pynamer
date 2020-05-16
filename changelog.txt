@@ -1,3 +1,22 @@
+V. 05:
+	- Added the ability to hide and show hidden files instead of always showing them
+	- Added Display menu
+	- Added Display Menu Function to hide and show hidden files
+	- Added the ability to show Files before Directories instead of always showing Directories before Files
+	- Aded Display Menu function to change directories before files and viceversa
+	- Added support for MP4 metadata
+
+V. 04.05:
+	- Optimized code conditionals and error handling in the use of metadata values for the rename
+	- Made the creation of the configuration folder more cross-platform
+	- If theres any problem reaching the configuration folder the command related functions get disabled at startup
+	- Added print statements clarity
+	- Updated PROJECT_URL
+	- Error handling for invalid characters
+	- Changed the rename function to use os.rename() instead of shutil.move() (that technically uses os.rename under the hood) to better catch naming exceptions whith forbidden characters and the like
+	- Removed "import shutil" since it wasn't being used anymore
+	- Highly optimized treeview loading with "os.scandir"
+
 V. 04:
 	- Changed project name to "Batch Pynamer"
 	- Added the ability to rename files using metadata values
@@ -7,6 +26,7 @@ V. 04:
 
 	To do:
 		- Add metadata changes for images and videos
+		- Make more command line usable
 
 V. 03.05:
 	- Added the ability to open the program in a specific folder calling it with the folder as an argument
