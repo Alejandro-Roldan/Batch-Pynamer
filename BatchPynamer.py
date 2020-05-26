@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import time
-
 import sys
 import os
 import pathlib
@@ -15,6 +13,7 @@ import re               # regular expressions
 
 import tkinter as tk
 from tkinter import ttk
+from _tkinter import TclError
 
 # All previous imports are basic python libraries
 
@@ -28,7 +27,7 @@ try:
     from mutagen.id3 import ID3, APIC
     from mutagen.mp3 import MP3
 
-    from mutagen.mp4 import MP4, MP4Cover
+    from mutagen.mp4 import MP4
     from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 
 
@@ -94,7 +93,7 @@ GLOBAL CONSTANTS
 
 
 APP_NAME = 'Batch Pynamer'
-APP_VER = 5.00
+APP_VER = 5.05
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
 PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
@@ -106,7 +105,18 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
-    
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    # PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
+
+# Get the maximum filename lenght in the active drive
+MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
 
 # Configuration folder path depending on OS
 if sys.platform == 'linux':
@@ -255,9 +265,6 @@ class Top_Menu:
         self.selectionMenu()
         self.menubar.add_cascade(label="Selection", menu=self.selection_menu)
 
-        self.displayMenu()
-        self.menubar.add_cascade(label="Display", menu=self.display_menu)
-
         # Only create the command menu if there is a configuration folder
         self.commandMenu()
         self.menubar.add_cascade(label="Commands", menu=self.command_menu)
@@ -385,30 +392,6 @@ class Top_Menu:
                                         command=fn_treeview.invertSelection
                                         )
 
-    def displayMenu(self, *args, **kwargs):
-        ''' Display Options Menu dropdown '''
-        # Variable defs
-        self.hide_files = tk.BooleanVar(value=True)
-
-        # Create the menu
-        self.display_menu = tk.Menu(
-                                    self.menubar,
-                                    tearoff=0,
-                                    bg='gray75',
-                                    foreground='black'
-                                    )
-
-        self.display_menu.add_checkbutton(
-                                            label='Hide hidden folders',
-                                            variable=self.hide_files,
-                                            command=self.hiddenFilesSwitch
-                                            )
-
-        self.display_menu.add_checkbutton(
-                                            label='Show Files before Dirs',
-                                            command=Files_Fore_Dirs
-                                            )
-
     def commandMenu(self, *args, **kwargs):
         ''' Command Menu Dropdown '''
         # Variable defs
@@ -477,26 +460,6 @@ class Top_Menu:
                                                 value=command_name
                                                 )
 
-    def hideFilesGet(self, *args, **kwargs):
-        return self.hide_files.get()
-
-    def hiddenFilesSwitch(self, *args, **kwargs):
-        ''' Call to hide hidden files '''
-        global hidden_global
-        hidden_global = not hidden_global
-
-        hide = self.hideFilesGet()
-        if hide:
-            fn_treeview.hideHiddenFiles()
-            folder_treeview.hideHiddenFiles()
-            msg = 'Not showing hidden files'
-        else:
-            fn_treeview.showHiddenFiles()
-            folder_treeview.showHiddenFiles()
-            msg = 'Showing hidden files'
-
-        inf_bar.lastActionRefresh(msg)
-
     def renameEnable(self, *args, **kwargs):
         self.file_menu.entryconfigure(index=0, state='active')
         self.file_menu.entryconfigure(index=1, state='active')
@@ -544,10 +507,12 @@ class TreeNavigator:
         '''
         self.path = path
 
-        self.detached_items = []
+        # Create a dict of what nodes exist. Used to load the placeholder nodes
+        self.nodes = {}
 
         frame = ttk.Frame(master)
         frame.grid(row=1, column=0)
+
         # Directory navigator, treeview
         self.tree_nav = ttk.Treeview(frame, selectmode='browse')
         # Scroll bars tree file navigation
@@ -572,129 +537,88 @@ class TreeNavigator:
         self.tree_nav.grid(row=0, column=0)
         ysb_tree_nav.grid(row=0, column=1, sticky='ns')
         xsb_tree_nav.grid(row=1, column=0, sticky='ew')
-        # Initialization
-        self.basicPopulation()
 
         self.bindEntries()
 
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
         # Tree navigation bindings
-        self.tree_nav.bind('<<TreeviewOpen>>', self.Open_Node)
+        # self.tree_nav.bind('<<TreeviewOpen>>', self.openNode)
         self.tree_nav.bind('<<TreeviewSelect>>', TreeNav_Select_Calls)
-
-    def basicPopulation(self, *args, **kwargs):
-        # Create a dict of what nodes exist. Used to load the placeholder nodes
-        self.nodes = dict()
-
-        # Show Hidden Files before atempting to reset the widget
-        self.showHiddenFiles()
-        # Delete all children and reset Treeview
-        for child in self.tree_nav.get_children():
-            self.tree_nav.delete(child)
-
-        # Load folders and insert nodes
-        directories, files = Load_Child(self.path)
-        for idx, item in enumerate(directories):
-            self.insertNode('', item, os.path.join(self.path, item), idx)
-
-        # Hide the hidden files depending on the global flag (this flag exists
-        # only for this one case)
-        if hidden_global: self.hideHiddenFiles()
 
     def selectedItem(self, *args, **kwargs):
         # Since this tree can only select 1 item at a time we just pass
         # the index instead of doing a for loop
-        return self.tree_nav.selection()[0]
+        return self.tree_nav.focus()
 
-    def hideHiddenFiles(self):
-        '''
-            Checks the nodes with "hidden" tag, creates a list with those
-            items and then detaches them from the treeview.
-        '''
-        all_children = self.tree_nav.tag_has('hidden')
-        for path in all_children:
-            index = self.tree_nav.index(path)
-            parent = self.tree_nav.parent(path)
-            # Create list with the full path, its parent and the index number
-            self.detached_items.append([path, parent, index])
+    def deleteChildren(self, path='', *args, **kwargs):
+        for child in self.tree_nav.get_children(path):
+            self.tree_nav.delete(child)
 
-        self.tree_nav.detach(*all_children)
-
-    def showHiddenFiles(self):
-        ''' Reattachs the previously hidden nodes '''
-        for path, parent, index in self.detached_items:
-            self.tree_nav.reattach(path, parent, index)
-        self.detached_items.clear()
-
-    def insertNode(self, parent, text, abspath, idx, *args, **kwargs):
+    def insertNode(self, path='', name='', tag='', *args, **kwargs):
         ''' Create nodes for the tree file navigation. '''
-        # For hidden folders use a tag to mark it
-        if text.startswith('.'): tag = 'hidden'
-        else: tag = 'unhidden'
+        parent = os.path.split(path)[0]
+        if parent == self.path: parent = ''
 
-        # uses the absolute path to the folder as the iid
+        # Uses the absolute path to the folder as the iid
         node = self.tree_nav.insert(
                                     parent=parent,
-                                    index=idx,
-                                    iid=abspath,
-                                    text=text,
-                                    tag=tag,
+                                    index='end',
+                                    iid=path,
+                                    text=name,
                                     open=False
                                     )
-        # make dirs openable without loading children
-        if os.path.isdir(abspath):
-            self.nodes[node] = abspath
+
+        # Make dirs openable without loading children
+        if os.path.isdir(path):
+            self.nodes[node] = path
             self.tree_nav.insert(node, 'end')
 
 
-    def Open_Node(self, *args, **kwargs):
+
+    def openNode(self, *args, **kwargs):
         ''' Open Node action. Only avaible to the tree file navigation. '''
-        # get active node
-        node = self.tree_nav.focus()
-        # get the path to the directory of the opening node
-        abspath = self.nodes.pop(node, None)
+        # Get active node
+        path = self.tree_nav.focus()
+        hidden = nb.filters.hiddenGet()
+
+        # Get the path to the directory of the opening node
+        abspath = self.nodes.pop(path, None)
         if abspath:
-            # delete the placeholder node that was created previously
-            self.tree_nav.delete(self.tree_nav.get_children(node))
-            directories, files = Load_Child(abspath)
-            # check if the opened folder has any files or directories
-            # if it doesn't, add an empty node
-            if files:
-                # inserts only the directories
-                # because we dont want to show the files in this treeview
-                for idx, item in enumerate(directories):
-                    self.insertNode(
-                                    node,
-                                    item,
-                                    os.path.join(abspath, item),
-                                    idx
-                                    )
-            else:   # for empty folders
-                self.insertNode(
-                                node,
-                                '(empty)',
-                                os.path.join(abspath, '(empty)', 0)
-                                )
+            # Delete the placeholder node that was created previously
+            self.tree_nav.delete(self.tree_nav.get_children(path))
 
-        # Hide hidden files if not set to show them
-        if menu_bar.hideFilesGet(): self.hideHiddenFiles()
+            Scandir_Recursive(path=path, tree=self, folders=True,
+                                        hidden=hidden, files=False, depth=0)
 
-    def openFolderTreeNav(self, *args, **kwargs):
-        folder_path = self.selectedItem()
-        fn_treeview.openFolder(folder_path)
+            Tree_Sort(tree=self.tree_nav, parent=path)
+
+    def refreshView(self, *args, **kwargs):
+        path = self.path
+        # Get if hidden folders are active
+        hidden = nb.filters.hiddenGet()
+        # Get the selected node
+        active_node = self.selectedItem()
+
+        # Delete all children and reset Treeview
+        self.deleteChildren()
+
+        Scandir_Recursive(path=path, tree=self, folders=True,
+                                    files=False, hidden=hidden, depth=0)
+        Tree_Sort(tree=self.tree_nav)
 
     def updateNode(self, *args, **kwargs):
         '''
             Updates the focused node.
-            Deletes all children and inserts an empty node
+            Close focused node, deletes all children and inserts an empty node
         '''
         path = self.tree_nav.focus()
-        children = self.tree_nav.get_children(path)
-        for child in children:
-            self.tree_nav.delete(child)
+        # Close focused node
+        self.tree_nav.item(path, open=False)
+        # Delete children nodes of the focused node
+        self.deleteChildren(path)
 
-        # reinsert an empty node
+        # Reinsert an empty node
         self.tree_nav.insert(path, 'end')
         self.nodes[path] = path
 
@@ -708,7 +632,7 @@ class FileNavigator:
         frame.grid(row=1, column=1, sticky='w'+'e')
         frame.columnconfigure(2, weight=1)
 
-        self.detached_items = []
+        self.active_path = ''
 
         # File selection, treeview
         self.tree_folder = ttk.Treeview(frame, selectmode='extended')
@@ -776,66 +700,49 @@ class FileNavigator:
         # Set inverted as the new selection
         self.selectionSet(inverted)
 
-    def hideHiddenFiles(self):
-        all_children = self.tree_folder.tag_has('hidden')
-        for path in all_children:
-            index = self.tree_folder.index(path)
-            parent = self.tree_folder.parent(path)
-            self.detached_items.append([path, parent, index])
-
-        self.tree_folder.detach(*all_children)
-
-    def showHiddenFiles(self):
-        for path, parent, index in self.detached_items:
-            self.tree_folder.reattach(path, parent, index)
-        self.detached_items.clear()
-
-    def insertNode(self, text, abspath, idx, *args, **kwargs):
-        ''' Create nodes '''
-        # For hidden folders use a tag to mark it
-        if text.startswith('.'): tag = 'hidden'
-        else: tag = 'unhidden'
-
-        # uses the absolute path to the folder as the iid
-        node = self.tree_folder.insert(
-                                        parent='',
-                                        index=idx,
-                                        iid=abspath,
-                                        text=text,
-                                        values=[text],
-                                        tag=tag,
-                                        open=False
-                                        )
-
-    def openFolder(self, folder_path, *args, **kwargs):
-        ''' Loads the treeview of the files inside the selected folder '''
-        self.showHiddenFiles()
-        self.childrenDeleteAll()
-        # load the directories and add them
-        directories, files = Load_Child(folder_path)
-
-        for idx, item in enumerate(files):
-            self.insertNode(item, os.path.join(folder_path, item), idx)
-
-        if menu_bar.hideFilesGet(): self.hideHiddenFiles()
-
-    def childrenDeleteAll(self, *args, **kwargs):
+    def childrenDelete(self, *args, **kwargs):
         ''' Delete already existing nodes in the folder view '''
         to_delete = self.tree_folder.get_children()
         for item in to_delete:
             self.tree_folder.delete(item)
 
-    def setNewName(self, path, new_name, *args, **kwargs):
+    def setNewName(self, path, new_name, old_name, *args, **kwargs):
         return self.tree_folder.set(path, '#1', new_name)
 
     def selectedItems(self, *args, **kwargs):
         return self.tree_folder.selection()
 
+    def showNewName(self, *args, **kwargs):
+        '''
+            Iterates over each selected item and recreates each new name
+            following the renaming rules given inside the rename page of
+            the notebook.
+        '''
+        # get list of selected items iids
+        selection = self.selectedItems()
+        for idx, path in enumerate(selection):
+            # get the old name
+            old_name = self.oldNameGet(path)
+            # transform the old name to the new name
+            new_name = New_Naming(old_name, idx, path)
+            # changes the new name column
+            self.setNewName(path, new_name, old_name)
+
+    def resetNewName(self, *args, **kwargs):
+        '''
+            Renames every item to their old name, so if you change selection
+            they dont still show the new name.
+        '''
+        all_nodes = self.tree_folder.get_children()
+        for item in all_nodes:
+            old_name = self.oldNameGet(item)
+            self.setNewName(item, old_name, old_name)
+
     def rightClickPathToClip(self, event, *args, **kwargs):
         '''
-        When you right click over an item in the folder treeview gets the
-        path to that item and puts it in the clipboard so you can paste it
-        somewhere elese.
+            When you right click over an item in the folder treeview gets the
+            path to that item and puts it in the clipboard so you can paste it
+            somewhere elese.
         '''
         # Get the path of the item in the row under the cursor position
         path = self.tree_folder.identify_row(event.y)
@@ -849,42 +756,63 @@ class FileNavigator:
         # Set info msg
         inf_bar.lastActionRefresh('Copied "{}" Path to Clipboard'.format(name))
 
-    def resetNewName(self, *args, **kwargs):
-        '''
-        Renames every item to their old name, so if you change selection
-        they dont still show the new name.
-        '''
-        all_nodes = self.tree_folder.get_children()
-        for item in all_nodes:
-            old_name = self.oldNameGet(item)
-            self.setNewName(item, old_name)
+    def insertNode(self, path='', name='', tag='', *args, **kwargs):
+        ''' Create nodes '''
+        # uses the absolute path to the folder as the iid
+        self.tree_folder.insert(
+                                parent='',
+                                index='end',
+                                iid=path,
+                                text=name,
+                                values=[name],
+                                tags=tag,
+                                open=False
+                                )
 
-    def refreshView(self, *args, **kwargs):
+    def refreshView(self, path='', *args, **kwargs):
         ''' Get the folder path and update the treeview '''
-        folder_path = dir_entry_frame.folderDirGet()
-        self.openFolder(folder_path)
+        # When the path isn't set or the path is an event call string
+        # use the active_path
+        if not path or path == 'PY_VAR49':
+            path = self.active_path
 
+        # Get the filters values
+        mask = nb.filters.maskGet()
+        ext = nb.filters.extGet()
+        folders = nb.filters.foldersGet()
+        files = nb.filters.filesGet()
+        hidden = nb.filters.hiddenGet()
+        files_before_dirs = nb.filters.filesBeforeDirsGet()
+        min_len = nb.filters.nameLenMinGet()
+        max_len = nb.filters.nameLenMaxGet()
+        depth = nb.filters.depthGet()
+
+        # Compile the regular expressions mask
+        mask = re.compile(mask)
+
+        # Transform the list of extensions into a tuple and add a . before the
+        # extension to make sure that its an extension and not just that the
+        # filename ends in that
+        ext_list = ['.' + i for i in re.split('; |;|, |,', ext)]
+        try:
+            ext_list.remove('.')
+        except ValueError:
+            pass
+        ext_tuple = tuple(ext_list)
+
+        # Delete the children, load the new ones and sort them
+        self.childrenDelete()
+        Scandir_Recursive(path=path, tree=self, mask=mask,
+                                        ext_tuple=ext_tuple, folders=folders,
+                                        files=files, hidden=hidden,
+                                        min_len=min_len, max_len=max_len,
+                                        depth=depth)
+        Tree_Sort(tree=self.tree_folder, depth=depth, files_before_dirs=files_before_dirs)
+
+        # Call info set actions
+        inf_bar.numItemsRefresh()
+        dir_entry_frame.folderDirSet()
         inf_bar.lastActionRefresh('Refreshed File View')
-
-    @staticmethod
-    def Show_New_Name(*args, **kwargs):
-        '''
-        Iterates over each selected item and recreates each new name
-        following the renaming rules given inside the rename page of
-        the notebook.
-        '''
-        # get list of selected items iids
-        selection = fn_treeview.selectedItems()
-        sel_item = 0   # the index of the selected item, used for numbering
-        for path in selection:
-            # get the old name
-            old_name = fn_treeview.oldNameGet(path)
-            # transform the old name to the new name
-            new_name = New_Naming(old_name, sel_item, path)
-            # changes the new name column
-            fn_treeview.setNewName(path, new_name)
-
-            sel_item += 1
 
 
 class DirEntryFrame:
@@ -920,7 +848,7 @@ class DirEntryFrame:
 
     def folderNavRefresh(self, *args, **kwargs):
         ''' Refreshes the folder navigation treeview '''
-        folder_treeview.basicPopulation()
+        folder_treeview.refreshView()
         inf_bar.lastActionRefresh('Refreshed Browse Files Treeview')
 
     def folderDirSet(self, *args, **kwargs):
@@ -932,7 +860,8 @@ class DirEntryFrame:
         folder_path = self.folderDirGet()
         # Check if the path is a valid directory
         if os.path.isdir(folder_path):
-            fn_treeview.openFolder(folder_path)
+            # fn_treeview.openFolder(folder_path)
+            fn_treeview.refreshView(folder_path)
         else:
             inf_bar.lastActionRefresh('Not a Valid Directory')
             self.folderDirSet()
@@ -1000,8 +929,15 @@ class ChangesNotebook:
         self.numbering = Numbering(self.nb_rename_frame)
         # Extension (10)
         self.extension_rep = Extension_Rep(self.nb_rename_frame)
-        # Rename (last)
-        self.rename = Rename(self.nb_rename_frame)
+
+        # Bottom Frame for Filters and Rename buttons
+        self.nb_bottom_frame = ttk.Frame(self.nb_rename_frame)
+        self.nb_bottom_frame.grid(column=0, row=3, columnspan=5, sticky='w'+'e')
+        self.nb_bottom_frame.columnconfigure(0, weight=1)
+        # Filters
+        self.filters = Filters_Widget(self.nb_bottom_frame)
+        # Rename
+        self.rename = Rename(self.nb_bottom_frame)
 
         # Add a little bit of padding between each widget
         for child in self.nb_rename_frame.winfo_children():
@@ -1128,8 +1064,8 @@ class Reg_Exp:    # (1)
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
         # calls to update the new name column
-        self.match_reg.trace_add('write', FileNavigator.Show_New_Name)
-        self.replace_with.trace_add('write', FileNavigator.Show_New_Name)
+        self.match_reg.trace_add('write', fn_treeview.showNewName)
+        self.replace_with.trace_add('write', fn_treeview.showNewName)
 
     def extendedRegExp(self, *args, **kwargs):
         '''
@@ -1301,8 +1237,8 @@ class Name_Basic:   # (2)
         self.name_opt_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.name_opt.trace_add('write', FileNavigator.Show_New_Name)
-        self.fixed_name.trace_add('write', FileNavigator.Show_New_Name)
+        self.name_opt.trace_add('write', fn_treeview.showNewName)
+        self.fixed_name.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, event=None, *args, **kwargs):
         '''
@@ -1411,9 +1347,9 @@ class Replace:    # (3)
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
         # calls to update the new name column
-        self.replace_this.trace_add('write', FileNavigator.Show_New_Name)
-        self.replace_with.trace_add('write', FileNavigator.Show_New_Name)
-        self.match_case.trace_add('write', FileNavigator.Show_New_Name)
+        self.replace_this.trace_add('write', fn_treeview.showNewName)
+        self.replace_with.trace_add('write', fn_treeview.showNewName)
+        self.match_case.trace_add('write', fn_treeview.showNewName)
     
     def resetWidget(self, *args, **kwargs):
         ''' Resets each and all data variables inside the widget '''
@@ -1505,7 +1441,7 @@ class Case:   # (4)
         self.case_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.case_want.trace_add('write', FileNavigator.Show_New_Name)
+        self.case_want.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, *args, **kwargs):
         '''
@@ -1595,7 +1531,7 @@ class Remove:     # (5)
         self.first_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    to=500,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.first_n
                                     )
         self.first_n_spin.grid(column=1, row=0)
@@ -1605,7 +1541,7 @@ class Remove:     # (5)
         self.last_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    to=500,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.last_n
                                     )
         self.last_n_spin.grid(column=3, row=0)
@@ -1615,7 +1551,7 @@ class Remove:     # (5)
         self.from_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    to=500,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.from_n
                                     )
         self.from_n_spin.grid(column=1, row=1)
@@ -1625,7 +1561,7 @@ class Remove:     # (5)
         self.to_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    to=500,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.to_n
                                     )
         self.to_n_spin.grid(column=3, row=1)
@@ -1783,20 +1719,20 @@ class Remove:     # (5)
         self.crop_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.first_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.last_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.from_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.to_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.rm_words.trace_add('write', FileNavigator.Show_New_Name)
-        self.rm_chars.trace_add('write', FileNavigator.Show_New_Name)
-        self.crop_pos.trace_add('write', FileNavigator.Show_New_Name)
-        self.crop_this.trace_add('write', FileNavigator.Show_New_Name)
-        self.digits.trace_add('write', FileNavigator.Show_New_Name)
-        self.d_s.trace_add('write', FileNavigator.Show_New_Name)
-        self.accents.trace_add('write', FileNavigator.Show_New_Name)
-        self.chars.trace_add('write', FileNavigator.Show_New_Name)
-        self.sym.trace_add('write', FileNavigator.Show_New_Name)
-        self.lead_dots.trace_add('write', FileNavigator.Show_New_Name)
+        self.first_n.trace_add('write', fn_treeview.showNewName)
+        self.last_n.trace_add('write', fn_treeview.showNewName)
+        self.from_n.trace_add('write', fn_treeview.showNewName)
+        self.to_n.trace_add('write', fn_treeview.showNewName)
+        self.rm_words.trace_add('write', fn_treeview.showNewName)
+        self.rm_chars.trace_add('write', fn_treeview.showNewName)
+        self.crop_pos.trace_add('write', fn_treeview.showNewName)
+        self.crop_this.trace_add('write', fn_treeview.showNewName)
+        self.digits.trace_add('write', fn_treeview.showNewName)
+        self.d_s.trace_add('write', fn_treeview.showNewName)
+        self.accents.trace_add('write', fn_treeview.showNewName)
+        self.chars.trace_add('write', fn_treeview.showNewName)
+        self.sym.trace_add('write', fn_treeview.showNewName)
+        self.lead_dots.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, *args, **kwargs):
         '''
@@ -2028,7 +1964,7 @@ class Move_Copy_Parts:    # (6)
         self.ori_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    to=500,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.ori_n
                                     )
         self.ori_n_spin.grid(column=3, row=0)
@@ -2050,7 +1986,7 @@ class Move_Copy_Parts:    # (6)
         self.end_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    to=500,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.end_n
                                     )
         self.end_n_spin.grid(column=7, row=0)
@@ -2098,11 +2034,11 @@ class Move_Copy_Parts:    # (6)
         self.end_pos_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.ori_pos.trace_add('write', FileNavigator.Show_New_Name)
-        self.ori_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.end_pos.trace_add('write', FileNavigator.Show_New_Name)
-        self.end_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.sep.trace_add('write', FileNavigator.Show_New_Name)
+        self.ori_pos.trace_add('write', fn_treeview.showNewName)
+        self.ori_n.trace_add('write', fn_treeview.showNewName)
+        self.end_pos.trace_add('write', fn_treeview.showNewName)
+        self.end_n.trace_add('write', fn_treeview.showNewName)
+        self.sep.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, *args, **kwargs):
         '''
@@ -2226,8 +2162,8 @@ class Add_To_String:  # (7)
         self.at_pos_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    from_=-500,
-                                    to=500,
+                                    from_=-MAX_NAME_LEN,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.at_pos
                                     )
         self.at_pos_spin.grid(column=1, row=2)
@@ -2279,11 +2215,11 @@ class Add_To_String:  # (7)
     def bindEntries(self, *args, **kwargs):
         ''' What to execute when the bindings happen. '''
         # calls to update the new name column
-        self.prefix.trace_add('write', FileNavigator.Show_New_Name)
-        self.insert_this.trace_add('write', FileNavigator.Show_New_Name)
-        self.at_pos.trace_add('write', FileNavigator.Show_New_Name)
-        self.suffix.trace_add('write', FileNavigator.Show_New_Name)
-        self.word_space.trace_add('write', FileNavigator.Show_New_Name)
+        self.prefix.trace_add('write', fn_treeview.showNewName)
+        self.insert_this.trace_add('write', fn_treeview.showNewName)
+        self.at_pos.trace_add('write', fn_treeview.showNewName)
+        self.suffix.trace_add('write', fn_treeview.showNewName)
+        self.word_space.trace_add('write', fn_treeview.showNewName)
 
     def resetWidget(self, *args, **kwargs):
         ''' Resets each and all data variables inside the widget. '''
@@ -2410,9 +2346,9 @@ class Append_Folder_Name: # (8)
         self.name_pos_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.name_pos.trace_add('write', FileNavigator.Show_New_Name)
-        self.sep.trace_add('write', FileNavigator.Show_New_Name)
-        self.levels.trace_add('write', FileNavigator.Show_New_Name)
+        self.name_pos.trace_add('write', fn_treeview.showNewName)
+        self.sep.trace_add('write', fn_treeview.showNewName)
+        self.levels.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, *args, **kwargs):
         '''
@@ -2490,8 +2426,8 @@ class Numbering:  # (9)
         self.mode = tk.StringVar()
         self.at_n = tk.IntVar()
         self.start_num = tk.IntVar()
-        self.incr_num = tk.IntVar()
-        self.pad = tk.IntVar()
+        self.incr_num = tk.IntVar(value=1)
+        self.pad = tk.IntVar(value=1)
         self.sep = tk.StringVar()
         self.type_base = tk.StringVar()
 
@@ -2513,19 +2449,18 @@ class Numbering:  # (9)
         self.at_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
-                                    from_=-500,
-                                    to=500,
+                                    from_=-MAX_NAME_LEN,
+                                    to=MAX_NAME_LEN,
                                     textvariable=self.at_n
                                     )
         self.at_n_spin.grid(column=3, row=0)
-        self.at_n.set(0)
 
         # Start from this number, spinbox
         ttk.Label(self.lf, text='Start').grid(column=0, row=1, sticky='ew')
         self.start_num_spin = ttk.Spinbox(
                                         self.lf,
                                         width=3,
-                                        to=500,
+                                        to=MAX_NAME_LEN,
                                         textvariable=self.start_num
                                         )
         self.start_num_spin.grid(column=1, row=1)
@@ -2536,7 +2471,7 @@ class Numbering:  # (9)
                                         self.lf,
                                         width=3,
                                         from_=1,
-                                        to=500,
+                                        to=MAX_NAME_LEN,
                                         textvariable=self.incr_num
                                         )
         self.incr_num_spin.grid(column=3, row=1)
@@ -2544,7 +2479,6 @@ class Numbering:  # (9)
         # The ttk.spinbox doesn't begin in the minimun value thats set
         # Solution would be to set it to the desired number as initialization
         # But this is not a bug from my end
-        self.incr_num.set(1)
 
         # Padding of possible 0s, spinbox
         ttk.Label(self.lf, text='Pad').grid(column=0, row=2, sticky='ew')
@@ -2552,7 +2486,7 @@ class Numbering:  # (9)
                                 self.lf,
                                 width=3,
                                 from_=1,
-                                to=500,
+                                to=MAX_NAME_LEN,
                                 textvariable=self.pad
                                 )
         self.pad_spin.grid(column=1, row=2)
@@ -2560,7 +2494,6 @@ class Numbering:  # (9)
         # The ttk.spinbox doesn't begin in the minimun value thats set
         # Solution would be to set it to the desired number as initialization
         # But this is not a bug from my end
-        self.pad.set(1)
 
         # Separator, entry
         ttk.Label(self.lf, text='Sep.').grid(column=2, row=2, sticky='ew')
@@ -2626,13 +2559,13 @@ class Numbering:  # (9)
         self.type_base_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.mode.trace_add('write', FileNavigator.Show_New_Name)
-        self.at_n.trace_add('write', FileNavigator.Show_New_Name)
-        self.start_num.trace_add('write', FileNavigator.Show_New_Name)
-        self.incr_num.trace_add('write', FileNavigator.Show_New_Name)
-        self.pad.trace_add('write', FileNavigator.Show_New_Name)
-        self.sep.trace_add('write', FileNavigator.Show_New_Name)
-        self.type_base.trace_add('write', FileNavigator.Show_New_Name)
+        self.mode.trace_add('write', fn_treeview.showNewName)
+        self.at_n.trace_add('write', fn_treeview.showNewName)
+        self.start_num.trace_add('write', fn_treeview.showNewName)
+        self.incr_num.trace_add('write', fn_treeview.showNewName)
+        self.pad.trace_add('write', fn_treeview.showNewName)
+        self.sep.trace_add('write', fn_treeview.showNewName)
+        self.type_base.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, *args, **kwargs):
         '''
@@ -2748,19 +2681,19 @@ class Numbering:  # (9)
 
 class Extension_Rep:  # (10)
     '''
-    Draws the extension replacer widget. Inside rename notebook.
-    10th thing to change.
-    It has:
-        - Dropdown to choose how to change the extension
-            - Same
-            - Lower case
-            - Upper case
-            - Title
-            - Extra: adds a new extension at the end
-            - Fixed: changes the extension to a new one
-            - Remove
-        - Entry to write the new extension for the "Extra" and the "Fixed"
-        options
+        Draws the extension replacer widget. Inside rename notebook.
+        10th thing to change.
+        It has:
+            - Dropdown to choose how to change the extension
+                - Same
+                - Lower case
+                - Upper case
+                - Title
+                - Extra: adds a new extension at the end
+                - Fixed: changes the extension to a new one
+                - Remove
+            - Entry to write the new extension for the "Extra" and the "Fixed"
+            options
     '''
     def __init__(self, master, *args, **kwargs):        
         self.lf = ttk.Labelframe(master, text='Extension (10)')
@@ -2811,12 +2744,11 @@ class Extension_Rep:  # (10)
 
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
-
         self.change_ext_combo.bind('<<ComboboxSelected>>', self.defocus)
 
         # calls to update the new name column
-        self.change_ext.trace_add('write', FileNavigator.Show_New_Name)
-        self.fixed_ext.trace_add('write', FileNavigator.Show_New_Name)
+        self.change_ext.trace_add('write', fn_treeview.showNewName)
+        self.fixed_ext.trace_add('write', fn_treeview.showNewName)
 
     def defocus(self, *args, **kwargs):
         '''
@@ -2864,6 +2796,165 @@ class Extension_Rep:  # (10)
         return ext
 
 
+class Filters_Widget:
+    '''
+        Draws the filter widget. Inside rename notebook.
+        It has:
+            - A regular expression mask entry
+            - A extension list entry
+            - A folders checkbutton
+            - A files checkbutton
+            - A Files before Directories checkbutton
+            - A hidden files checkbutton
+            - A minimum name length spinbox
+            - A maximum name lenght spinbox
+            - A recursive depth level spinbox
+    '''
+    def __init__(self, master, *args, **kwargs):
+        self.lf = ttk.Labelframe(master, text='Filter File View')
+        self.lf.grid(column=0, row=0, sticky='w')
+
+        # Variable defs
+        self.mask = tk.StringVar()
+        self.ext = tk.StringVar()
+        self.folders = tk.BooleanVar(value=True)
+        self.files = tk.BooleanVar(value=True)
+        self.hidden = tk.BooleanVar(value=False)
+        self.files_before_dirs = tk.BooleanVar(value=False)
+        self.min_len = tk.IntVar(value=0)
+        self.max_len = tk.IntVar(value=MAX_NAME_LEN)
+        self.depth = tk.IntVar(value=0)
+
+        
+        # Regular expression mask, entry
+        ttk.Label(self.lf, text="Mask").grid(column=0, row=0, sticky='e')
+        self.mask_entry = ttk.Entry(
+                                    self.lf,
+                                    width=10,
+                                    textvariable=self.mask
+                                    )
+        self.mask_entry.grid(column=1, row=0, sticky='w')
+
+        # Extension list, entry
+        ttk.Label(self.lf, text="Ext(s)").grid(column=0, row=1, sticky='e')
+        self.ext_entry = ttk.Entry(
+                                    self.lf,
+                                    width=10,
+                                    textvariable=self.ext
+                                    )
+        self.ext_entry.grid(column=1, row=1, sticky='w')
+
+        # Folders, checkbutton
+        self.folders_check = ttk.Checkbutton(
+                                                self.lf,
+                                                text='Folders',
+                                                variable=self.folders,
+                                                )
+        self.folders_check.grid(column=2, row=0, sticky='w')
+
+        # Files, checkbutton
+        self.files_check = ttk.Checkbutton(
+                                                self.lf,
+                                                text='Files',
+                                                variable=self.files,
+                                                )
+        self.files_check.grid(column=2, row=1, sticky='w')
+
+        # Files before directories, checkbutton
+        self.files_before_dirs_check = ttk.Checkbutton(
+                                                self.lf,
+                                                text='Files before Dirs',
+                                                variable=self.files_before_dirs,
+                                                )
+        self.files_before_dirs_check.grid(column=3, row=0, sticky='w')
+
+        # Hidden files, checkbutton
+        self.hidden_check = ttk.Checkbutton(
+                                                self.lf,
+                                                text='Hidden',
+                                                variable=self.hidden,
+                                                )
+        self.hidden_check.grid(column=3, row=1, sticky='w')
+        
+        # Name length group
+        ttk.Label(self.lf, text='Name lenght').grid(column=4, row=0, columnspan=4)
+
+        # Minimum name length, spinbox
+        ttk.Label(self.lf, text='min').grid(column=4, row=1, sticky='e')
+        self.name_len_min_spin = ttk.Spinbox(
+                                    self.lf,
+                                    width=3,
+                                    to=MAX_NAME_LEN,
+                                    textvariable=self.min_len
+                                    )
+        self.name_len_min_spin.grid(column=5, row=1, sticky='w')
+
+        # Maximum name lenght, spinbox
+        ttk.Label(self.lf, text='max').grid(column=6, row=1, sticky='e')
+        self.name_len_max_spin = ttk.Spinbox(
+                                    self.lf,
+                                    width=3,
+                                    to=MAX_NAME_LEN,
+                                    textvariable=self.max_len
+                                    )
+        self.name_len_max_spin.grid(column=7, row=1, sticky='w')
+
+        # Recursive depth levels, spinbox
+        ttk.Label(self.lf, text='Recursive Levels').grid(column=9, row=0, sticky='ew')
+        self.depth_spin = ttk.Spinbox(
+                                    self.lf,
+                                    width=3,
+                                    from_=-1,
+                                    to=MAX_NAME_LEN,
+                                    textvariable=self.depth
+                                    )
+        self.depth_spin.grid(column=10, row=0)
+
+
+        self.bindEntries()
+
+
+    def bindEntries(self, *args, **kwargs):
+        ''' Defines the binded actions '''
+        self.mask.trace_add('write', fn_treeview.refreshView)
+        self.ext.trace_add('write', fn_treeview.refreshView)
+        self.folders.trace_add('write', fn_treeview.refreshView)
+        self.files.trace_add('write', fn_treeview.refreshView)
+        self.hidden.trace_add('write', fn_treeview.refreshView)
+        self.hidden.trace_add('write', folder_treeview.refreshView)
+        self.files_before_dirs.trace_add('write', fn_treeview.refreshView)
+        self.min_len.trace_add('write', fn_treeview.refreshView)
+        self.max_len.trace_add('write', fn_treeview.refreshView)
+        self.depth.trace_add('write', fn_treeview.refreshView)
+
+    def maskGet(self, *args, **kwargs):
+        return self.mask.get()
+
+    def extGet(self, *args, **kwargs):
+        return self.ext.get()
+
+    def foldersGet(self, *args, **kwargs):
+        return self.folders.get()
+
+    def filesGet(self, *args, **kwargs):
+        return self.files.get()
+
+    def hiddenGet(self, *args, **kwargs):
+        return self.hidden.get()
+
+    def filesBeforeDirsGet(self, *args, **kwargs):
+        return self.files_before_dirs.get()
+
+    def nameLenMinGet(self, *args, **kwargs):
+        return self.min_len.get()
+
+    def nameLenMaxGet(self, *args, **kwargs):
+        return self.max_len.get()
+
+    def depthGet(self, *args, **kwargs):
+        return self.depth.get()
+
+
 class Rename:
     '''
     Draws the Rename button. Inside rename notebook. This is always last.
@@ -2874,8 +2965,9 @@ class Rename:
     '''
     def __init__(self, master, *args, **kwargs):
         self.frame = ttk.Frame(master)
-        self.frame.grid(column=0, row=3, columnspan=5, sticky='w'+'e')
-        self.frame.columnconfigure(0, weight=1)
+        # self.frame.grid(column=1, row=0, columnspan=5, sticky='w'+'e')
+        self.frame.grid(column=1, row=0, sticky='w'+'e')
+        # self.frame.columnconfigure(0, weight=1)
 
         self.load_command_button = ttk.Button(
                                         self.frame,
@@ -3148,7 +3240,7 @@ class Metadata_ListEntries:
 
             for key in self.meta_dict:
                 # remove duplicates
-                self.meta_dict[key] = noDuplicatesList(self.meta_dict[key])
+                self.meta_dict[key] = No_Duplicate_List(self.meta_dict[key])
                 # list to string
                 str_value = self.metaValuesListToStr(self.meta_dict[key])
 
@@ -3188,8 +3280,7 @@ class Metadata_ListEntries:
         
     def metadataEntriesCreate(self, *args, **kwargs):
         ''' Create the metadata list entries with their values'''
-        n = 0
-        for key in self.meta_dict:
+        for n, key in enumerate(self.meta_dict):
             ttk.Label(
                         self.field_frame.interior,
                         text=key, width=25, anchor='e'
@@ -3200,8 +3291,6 @@ class Metadata_ListEntries:
                         width=55,
                         textvariable=self.meta_dict[key]
                         ).grid(column=1, row=n, sticky='e')
-
-            n += 1
 
     def createMetadataTag(self, *args, **kwargs):
         '''
@@ -3826,40 +3915,93 @@ GENERAL FUNCTIONS
 '''
 ###################################
 
-def Load_Child(path, *args, **kwargs):
+
+
+def Scandir_Recursive(path, tree, mask=re.compile(''), ext_tuple=[],
+    folders=True, files=True, hidden=False, min_len=0, max_len=9999, depth=0):
     '''
-    Loads the directories inside the folder given by "path".
-    Separates the output in files and directories.
-    Error handling if unable to open.
+        A scandir implementation that allows recursiveness by level and returns
+        a list of os.DirEntry objects.
+        Depth starts at the maximum value and goes down by one in each function
+        call until it reaches 0 where it doesn't call the function anymore.
+        If the depth is -1 execute maximum recursiveness.
     '''
-    order = files_fore_dirs
+    # loop through scandir
+    for entry in os.scandir(path):
+        if entry.is_file(): tag = 'file'
+        elif entry.is_dir(follow_symlinks=False): tag = 'directory'
 
-    try:
-        files=[]
-        directories=[]
+        # BIIIG filter logic check to add entries
+        if (mask.match(entry.name) and
+            (not ext_tuple or entry.name.endswith(ext_tuple)) and
+            ((folders and entry.is_dir(follow_symlinks=False)) or
+            (files and entry.is_file())) and
+            (hidden or not entry.name.startswith('.')) and
+            (len(entry.name) > min_len and len(entry.name) < max_len)):
 
-        # os.scandir() faster than os.walk() and os.listdir(), also easier to
-        # check for file or dir
-        for entry in os.scandir(path):
-            if entry.is_file():
-                files.append(entry.name)
-            else:
-                directories.append(entry.name)
-            # Slightly faster to if-else than if-if or if-elif
+            tree.insertNode(
+                                        path=entry.path,
+                                        name=entry.name,
+                                        values=[entry.name],
+                                        tag=tag
+                                        )
 
-        # Sort alphabetically case-insensitive
+        # When entry.is_dir
+        if (entry.is_dir(follow_symlinks=False) and (hidden or not entry.name.startswith('.'))):
+            # Try calling the function again inside the directory
+            try:
+                # If depth is already 0 skip and continue with the next step
+                # of the loop
+                if depth == 0: continue
+                # If the depth is larger than 0 call the function again
+                # with depth-1. That'll produce that when it finds another
+                # directory inside it it will call the function with
+                # (depth-1)-1. It'll do that until there are no more folders
+                # in which case it will go back up to where it left off
+                # and repeat
+                elif depth > 0: next_depth = depth - 1
+                # And if depth is -1 call the function again with depth=-1.
+                # This will cause to call the function in every possible
+                # folder
+                elif depth == -1: next_depth = -1
+
+                Scandir_Recursive(entry.path, tree=tree, mask=mask,
+                                            ext_tuple=ext_tuple,
+                                            folders=folders, files=files,
+                                            hidden=hidden, min_len=min_len,
+                                            max_len=max_len, depth=next_depth)
+
+            # Unless it catches any of this errors
+            except (FileNotFoundError, NotADirectoryError, PermissionError):
+                pass
+
+def Tree_Sort(tree, depth=-1, parent='', files_before_dirs=False, *args, **kwargs):
+    ''' Sort the tree list with a few options '''
+    # When depth wasn't 0 sort alphabetically and case-insensitively
+    # the absolute paths, this will produce having a folder followed by
+    # its contents
+    if depth != 0:
+        other_tree = [item for item in tree.get_children(parent)]
+        other_tree.sort(key=str.lower)
+    # When the depth was 0 separate the tree into files and directories, sort
+    # each of them alphabetically case-insensitive, and then join them
+    # together again
+    else:
+        # Separate into files and folders and sort them
+        files = list(tree.tag_has('file'))
         files.sort(key=str.lower)
+        directories = list(tree.tag_has('directory'))
         directories.sort(key=str.lower)
-        # Showing order
-        if order:
-            files = files + directories
+
+        # Join again files before dirs or viceversa
+        if files_before_dirs:
+            other_tree = files + directories
         else:
-            files = directories + files
+            other_tree = directories + files
 
-    except OSError as e:
-        files = directories = ['Unable to Open']
-
-    return directories, files
+    # Move each element to its new position
+    for idx, item in enumerate(other_tree):
+        tree.move(item, parent, idx)
 
 def Populate_Fields(*args, **kwargs):
     '''
@@ -3871,7 +4013,7 @@ def Populate_Fields(*args, **kwargs):
     if tab == 'Rename':
         # Shows new naming
         fn_treeview.resetNewName()
-        FileNavigator.Show_New_Name()
+        fn_treeview.showNewName()
         # Enables the menu options for renaming
         menu_bar.renameEnable()
         # Disables the menu options for metadata
@@ -3888,25 +4030,7 @@ def Populate_Fields(*args, **kwargs):
         # Disables the menu options for renaming
         menu_bar.renameDisable()
 
-def Files_Fore_Dirs(*args, **kwargs):
-    '''
-        Change from showing directories first to showing files first and
-        viceversa
-    '''
-    # Use of a global variable
-    global files_fore_dirs
-    # Change its value to the opposite
-    files_fore_dirs = not files_fore_dirs
-
-    # Reload the fileview
-    fn_treeview.refreshView()
-    if files_fore_dirs:
-        msg = 'Refreshed Treeview. Showing Files before Directories'
-    else:
-        msg = 'Refreshed Treeview. Showing Directories before Files'
-    inf_bar.lastActionRefresh(msg)
-
-def noDuplicatesList(list_convert, *args, **kwargs):
+def No_Duplicate_List(list_convert, *args, **kwargs):
     return list(dict.fromkeys(list_convert))
 
 def Show_Working(inf_msg='Working...', *args, **kwargs):
@@ -3930,9 +4054,16 @@ def Finish_Show_Working(inf_msg='Done', *args, **kwargs):
     inf_bar.lastActionRefresh(inf_msg)
 
 def TreeNav_Select_Calls(*args, **kwargs):
-    folder_treeview.openFolderTreeNav()
-    inf_bar.numItemsRefresh()
-    dir_entry_frame.folderDirSet()
+    ''' Call when selecting a folder in the folder treeview '''
+    # Get selected folder's path
+    path = folder_treeview.selectedItem()
+    # Set that path as the active path in the file treeview
+    fn_treeview.active_path = path
+
+    # Refresh the file treeview
+    fn_treeview.refreshView(path)
+    # Load the selected node
+    folder_treeview.openNode(path)
 
 def Call_For_Info_Bar(*args, **kwargs):
     inf_bar.numItemsRefresh()
@@ -3942,7 +4073,7 @@ def Refresh_Treeviews(*args, **kwargs):
     # Update the file view
     fn_treeview.refreshView()
     # Update the folder view
-    dir_entry_frame.folderNavRefresh()
+    folder_treeview.updateNode()
 
     inf_bar.lastActionRefresh('Refreshed Both Treeviews')
 
@@ -4044,51 +4175,52 @@ PROGRAM
 '''
 ###################################
 
-'''
-PROGRAM INITIALIZATION
-'''
-if CONFIG_FOLDER_PATH: Create_Config_Folder(CONFIG_FOLDER_PATH)
-last_rename = Last_Rename()
-hidden_global = True
-files_fore_dirs = False
+if __name__ == '__main__':
 
+    '''
+    PROGRAM INITIALIZATION
+    '''
+    if CONFIG_FOLDER_PATH: Create_Config_Folder(CONFIG_FOLDER_PATH)
+    last_rename = Last_Rename()
 
-'''
-WINDOW INITIALIZATION
-'''
-root = tk.Tk()
-root.title(TITLE)
-root.attributes('-type', 'dialog')  # makes the window a pop up/dialog
+    '''
+    WINDOW INITIALIZATION
+    '''
+    root = tk.Tk()
+    root.title(TITLE)
+    root.attributes('-type', 'dialog')  # makes the window a pop up/dialog
 
+    '''
+    MAINFRAME AND SUBFRAMES
+    '''
+    mainframe = ttk.Frame(root, padding='5 5 5 5')
+    mainframe.grid(column=0, row=0, sticky='nwes')
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
 
-'''
-MAINFRAME AND SUBFRAMES
-'''
-mainframe = ttk.Frame(root, padding='5 5 5 5')
-mainframe.grid(column=0, row=0, sticky='nwes')
-root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+    # Tree view & File view
+    # Frame Creation for the folder treeview, file view and the directory entry
+    f_t_view_frame = ttk.Frame(mainframe)
+    f_t_view_frame.grid(column=0, row=0, sticky='w'+'e')
+    f_t_view_frame.columnconfigure(1, weight=1)
+    fn_treeview = FileNavigator(f_t_view_frame)
+    folder_treeview = TreeNavigator(f_t_view_frame, path=PATH)
+    dir_entry_frame = DirEntryFrame(f_t_view_frame)
 
-# Tree view & File view
-# Frame Creation for the folder treeview, file view and the directory entry
-f_t_view_frame = ttk.Frame(mainframe)
-f_t_view_frame.grid(column=0, row=0, sticky='w'+'e')
-f_t_view_frame.columnconfigure(1, weight=1)
-fn_treeview = FileNavigator(f_t_view_frame)
-folder_treeview = TreeNavigator(f_t_view_frame, path=PATH)
-dir_entry_frame = DirEntryFrame(f_t_view_frame)
+    # Extra Information Bar
+    inf_bar = InfoBar(mainframe)
 
-# Extra Information Bar
-inf_bar = InfoBar(mainframe)
+    # Notebook
+    nb = ChangesNotebook(mainframe)
 
-# Notebook
-nb = ChangesNotebook(mainframe)
+    # Menubar
+    menu_bar = Top_Menu(root)
 
-# Menubar
-menu_bar = Top_Menu(root)
+    # Set Padding around the window
+    for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
 
-# Set Padding around the window
-for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
+    # Initialize the treeview
+    folder_treeview.refreshView()
 
-root.config(menu=menu_bar.menubar)
-root.mainloop()
+    root.config(menu=menu_bar.menubar)
+    root.mainloop()

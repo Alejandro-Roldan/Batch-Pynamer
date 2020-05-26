@@ -1,3 +1,15 @@
+V. 05.06:
+	- Implemented recursiveness to the file treeview
+	- Implemented filtering the file treeview (+ the folder treeview just for hidden folders)
+	- Added a filtering treeview widget
+	- Cleaned code
+
+
+V. 05.05:
+	- Optimized loading directories calls
+	- Added colors to rows, change to green when they change name (doesnt work because of bug from tkinter)
+	- Since we need a defined limit for the spinboxes I decided to add a check for filename length limit (and double it for safeness) and to use it instead of an arbitrary lenght number (also trying to rename to something beyond the filename lenght gets catched by the OsError handling that was already implemented for catching invalid chars)
+	
 V. 05:
 	- Added the ability to hide and show hidden files instead of always showing them
 	- Added Display menu
@@ -5,6 +17,7 @@ V. 05:
 	- Added the ability to show Files before Directories instead of always showing Directories before Files
 	- Aded Display Menu function to change directories before files and viceversa
 	- Added support for MP4 metadata
+	- Added enumerate where possible for more concise code
 
 V. 04.05:
 	- Optimized code conditionals and error handling in the use of metadata values for the rename
@@ -23,10 +36,6 @@ V. 04:
 	- Added function to set the metadata's title and tracknumber from the filename (splits the filename at the first apparition of "-" and sets the first part to be the tracknumber and the second to be the title)
 	- Added File Menu Function to set the title and the tracknumber metadata
 	- Now when applying changes to the metadata it automatically reloads
-
-	To do:
-		- Add metadata changes for images and videos
-		- Make more command line usable
 
 V. 03.05:
 	- Added the ability to open the program in a specific folder calling it with the folder as an argument
