@@ -13,7 +13,6 @@ import re               # regular expressions
 
 import tkinter as tk
 from tkinter import ttk
-from _tkinter import TclError
 
 # All previous imports are basic python libraries
 
@@ -93,7 +92,7 @@ GLOBAL CONSTANTS
 
 
 APP_NAME = 'Batch Pynamer'
-APP_VER = 5.05
+APP_VER = 5.06
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
 PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
@@ -105,6 +104,15 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -580,7 +588,7 @@ class TreeNavigator:
             self.tree_nav.delete(self.tree_nav.get_children(path))
 
             Scandir_Recursive(path=path, tree=self, folders=True,
-                                        hidden=hidden, files=False, depth=0)
+                                        files=False, hidden=hidden, depth=0)
 
             Tree_Sort(tree=self.tree_nav, parent=path)
 
@@ -760,11 +768,11 @@ class FileNavigator:
                                 open=False
                                 )
 
-    def refreshView(self, path='', *args, **kwargs):
+    def refreshView(self, event=None, path='', *args, **kwargs):
         ''' Get the folder path and update the treeview '''
         # When the path isn't set or the path is an event call string
         # use the active_path
-        if not path or path == 'PY_VAR49':
+        if not path:
             path = self.active_path
 
         # Get the filters values
@@ -774,6 +782,7 @@ class FileNavigator:
         files = nb.filters.filesGet()
         hidden = nb.filters.hiddenGet()
         files_before_dirs = nb.filters.filesBeforeDirsGet()
+        reverse = nb.filters.reverseGet()
         min_len = nb.filters.nameLenMinGet()
         max_len = nb.filters.nameLenMaxGet()
         depth = nb.filters.depthGet()
@@ -798,7 +807,8 @@ class FileNavigator:
                                         files=files, hidden=hidden,
                                         min_len=min_len, max_len=max_len,
                                         depth=depth)
-        Tree_Sort(tree=self.tree_folder, depth=depth, files_before_dirs=files_before_dirs)
+        Tree_Sort(tree=self.tree_folder, depth=depth,
+                    files_before_dirs=files_before_dirs, reverse=reverse)
 
         # Call info set actions
         inf_bar.numItemsRefresh()
@@ -2812,6 +2822,7 @@ class Filters_Widget:
         self.files = tk.BooleanVar(value=True)
         self.hidden = tk.BooleanVar(value=False)
         self.files_before_dirs = tk.BooleanVar(value=False)
+        self.reverse = tk.BooleanVar(value=False)
         self.min_len = tk.IntVar(value=0)
         self.max_len = tk.IntVar(value=MAX_NAME_LEN)
         self.depth = tk.IntVar(value=0)
@@ -2851,47 +2862,33 @@ class Filters_Widget:
                                                 )
         self.files_check.grid(column=2, row=1, sticky='w')
 
-        # Files before directories, checkbutton
-        self.files_before_dirs_check = ttk.Checkbutton(
-                                                self.lf,
-                                                text='Files before Dirs',
-                                                variable=self.files_before_dirs,
-                                                )
-        self.files_before_dirs_check.grid(column=3, row=0, sticky='w')
-
         # Hidden files, checkbutton
         self.hidden_check = ttk.Checkbutton(
                                                 self.lf,
                                                 text='Hidden',
                                                 variable=self.hidden,
                                                 )
-        self.hidden_check.grid(column=3, row=1, sticky='w')
-        
-        # Name length group
-        ttk.Label(self.lf, text='Name lenght').grid(column=4, row=0, columnspan=4)
+        self.hidden_check.grid(column=3, row=0, sticky='w')
 
-        # Minimum name length, spinbox
-        ttk.Label(self.lf, text='min').grid(column=4, row=1, sticky='e')
-        self.name_len_min_spin = ttk.Spinbox(
-                                    self.lf,
-                                    width=3,
-                                    to=MAX_NAME_LEN,
-                                    textvariable=self.min_len
-                                    )
-        self.name_len_min_spin.grid(column=5, row=1, sticky='w')
+        # Reverse files, checkbutton
+        self.reverse_check = ttk.Checkbutton(
+                                                self.lf,
+                                                text='Reverse',
+                                                variable=self.reverse,
+                                                )
+        self.reverse_check.grid(column=3, row=1, sticky='w')
 
-        # Maximum name lenght, spinbox
-        ttk.Label(self.lf, text='max').grid(column=6, row=1, sticky='e')
-        self.name_len_max_spin = ttk.Spinbox(
-                                    self.lf,
-                                    width=3,
-                                    to=MAX_NAME_LEN,
-                                    textvariable=self.max_len
-                                    )
-        self.name_len_max_spin.grid(column=7, row=1, sticky='w')
+        # Files before directories, checkbutton
+        self.files_before_dirs_check = ttk.Checkbutton(
+                                                self.lf,
+                                                text='Files before Dirs',
+                                                variable=self.files_before_dirs,
+                                                )
+        self.files_before_dirs_check.grid(column=4, row=1, columnspan=2, sticky='w')
+
 
         # Recursive depth levels, spinbox
-        ttk.Label(self.lf, text='Recursive Levels').grid(column=9, row=0, sticky='ew')
+        ttk.Label(self.lf, text='Recursive Levels').grid(column=4, row=0, sticky='ew')
         self.depth_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
@@ -2899,7 +2896,32 @@ class Filters_Widget:
                                     to=MAX_NAME_LEN,
                                     textvariable=self.depth
                                     )
-        self.depth_spin.grid(column=10, row=0)
+        self.depth_spin.grid(column=5, row=0)
+        
+        # Name lenght group
+        ttk.Label(self.lf, text='Name lenght').grid(column=6, row=0, columnspan=4)
+
+        # Minimum name lenght, spinbox
+        ttk.Label(self.lf, text='min').grid(column=6, row=1, sticky='e')
+        self.name_len_min_spin = ttk.Spinbox(
+                                    self.lf,
+                                    width=3,
+                                    to=MAX_NAME_LEN,
+                                    textvariable=self.min_len
+                                    )
+        self.name_len_min_spin.grid(column=7, row=1, sticky='w')
+
+        # Maximum name lenght, spinbox
+        ttk.Label(self.lf, text='max').grid(column=8, row=1, sticky='e')
+        self.name_len_max_spin = ttk.Spinbox(
+                                    self.lf,
+                                    width=3,
+                                    to=MAX_NAME_LEN,
+                                    textvariable=self.max_len
+                                    )
+        self.name_len_max_spin.grid(column=9, row=1, sticky='w')
+
+        
 
 
         self.bindEntries()
@@ -2914,6 +2936,7 @@ class Filters_Widget:
         self.hidden.trace_add('write', fn_treeview.refreshView)
         self.hidden.trace_add('write', folder_treeview.refreshView)
         self.files_before_dirs.trace_add('write', fn_treeview.refreshView)
+        self.reverse.trace_add('write', fn_treeview.refreshView)
         self.min_len.trace_add('write', fn_treeview.refreshView)
         self.max_len.trace_add('write', fn_treeview.refreshView)
         self.depth.trace_add('write', fn_treeview.refreshView)
@@ -2935,6 +2958,9 @@ class Filters_Widget:
 
     def filesBeforeDirsGet(self, *args, **kwargs):
         return self.files_before_dirs.get()
+
+    def reverseGet(self, *args, **kwargs):
+        return self.reverse.get()
 
     def nameLenMinGet(self, *args, **kwargs):
         return self.min_len.get()
@@ -3966,23 +3992,24 @@ def Scandir_Recursive(path, tree, mask=re.compile(''), ext_tuple=[],
             except (FileNotFoundError, NotADirectoryError, PermissionError):
                 pass
 
-def Tree_Sort(tree, depth=-1, parent='', files_before_dirs=False, *args, **kwargs):
+def Tree_Sort(tree, depth=-1, parent='', files_before_dirs=False,
+    reverse=False, *args, **kwargs):
     ''' Sort the tree list with a few options '''
     # When depth wasn't 0 sort alphabetically and case-insensitively
     # the absolute paths, this will produce having a folder followed by
     # its contents
     if depth != 0:
         other_tree = [item for item in tree.get_children(parent)]
-        other_tree.sort(key=str.lower)
+        other_tree.sort(key=str.lower, reverse=reverse)
     # When the depth was 0 separate the tree into files and directories, sort
     # each of them alphabetically case-insensitive, and then join them
     # together again
     else:
         # Separate into files and folders and sort them
         files = list(tree.tag_has('file'))
-        files.sort(key=str.lower)
+        files.sort(key=str.lower, reverse=reverse)
         directories = list(tree.tag_has('directory'))
-        directories.sort(key=str.lower)
+        directories.sort(key=str.lower, reverse=reverse)
 
         # Join again files before dirs or viceversa
         if files_before_dirs:
