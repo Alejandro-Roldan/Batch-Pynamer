@@ -104,15 +104,6 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
-    # PATH = '/'
-    # PATH = '/home'
-    # PATH = '/home/Jupiter'
-    PATH = '/home/Jupiter/Music'
-    # PATH = '/home/Mars/Music'
-    # PATH = '/home/Jupiter/Musiclol'
-    # PATH = '/home/Jupiter/MusicTrials'
-    # PATH = '/media'
-    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
