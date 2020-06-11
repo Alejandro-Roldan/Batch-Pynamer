@@ -1,6 +1,22 @@
+V. 06.00:
+	- Highly optimized the treeview sorting. In previous versions the elements sorting was considerably slow (although only noticiable when there were many many items, specially when using the recursive option), so it has been completly changed to a much much faster implementation wich barely adds any overhead. This was achived by creating the list of items then sorting it then inserting the items in the treeview, rather than inserting the item to the treeview as they were read and then sorting the treeview by moving each item to a new index.
+	- Change the insertNode to get the entry instead of the values
+	- Added an origin node in the folder treeview
+	- Change order for some menu options
+	- Added a few key bindings that for refreshing the views that had been forgotten to be added although the accelerators where there.
+	- Removed unused classes
+
+V. 05.08:
+	- Added Renaming from file
+	- Added Renaming from the bottom to the top
+	- Fixed bug where renaming with recursiveness would name the folders before the files in them so then i couldn't rename the files because the path no longer exists
+	- Changed filtering call to act for the mask and ext entries when losing focus from them, so as to not load the whole tree with each keystroke
+	- Added key bindings for menu options
+	- Added accelerators (display the key binding next to the menubar options)
+
 V. 05.06:
 	- Implemented recursiveness to the file treeview
-	- Implemented filtering the file treeview (+ the folder treeview just for hidden folders)
+	- Implemented filtering the file treeview (+ the folder treeview for hidden folders)
 	- Added a filtering treeview widget
 	- Cleaned code
 

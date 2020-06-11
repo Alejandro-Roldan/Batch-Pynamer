@@ -54,6 +54,7 @@ except ImportError:
         - Notebook
         - Extra Information Bar
 
+        - Rename from file frame
         - Regular Expressions frame
         - Name frame
         - Replace frame
@@ -92,7 +93,7 @@ GLOBAL CONSTANTS
 
 
 APP_NAME = 'Batch Pynamer'
-APP_VER = 5.06
+APP_VER = 6.00
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
 PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
@@ -104,8 +105,17 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
-# Get the maximum filename lenght in the active drive
+# Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
 
 # Configuration folder path depending on OS
@@ -133,12 +143,12 @@ WIDGET CREATION CLASSES
 ###################################
 
 class VerticalScrolledFrame(ttk.Frame):
-    """
-    A pure Tkinter scrollable frame that actually works!
-    * Use the 'interior' attribute to place widgets inside the scrollable frame
-    * Construct and pack/place/grid normally
-    * This frame only allows vertical scrolling
-    """
+    '''
+        A pure Tkinter scrollable frame that actually works!
+        * Use the 'interior' attribute to place widgets inside the scrollable frame
+        * Construct and pack/place/grid normally
+        * This frame only allows vertical scrolling
+    '''
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)            
 
@@ -227,16 +237,6 @@ class Last_Rename:
         return str(self.last_rename_list)
 
 
-class Error(Exception):
-    ''' Base class for other exceptions '''
-    pass
-
-
-class NamingError(Error):
-    ''' Raised when the new file name is already in use '''
-    pass
-
-
 
 ###################################
 '''
@@ -268,6 +268,8 @@ class Top_Menu:
 
     def fileMenu(self, *args, **kwargs):
         ''' File Menu Dropdown '''
+        self.rename_bot_top = tk.BooleanVar()
+
         # Create the menu
         self.file_menu = tk.Menu(
                                     self.menubar,
@@ -279,19 +281,28 @@ class Top_Menu:
         # Rename
         self.file_menu.add_command(
                                     label='Rename',
-                                    command=nb.rename.finalRenameCall
+                                    command=Rename.Final_Rename,
+                                    accelerator='Ctrl+R'
                                     )
 
         # Undo Rename
         self.file_menu.add_command(
                                     label='Undo Rename',
-                                    command=Rename.Undo
+                                    command=Rename.Undo,
+                                    accelerator='Ctrl+Z'
                                     )
 
         # Reset Entry Fields
         self.file_menu.add_command(
                                     label='Reset Entry Fields',
-                                    command=Rename.Full_Reset
+                                    command=Rename.Full_Reset,
+                                    accelerator='Ctrl+T'
+                                    )
+
+        # Rename from Bottom to Top
+        self.file_menu.add_checkbutton(
+                                    label='When Renaming: from Bottom to Top',
+                                    variable=self.rename_bot_top
                                     )
 
         # Separator
@@ -336,13 +347,15 @@ class Top_Menu:
         # Refresh Files
         self.file_menu.add_command(
                                     label='Refresh Files',
-                                    command=fn_treeview.refreshView
+                                    command=fn_treeview.refreshView,
+                                    accelerator='F5'
                                     )
 
         # Refresh Tree
         self.file_menu.add_command(
                                     label='Refresh Tree',
-                                    command=dir_entry_frame.folderNavRefresh
+                                    command=dir_entry_frame.folderNavRefresh,
+                                    accelerator='Ctrl+F5'
                                     )
 
         # Separator
@@ -353,6 +366,9 @@ class Top_Menu:
                                     label='Exit',
                                     command=root.quit
                                     )
+
+    def renameBotTopGet(self, *args, **kwargs):
+        return self.rename_bot_top.get()
 
     def selectionMenu(self, *args, **kwargs):
         ''' Selection Menu Dropdown '''
@@ -367,19 +383,22 @@ class Top_Menu:
         # Select All
         self.selection_menu.add_command(
                                         label='Select All',
-                                        command=fn_treeview.selectAll
+                                        command=fn_treeview.selectAll,
+                                        accelerator='Ctrl+A'
                                         )
 
         # Deselect All
         self.selection_menu.add_command(
                                         label='Deselect All',
-                                        command=fn_treeview.deselectAll
+                                        command=fn_treeview.deselectAll,
+                                        accelerator='Ctrl+D'
                                         )
 
         # Invert Selection
         self.selection_menu.add_command(
                                         label='Invert Selection',
-                                        command=fn_treeview.invertSelection
+                                        command=fn_treeview.invertSelection,
+                                        accelerator='Ctrl+I'
                                         )
 
     def commandMenu(self, *args, **kwargs):
@@ -404,13 +423,14 @@ class Top_Menu:
         # Load selected command
         self.command_menu.add_command(
                                         label='Load Field States from Command',
-                                        command=Load_Command_Call
+                                        command=Load_Command_Call,
+                                        accelerator='Ctrl+E'
                                         )
 
         # Apply selected command
         self.command_menu.add_command(
                                         label='Apply Selected Command',
-                                        command=nb.rename.applyCommandCall
+                                        command=Rename.Apply_Command
                                         )
 
         # Delete selected command
@@ -462,19 +482,19 @@ class Top_Menu:
 
     def metadataEnable(self, *args, **kwargs):
         if METADATA_IMPORT:
-            self.file_menu.entryconfigure(index=4, state='active')
             self.file_menu.entryconfigure(index=5, state='active')
             self.file_menu.entryconfigure(index=6, state='active')
             self.file_menu.entryconfigure(index=7, state='active')
             self.file_menu.entryconfigure(index=8, state='active')
+            self.file_menu.entryconfigure(index=9, state='active')
 
     def metadataDisable(self, *args, **kwargs):
         if METADATA_IMPORT:
-            self.file_menu.entryconfigure(index=4, state='disable')
             self.file_menu.entryconfigure(index=5, state='disable')
             self.file_menu.entryconfigure(index=6, state='disable')
             self.file_menu.entryconfigure(index=7, state='disable')
             self.file_menu.entryconfigure(index=8, state='disable')
+            self.file_menu.entryconfigure(index=9, state='disable')
 
     def selectedCommandGet(self, *args, **kwargs):
         return self.selected_command.get()
@@ -533,8 +553,8 @@ class TreeNavigator:
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
         # Tree navigation bindings
-        # self.tree_nav.bind('<<TreeviewOpen>>', self.openNode)
-        self.tree_nav.bind('<<TreeviewSelect>>', TreeNav_Select_Calls)
+        self.tree_nav.bind('<<TreeviewOpen>>', self.openNode)
+        self.tree_nav.bind('<<TreeviewSelect>>', fn_treeview.refreshView)
 
     def selectedItem(self, *args, **kwargs):
         # Since this tree can only select 1 item at a time we just pass
@@ -542,46 +562,52 @@ class TreeNavigator:
         return self.tree_nav.focus()
 
     def deleteChildren(self, path='', *args, **kwargs):
+        ''' Delete already existing nodes in the folder view '''
         for child in self.tree_nav.get_children(path):
             self.tree_nav.delete(child)
 
-    def insertNode(self, path='', name='', tag='', *args, **kwargs):
+    def insertNode(self, entry, *args, **kwargs):
         ''' Create nodes for the tree file navigation. '''
-        parent = os.path.split(path)[0]
-        if parent == self.path: parent = ''
+        parent = os.path.dirname(entry.path)
 
         # Uses the absolute path to the folder as the iid
         node = self.tree_nav.insert(
                                     parent=parent,
                                     index='end',
-                                    iid=path,
-                                    text=name,
+                                    iid=entry.path,
+                                    text=entry.name,
                                     open=False
                                     )
 
-        # Make dirs openable without loading children
-        if os.path.isdir(path):
-            self.nodes[node] = path
-            self.tree_nav.insert(node, 'end')
-
-
+        # Make dirs openable without loading children by creating an empty
+        # node inside
+        self.nodes[node] = entry.path
+        self.tree_nav.insert(parent=node, index='end')
 
     def openNode(self, *args, **kwargs):
         ''' Open Node action. Only avaible to the tree file navigation. '''
         # Get active node
         path = self.tree_nav.focus()
-        hidden = nb.filters.hiddenGet()
 
-        # Get the path to the directory of the opening node
-        abspath = self.nodes.pop(path, None)
-        if abspath:
+        # Get the path to the directory of the opening node and only act when
+        # it finds it in the dictionary (which means the node hasn't been
+        # opened previously, if it where then there would be no need to reload
+        # the contents)
+        if self.nodes.pop(path, None):
             # Delete the placeholder node that was created previously
             self.tree_nav.delete(self.tree_nav.get_children(path))
 
-            Scandir_Recursive(path=path, tree=self, folders=True,
-                                        files=False, hidden=hidden, depth=0)
+            # Get if we need to show hidden folders
+            hidden = nb.filters.hiddenGet()
+            # Get folders and sort them
+            scanned_dir = Scandir_Recursive(path=path, folders=True,
+                                            files=False, hidden=hidden,
+                                            depth=0)
+            scanned_dir = Tree_Sort(tree=scanned_dir)
+            # Insert the entries
+            for entry in scanned_dir:
+                self.insertNode(entry)
 
-            Tree_Sort(tree=self.tree_nav, parent=path)
 
     def refreshView(self, *args, **kwargs):
         path = self.path
@@ -592,10 +618,21 @@ class TreeNavigator:
 
         # Delete all children and reset Treeview
         self.deleteChildren()
+        # Insert the original node
+        self.tree_nav.insert(
+                                parent='',
+                                index='end',
+                                iid=self.path,
+                                text=self.path,
+                                open=True
+                                )
 
-        Scandir_Recursive(path=path, tree=self, folders=True,
-                                    files=False, hidden=hidden, depth=0)
-        Tree_Sort(tree=self.tree_nav)
+        scanned_dir = Scandir_Recursive(path=path, folders=True,
+                                        files=False, hidden=hidden, depth=0)
+        scanned_dir = Tree_Sort(tree=scanned_dir)
+
+        for entry in scanned_dir:
+            self.insertNode(entry)
 
     def updateNode(self, *args, **kwargs):
         '''
@@ -690,10 +727,9 @@ class FileNavigator:
         # Set inverted as the new selection
         self.selectionSet(inverted)
 
-    def childrenDelete(self, *args, **kwargs):
+    def deleteChildren(self, *args, **kwargs):
         ''' Delete already existing nodes in the folder view '''
-        to_delete = self.tree_folder.get_children()
-        for item in to_delete:
+        for item in self.tree_folder.get_children():
             self.tree_folder.delete(item)
 
     def setNewName(self, path, new_name, old_name, *args, **kwargs):
@@ -746,65 +782,75 @@ class FileNavigator:
         # Set info msg
         inf_bar.lastActionRefresh('Copied "{}" Path to Clipboard'.format(name))
 
-    def insertNode(self, path='', name='', tag='', *args, **kwargs):
+    def insertNode(self, entry, tag='', *args, **kwargs):
         ''' Create nodes '''
         # uses the absolute path to the folder as the iid
         self.tree_folder.insert(
                                 parent='',
                                 index='end',
-                                iid=path,
-                                text=name,
-                                values=[name],
+                                iid=entry.path,
+                                text=entry.name,
+                                values=[entry.name],
                                 tags=tag,
                                 open=False
                                 )
 
-    def refreshView(self, event=None, path='', *args, **kwargs):
+    def refreshView(self, event=None, path='', tree=[], *args, **kwargs):
         ''' Get the folder path and update the treeview '''
-        # When the path isn't set or the path is an event call string
-        # use the active_path
+        # Get selected folder's path
+        path = folder_treeview.selectedItem()
+        # When the path isn't set use the active_path
         if not path:
             path = self.active_path
 
-        # Get the filters values
-        mask = nb.filters.maskGet()
-        ext = nb.filters.extGet()
-        folders = nb.filters.foldersGet()
-        files = nb.filters.filesGet()
-        hidden = nb.filters.hiddenGet()
-        files_before_dirs = nb.filters.filesBeforeDirsGet()
-        reverse = nb.filters.reverseGet()
-        min_len = nb.filters.nameLenMinGet()
-        max_len = nb.filters.nameLenMaxGet()
-        depth = nb.filters.depthGet()
+        # If after that the path is still empty (when a folder hasn't been
+        # selected) don't try to load it
+        if path:
+            # Get the filters values
+            mask = nb.filters.maskGet()
+            ext = nb.filters.extGet()
+            folders = nb.filters.foldersGet()
+            files = nb.filters.filesGet()
+            hidden = nb.filters.hiddenGet()
+            files_before_dirs = nb.filters.filesBeforeDirsGet()
+            reverse = nb.filters.reverseGet()
+            min_len = nb.filters.nameLenMinGet()
+            max_len = nb.filters.nameLenMaxGet()
+            depth = nb.filters.depthGet()
 
-        # Compile the regular expressions mask
-        mask = re.compile(mask)
+            # Compile the regular expressions mask
+            mask = re.compile(mask)
 
-        # Transform the list of extensions into a tuple and add a . before the
-        # extension to make sure that its an extension and not just that the
-        # filename ends in that
-        ext_list = ['.' + i for i in re.split('; |;|, |,', ext)]
-        try:
-            ext_list.remove('.')
-        except ValueError:
-            pass
-        ext_tuple = tuple(ext_list)
+            # Transform the list of extensions into a tuple and add a . before the
+            # extension to make sure that its an extension and not just that the
+            # filename ends in that
+            ext_list = ['.' + i for i in re.split('; |;|, |,', ext)]
+            try:
+                ext_list.remove('.')
+            except ValueError:
+                pass
+            ext_tuple = tuple(ext_list)
 
-        # Delete the children, load the new ones and sort them
-        self.childrenDelete()
-        Scandir_Recursive(path=path, tree=self, mask=mask,
-                                        ext_tuple=ext_tuple, folders=folders,
-                                        files=files, hidden=hidden,
-                                        min_len=min_len, max_len=max_len,
-                                        depth=depth)
-        Tree_Sort(tree=self.tree_folder, depth=depth,
-                    files_before_dirs=files_before_dirs, reverse=reverse)
+            # Delete the children, load the new ones and sort them
+            self.deleteChildren()
 
-        # Call info set actions
-        inf_bar.numItemsRefresh()
-        dir_entry_frame.folderDirSet()
-        inf_bar.lastActionRefresh('Refreshed File View')
+            scanned_dir = Scandir_Recursive(path, mask=mask,
+                                            ext_tuple=ext_tuple,
+                                            folders=folders, files=files,
+                                            hidden=hidden, min_len=min_len,
+                                            max_len=max_len, depth=depth)
+            scanned_dir = Tree_Sort(tree=scanned_dir, depth=depth,
+                                    files_before_dirs=files_before_dirs,
+                                    reverse=reverse)
+
+            for entry in scanned_dir:
+                self.insertNode(entry)
+
+            # Call info set actions
+            self.active_path = path
+            inf_bar.numItemsRefresh()
+            dir_entry_frame.folderDirSet()
+            inf_bar.lastActionRefresh('Refreshed File View')
 
 
 class DirEntryFrame:
@@ -844,7 +890,7 @@ class DirEntryFrame:
         inf_bar.lastActionRefresh('Refreshed Browse Files Treeview')
 
     def folderDirSet(self, *args, **kwargs):
-        folder_path = folder_treeview.selectedItem()
+        folder_path = fn_treeview.active_path
         self.folder_dir.set(folder_path)
 
     def openFolderTreeNav(self, *args, **kwags):
@@ -901,6 +947,8 @@ class ChangesNotebook:
         self.nb_rename_frame = ttk.Frame(master)
         self.nb_rename_frame.grid(sticky='nsew')
 
+        # Rename from File (0)
+        self.rename_from_file = Rename_From_File(self.nb_rename_frame)
         # Regular Expressions (1)
         self.reg_exp = Reg_Exp(self.nb_rename_frame)
         # Name (2)
@@ -924,7 +972,7 @@ class ChangesNotebook:
 
         # Bottom Frame for Filters and Rename buttons
         self.nb_bottom_frame = ttk.Frame(self.nb_rename_frame)
-        self.nb_bottom_frame.grid(column=0, row=3, columnspan=5, sticky='w'+'e')
+        self.nb_bottom_frame.grid(column=0, row=3, columnspan=6, sticky='w'+'e')
         self.nb_bottom_frame.columnconfigure(0, weight=1)
         # Filters
         self.filters = Filters_Widget(self.nb_bottom_frame)
@@ -1001,10 +1049,73 @@ RENAME CLASSES
 '''
 ###################################
 
+class Rename_From_File:     # (0)
+    def __init__(self, master, *args, **kwargs):        
+        self.lf = ttk.Labelframe(master, text='Rename From File (0)')
+        self.lf.grid(column=0, row=0, sticky='nsew')
+
+        # Variable defs
+        self.file = tk.StringVar()
+
+        # Chose case, combobox
+        ttk.Label(self.lf, text="Filename").grid(column=0, row=0, sticky='w')
+        self.file_entry = ttk.Entry(
+                                            self.lf,
+                                            width=10,
+                                            textvariable=self.file
+                                            )
+        self.file_entry.grid(column=1, row=0, sticky='ew')
+
+        # Reset, button
+        self.reset_button = ttk.Button(
+                                        self.lf,
+                                        width=2,
+                                        text="R",
+                                        command=self.resetWidget
+                                        )
+        self.reset_button.grid(column=2, row=1, sticky='e')
+
+        self.bindEntries()
+
+    def fileGet(self, *args, **kwargs):
+        return self.file.get()
+
+    def bindEntries(self, *args, **kwargs):
+        ''' Defines the binded actions '''
+        # calls to update the new name column
+        self.file.trace_add('write', fn_treeview.showNewName)
+
+    def resetWidget(self, *args, **kwargs):
+        ''' Resets each and all data variables inside the widget '''
+        self.fixed_name.set('')
+
+    def setCommand(self, var_dict, *args, **kwargs):
+        '''
+            Sets the variable fields according to the loaded
+            command dictionary
+        '''
+        self.file.set(var_dict['rename_from_file_file'])
+
+    @staticmethod
+    def appendVarValToDict(dict_={}, *args, **kwargs):
+        dict_['rename_from_file_file'] = nb.rename_from_file.fileGet()
+
+    @staticmethod
+    def Rename_From_File_Rename(name, idx, *wargs, **kwargs):
+        ''' Self explanatory '''
+        filename = nb.rename_from_file.fileGet()
+        if filename:
+            with open(filename, 'r') as f:
+                lines = f.readlines()
+                name = lines[idx]
+
+        return name
+
+
 class Reg_Exp:    # (1)
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Regular Expressions (1)')
-        self.lf.grid(column=0, row=0, sticky='nsew')
+        self.lf.grid(column=1, row=0, sticky='nsew')
 
         # Variable defs
         self.match_reg = tk.StringVar()
@@ -1180,7 +1291,7 @@ class Name_Basic:   # (2)
     '''
     def __init__(self, master, *args, **kwargs):        
         self.lf = ttk.Labelframe(master, text='Name (2)')
-        self.lf.grid(column=0, row=1, sticky='nsew')
+        self.lf.grid(column=2, row=0, sticky='nsew')
 
         # Variable defs
         self.name_opt = tk.StringVar()
@@ -1214,7 +1325,7 @@ class Name_Basic:   # (2)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='w')
+        self.reset_button.grid(column=2, row=2, sticky='e')
 
         self.bindEntries()
 
@@ -1268,7 +1379,6 @@ class Name_Basic:   # (2)
             name = name[::-1]
         elif name_opt == 'Fixed':
             name = nb.name_basic.fixedNameGet()
-            # name = Meta_Format(name, path)
 
         return name
 
@@ -1283,7 +1393,7 @@ class Replace:    # (3)
     '''
     def __init__(self, master, *args, **kwargs):        
         self.lf = ttk.Labelframe(master, text='Replace (3)')
-        self.lf.grid(column=1, row=0, sticky='nsew')
+        self.lf.grid(column=1, row=1, columnspan=2, sticky='nsew')
 
         # Variable defs
         self.replace_this = tk.StringVar()
@@ -1323,7 +1433,7 @@ class Replace:    # (3)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='w')
+        self.reset_button.grid(column=2, row=2, sticky='e')
 
         self.bindEntries()
 
@@ -1395,7 +1505,7 @@ class Case:   # (4)
     '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Case (4)')
-        self.lf.grid(column=1, row=1, sticky='nsew')
+        self.lf.grid(column=0, row=1, sticky='nsew')
 
         # Variable defs
         self.case_want = tk.StringVar()
@@ -1421,7 +1531,7 @@ class Case:   # (4)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='w')
+        self.reset_button.grid(column=2, row=1, sticky='e')
 
         self.bindEntries()
 
@@ -1500,7 +1610,7 @@ class Remove:     # (5)
     '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Remove (5)')
-        self.lf.grid(column=2, row=0, rowspan=2, sticky='nsew')
+        self.lf.grid(column=3, row=0, rowspan=2, sticky='nsew')
 
         # Variable defs
         self.first_n = tk.IntVar()
@@ -1930,7 +2040,7 @@ class Move_Copy_Parts:    # (6)
     '''
     def __init__(self, master, *args, **kwargs):        
         self.lf = ttk.Labelframe(master, text='Move/Copy Parts (6)')
-        self.lf.grid(column=0, row=2, columnspan=2, sticky='nsew')
+        self.lf.grid(column=0, row=2, columnspan=3, sticky='nsew')
 
         # Variable defs
         self.ori_pos = tk.StringVar()
@@ -2122,7 +2232,7 @@ class Add_To_String:  # (7)
     '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Add (7)')
-        self.lf.grid(column=3, row=0, rowspan=2, sticky='nsew')
+        self.lf.grid(column=4, row=0, rowspan=2, sticky='nsew')
 
         # Variable defs
         self.prefix = tk.StringVar()
@@ -2273,7 +2383,7 @@ class Append_Folder_Name: # (8)
     '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Append Folder Name (8)')
-        self.lf.grid(column=2, row=2, columnspan=2, sticky='nsew')
+        self.lf.grid(column=3, row=2, columnspan=2, sticky='nsew')
 
         # Variable defs
         self.name_pos = tk.StringVar()
@@ -2412,7 +2522,7 @@ class Numbering:  # (9)
     '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Numbering (9)')
-        self.lf.grid(column=4, row=0, rowspan=2, sticky='nsew')
+        self.lf.grid(column=5, row=0, rowspan=2, sticky='nsew')
 
         # Variable defs
         self.mode = tk.StringVar()
@@ -2601,7 +2711,7 @@ class Numbering:  # (9)
         dict_['numbering_type_base'] = nb.numbering.typeBaseGet()
 
     @staticmethod
-    def Numbering_Rename(name, sel_item, *args, **kwargs):
+    def Numbering_Rename(name, idx, *args, **kwargs):
         ''' Calls to create the numbering and then sets it up inplace '''
         mode = nb.numbering.modeGet()
         at_n = nb.numbering.atNGet()
@@ -2611,7 +2721,7 @@ class Numbering:  # (9)
 
         # calculate what number we are in taking into account the step and
         # the starting number
-        n = sel_item + start_num + (incr_num - 1) * sel_item
+        n = idx + start_num + (incr_num - 1) * idx
         # change the number to string and whatever base we selected
         n = Numbering.Numbering_Create(n)
 
@@ -2689,7 +2799,7 @@ class Extension_Rep:  # (10)
     '''
     def __init__(self, master, *args, **kwargs):        
         self.lf = ttk.Labelframe(master, text='Extension (10)')
-        self.lf.grid(column=4, row=2, sticky='nsew')
+        self.lf.grid(column=5, row=2, sticky='nsew')
 
         # Variable defs
         self.change_ext = tk.StringVar()
@@ -2920,8 +3030,10 @@ class Filters_Widget:
 
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
-        self.mask.trace_add('write', fn_treeview.refreshView)
-        self.ext.trace_add('write', fn_treeview.refreshView)
+        self.mask_entry.bind('<FocusOut>', fn_treeview.refreshView)
+        self.mask_entry.bind('<Return>', fn_treeview.refreshView)
+        self.ext_entry.bind('<FocusOut>', fn_treeview.refreshView)
+        self.ext_entry.bind('<Return>', fn_treeview.refreshView)
         self.folders.trace_add('write', fn_treeview.refreshView)
         self.files.trace_add('write', fn_treeview.refreshView)
         self.hidden.trace_add('write', fn_treeview.refreshView)
@@ -2980,7 +3092,7 @@ class Rename:
         self.load_command_button = ttk.Button(
                                         self.frame,
                                         text="Command",
-                                        command=self.applyCommandCall
+                                        command=self.Apply_Command
                                         )
         self.load_command_button.grid(column=0, row=1, padx=1, pady=1, sticky='e')
         # Disable the button if no path to where commands are stored
@@ -3004,26 +3116,11 @@ class Rename:
         self.rename_button = ttk.Button(
                                         self.frame,
                                         text="Rename",
-                                        command=self.finalRenameCall
+                                        command=self.Final_Rename
                                         )
         self.rename_button.grid(column=2, row=0, rowspan=2,
                                 padx=1, pady=1, sticky='nse'
                                 )
-
-    def finalRenameCall(self, *args, **kwargs):
-        last_rename.clear()
-        self.Final_Rename()
-
-    def applyCommandCall(self, *args, **kwargs):
-        ''' Call for the Apply_Command '''
-        # Clear the last_rename list
-        last_rename.clear()
-        # Save what the variable fields are right now
-        var_val_dict_in_use = Create_Var_Val_Dict()
-        # Apply command
-        self.Apply_Command()
-        # Set the variable fields back to what you had prior to the command
-        Set_Command_Call(var_val_dict_in_use)
 
     @staticmethod
     def Full_Reset(*args, **kwargs):
@@ -3046,6 +3143,11 @@ class Rename:
         '''
             Directly applies a command or a chain of commands.
         '''
+        # Clear the last_rename list
+        last_rename.clear()
+        # Save what the variable fields are right now
+        var_val_dict_in_use = Create_Var_Val_Dict()
+
         # Gets the selected command if a command_name wasn't provided
         if not command_name:
             command_name = menu_bar.selectedCommandGet()
@@ -3083,6 +3185,9 @@ class Rename:
         else:
             inf_bar.lastActionRefresh('No Command Selected')
 
+        # Set the variable fields back to what you had prior to the command
+        Set_Command_Call(var_val_dict_in_use)
+
     @staticmethod
     def Undo(*args, **kwargs):
         '''
@@ -3092,7 +3197,8 @@ class Rename:
         # Get a copy of the last changes list so when it gets modified it
         # doesnt affect this one and gets stuck in an infinite loop changing
         # back and forth
-        last_rename_list = last_rename.lastRenameListGet().copy()
+        # Undo the changes starting with the last one and going up
+        last_rename_list = reversed(last_rename.lastRenameListGet())
 
         # Try to undo the changes only if there are changes to undo
         if last_rename_list:
@@ -3125,7 +3231,22 @@ class Rename:
     @staticmethod
     def Final_Rename(*args, **kwargs):
         ''' Change the selected items names according to the entry fields '''
-        sel_paths = fn_treeview.selectedItems()
+        # Clear the last_rename action list
+        last_rename.clear()
+        # Get selected items
+        sel_paths = list(fn_treeview.selectedItems())
+
+        # When to reverse the naming items list so as to skip naming problems
+        # like with recursiveness naming a folder before the files in it so
+        # then the files can't be renamed because the path pointer doen't
+        # exists. Optimized the boolean function
+        # A=menu_bar.renameBotTopGet()
+        # B=nb.filters.depthGet()
+        # C=nb.filters.reverseGet()
+        # F(A,B,C)=~BA+B~C
+        if ((not nb.filters.depthGet() and menu_bar.renameBotTopGet()) or
+            (nb.filters.depthGet() and not nb.filters.reverseGet())):
+            sel_paths = reversed(sel_paths)
         
         # Try to apply the changes only if there is a selection
         if sel_paths:
@@ -3867,6 +3988,7 @@ def Create_Var_Val_Dict(*args, **kwargs):
     '''
     var_val_dict = {}
 
+    Rename_From_File.appendVarValToDict(var_val_dict)
     Reg_Exp.appendVarValToDict(var_val_dict)
     Name_Basic.appendVarValToDict(var_val_dict)
     Replace.appendVarValToDict(var_val_dict)
@@ -3904,6 +4026,7 @@ def Load_Command_Call(*args, **kwargs):
 
 def Set_Command_Call(dict_={}, *args, **kwargs):
     ''' Call each widget to set the entries values from the given dict '''
+    nb.rename_from_file.setCommand(dict_)
     nb.reg_exp.setCommand(dict_)
     nb.name_basic.setCommand(dict_)
     nb.replace.setCommand(dict_)
@@ -3924,9 +4047,9 @@ GENERAL FUNCTIONS
 ###################################
 
 
-
-def Scandir_Recursive(path, tree, mask=re.compile(''), ext_tuple=[],
-    folders=True, files=True, hidden=False, min_len=0, max_len=9999, depth=0):
+def Scandir_Recursive(path, mask=re.compile(''), ext_tuple=[],
+    folders=True, files=True, hidden=False, min_len=0, max_len=MAX_NAME_LEN,
+    depth=0, *args, **kwargs):
     '''
         A scandir implementation that allows recursiveness by level and returns
         a list of os.DirEntry objects.
@@ -3934,25 +4057,18 @@ def Scandir_Recursive(path, tree, mask=re.compile(''), ext_tuple=[],
         call until it reaches 0 where it doesn't call the function anymore.
         If the depth is -1 execute maximum recursiveness.
     '''
+    tree = []
     # loop through scandir
     for entry in os.scandir(path):
-        if entry.is_file(): tag = 'file'
-        elif entry.is_dir(follow_symlinks=False): tag = 'directory'
-
         # BIIIG filter logic check to add entries
         if (mask.match(entry.name) and
             (not ext_tuple or entry.name.endswith(ext_tuple)) and
             ((folders and entry.is_dir(follow_symlinks=False)) or
             (files and entry.is_file())) and
             (hidden or not entry.name.startswith('.')) and
-            (len(entry.name) > min_len and len(entry.name) < max_len)):
+            (min_len <= len(entry.name) <= max_len)):
 
-            tree.insertNode(
-                                        path=entry.path,
-                                        name=entry.name,
-                                        values=[entry.name],
-                                        tag=tag
-                                        )
+            tree.append(entry)
 
         # When entry.is_dir
         if (entry.is_dir(follow_symlinks=False) and (hidden or not entry.name.startswith('.'))):
@@ -3960,57 +4076,54 @@ def Scandir_Recursive(path, tree, mask=re.compile(''), ext_tuple=[],
             try:
                 # If depth is already 0 skip and continue with the next step
                 # of the loop
-                if depth == 0: continue
+                if depth == 0:
+                    continue
                 # If the depth is larger than 0 call the function again
                 # with depth-1. That'll produce that when it finds another
                 # directory inside it it will call the function with
                 # (depth-1)-1. It'll do that until there are no more folders
                 # in which case it will go back up to where it left off
                 # and repeat
-                elif depth > 0: next_depth = depth - 1
+                elif depth > 0:
+                    next_depth = depth - 1
                 # And if depth is -1 call the function again with depth=-1.
                 # This will cause to call the function in every possible
                 # folder
-                elif depth == -1: next_depth = -1
+                elif depth == -1:
+                    next_depth = -1
 
-                Scandir_Recursive(entry.path, tree=tree, mask=mask,
+                sub_tree = Scandir_Recursive(entry.path, mask=mask,
                                             ext_tuple=ext_tuple,
                                             folders=folders, files=files,
                                             hidden=hidden, min_len=min_len,
                                             max_len=max_len, depth=next_depth)
 
+                tree = tree + sub_tree
+
             # Unless it catches any of this errors
             except (FileNotFoundError, NotADirectoryError, PermissionError):
                 pass
 
-def Tree_Sort(tree, depth=-1, parent='', files_before_dirs=False,
+    return tree
+
+def Tree_Sort(tree, depth=-1, files_before_dirs=False,
     reverse=False, *args, **kwargs):
     ''' Sort the tree list with a few options '''
-    # When depth wasn't 0 sort alphabetically and case-insensitively
+    # When depth wasn't 0 sort alphabetically and case-insensitively (casefold)
     # the absolute paths, this will produce having a folder followed by
     # its contents
     if depth != 0:
-        other_tree = [item for item in tree.get_children(parent)]
-        other_tree.sort(key=str.lower, reverse=reverse)
-    # When the depth was 0 separate the tree into files and directories, sort
-    # each of them alphabetically case-insensitive, and then join them
-    # together again
+        tree.sort(key=lambda entry: entry.path.casefold(), reverse=reverse)
+
+    # When the depth is 0 order the list first by directories first then files
+    # or viceversa depending on the files_before_dirs flag, and then by name
+    # case-insensitevely (casefold)
     else:
-        # Separate into files and folders and sort them
-        files = list(tree.tag_has('file'))
-        files.sort(key=str.lower, reverse=reverse)
-        directories = list(tree.tag_has('directory'))
-        directories.sort(key=str.lower, reverse=reverse)
+        tree.sort(key=lambda entry:
+                    (entry.is_dir() if files_before_dirs else entry.is_file(),
+                        entry.name.casefold()), reverse=reverse)
 
-        # Join again files before dirs or viceversa
-        if files_before_dirs:
-            other_tree = files + directories
-        else:
-            other_tree = directories + files
-
-    # Move each element to its new position
-    for idx, item in enumerate(other_tree):
-        tree.move(item, parent, idx)
+    return tree
 
 def Populate_Fields(*args, **kwargs):
     '''
@@ -4062,18 +4175,6 @@ def Finish_Show_Working(inf_msg='Done', *args, **kwargs):
     # Show that its finish by setting the info bar message.
     inf_bar.lastActionRefresh(inf_msg)
 
-def TreeNav_Select_Calls(*args, **kwargs):
-    ''' Call when selecting a folder in the folder treeview '''
-    # Get selected folder's path
-    path = folder_treeview.selectedItem()
-    # Set that path as the active path in the file treeview
-    fn_treeview.active_path = path
-
-    # Refresh the file treeview
-    fn_treeview.refreshView(path)
-    # Load the selected node
-    folder_treeview.openNode(path)
-
 def Call_For_Info_Bar(*args, **kwargs):
     inf_bar.numItemsRefresh()
 
@@ -4086,7 +4187,7 @@ def Refresh_Treeviews(*args, **kwargs):
 
     inf_bar.lastActionRefresh('Refreshed Both Treeviews')
 
-def New_Naming(name, sel_item, path, *args, **kwargs):
+def New_Naming(name, idx, path, *args, **kwargs):
     '''
     Creates the new name going through all fields and making the changes
     to the old_name string
@@ -4094,6 +4195,7 @@ def New_Naming(name, sel_item, path, *args, **kwargs):
     # Separate name and extension
     name, ext = De_Ext(name)
 
+    name = Rename_From_File.Rename_From_File_Rename(name, idx)  # (0)
     name = Reg_Exp.Reg_Exp_Rename(name)                         # (1)
     name = Name_Basic.Name_Basic_Rename(name)                   # (2)
     name = Replace.Replace_Action(name)                         # (3)
@@ -4102,7 +4204,7 @@ def New_Naming(name, sel_item, path, *args, **kwargs):
     name = Move_Copy_Parts.Move_Copy_Action(name)               # (6)
     name = Add_To_String.Add_Rename(name)                       # (7)
     name = Append_Folder_Name.Append_Folder_Rename(name, path)  # (8)
-    name = Numbering.Numbering_Rename(name, sel_item)           # (9)
+    name = Numbering.Numbering_Rename(name, idx)                # (9)
 
     ext = Extension_Rep.Extension_Rename(ext)                   # (10)
 
@@ -4176,6 +4278,31 @@ def System_Rename(file, new_path, *args, **kwargs):
 
         # raise NamingError("Couldn't Rename file. Path already exists")
 
+def Root_Binds(*args, **kwargs):
+    ''' Key bindings for the whole program '''
+    ## "A" and "a" are different keys
+
+    # Entries Reset
+    root.bind('<Control-t>', Rename.Full_Reset)
+    root.bind('<Control-T>', Rename.Full_Reset)
+    # Rename
+    root.bind('<Control-r>', Rename.Final_Rename)
+    root.bind('<Control-R>', Rename.Final_Rename)
+    root.bind('<Control-z>', Rename.Undo)
+    root.bind('<Control-Z>', Rename.Undo)
+    # Refresh
+    root.bind('<F5>', fn_treeview.refreshView)
+    root.bind('<Control-F5>', folder_treeview.refreshView)
+    # Selection
+    root.bind('<Control-a>', fn_treeview.selectAll)
+    root.bind('<Control-A>', fn_treeview.selectAll)
+    root.bind('<Control-d>', fn_treeview.deselectAll)
+    root.bind('<Control-D>', fn_treeview.deselectAll)
+    root.bind('<Control-i>', fn_treeview.invertSelection)
+    root.bind('<Control-I>', fn_treeview.invertSelection)
+    # Command
+    root.bind('<Control-e>', Load_Command_Call)
+    root.bind('<Control-E>', Load_Command_Call)
 
 
 ###################################
@@ -4226,10 +4353,12 @@ if __name__ == '__main__':
     menu_bar = Top_Menu(root)
 
     # Set Padding around the window
-    for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
+    for child in mainframe.winfo_children():
+        child.grid_configure(padx=5, pady=5)
 
     # Initialize the treeview
     folder_treeview.refreshView()
+    Root_Binds()
 
     root.config(menu=menu_bar.menubar)
     root.mainloop()
