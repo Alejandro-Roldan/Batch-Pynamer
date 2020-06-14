@@ -5,6 +5,8 @@ V. 06.00:
 	- Change order for some menu options
 	- Added a few key bindings that for refreshing the views that had been forgotten to be added although the accelerators where there.
 	- Removed unused classes
+	- Solved bug where trying to add an image to the metadata would fail
+	- Cleaned code for readability
 
 V. 05.08:
 	- Added Renaming from file
