@@ -2,10 +2,12 @@ V. 06.00:
 	- Highly optimized the treeview sorting. In previous versions the elements sorting was considerably slow (although only noticiable when there were many many items, specially when using the recursive option), so it has been completly changed to a much much faster implementation wich barely adds any overhead. This was achived by creating the list of items then sorting it then inserting the items in the treeview, rather than inserting the item to the treeview as they were read and then sorting the treeview by moving each item to a new index.
 	- Change the insertNode to get the entry instead of the values
 	- Added an origin node in the folder treeview
+	- Added option for when renaming from a file to wrap over once all the items in the file have been used
 	- Change order for some menu options
-	- Added a few key bindings that for refreshing the views that had been forgotten to be added although the accelerators where there.
+	- Added a few key bindings for refreshing the views that had been forgotten to be added although the accelerators where there.
 	- Removed unused classes
-	- Solved bug where trying to add an image to the metadata would fail
+	- Fixed bug where trying to add an image to the metadata would fail
+	- Fixed bug where reseting wouldn't reset the rename from file widget
 	- Cleaned code for readability
 
 V. 05.08:

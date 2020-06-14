@@ -76,11 +76,6 @@ except ImportError:
         - General functions
 
         - Main function
-
-    KNOWN BUGS:
-        ttk.Spinbox starts from 0 even if its minimal value (from_) is set up
-        to other number higher than that. SOLVED but its a bug from tkinter
-        not my part
 '''
 ###############################################################################
 
@@ -105,6 +100,15 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -1040,15 +1044,24 @@ class Rename_From_File:     # (0)
 
         # Variable defs
         self.file = tk.StringVar()
+        self.wrap = tk.BooleanVar()
 
         # Chose case, combobox
         ttk.Label(self.lf, text="Filename").grid(column=0, row=0, sticky='w')
         self.file_entry = ttk.Entry(
-                                            self.lf,
-                                            width=10,
-                                            textvariable=self.file
-                                            )
+                                    self.lf,
+                                    width=10,
+                                    textvariable=self.file
+                                    )
         self.file_entry.grid(column=1, row=0, sticky='ew')
+
+        # Match case, checkbutton
+        self.wrap_check = ttk.Checkbutton(
+                                            self.lf,
+                                            text='Wrap',
+                                            variable=self.wrap,
+                                            )
+        self.wrap_check.grid(column=0, row=1)
 
         # Reset, button
         self.reset_button = ttk.Button(
@@ -1057,21 +1070,26 @@ class Rename_From_File:     # (0)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=1, sticky='e')
+        self.reset_button.grid(column=2, row=2, sticky='e')
 
         self.bindEntries()
 
     def fileGet(self, *args, **kwargs):
         return self.file.get()
 
+    def wrapGet(self, *args, **kwargs):
+        return self.wrap.get()
+
     def bindEntries(self, *args, **kwargs):
         ''' Defines the binded actions '''
         # Calls to update the new name column
         self.file.trace_add('write', fn_treeview.showNewName)
+        self.wrap.trace_add('write', fn_treeview.showNewName)
 
     def resetWidget(self, *args, **kwargs):
         ''' Resets each and all data variables inside the widget '''
-        self.fixed_name.set('')
+        self.file.set('')
+        self.wrap.set('')
 
     def setCommand(self, var_dict, *args, **kwargs):
         '''
@@ -1079,20 +1097,33 @@ class Rename_From_File:     # (0)
             command dictionary
         '''
         self.file.set(var_dict['rename_from_file_file'])
+        self.wrap.set(var_dict['rename_from_file_wrap'])
 
     @staticmethod
     def appendVarValToDict(dict_={}, *args, **kwargs):
         dict_['rename_from_file_file'] = nb.rename_from_file.fileGet()
+        dict_['rename_from_file_wrap'] = nb.rename_from_file.wrapGet()
 
     @staticmethod
     def Rename_From_File_Rename(name, idx, *wargs, **kwargs):
-        ''' Self explanatory '''
+        '''
+            Get the file to extract the names from, open it and match the names
+            one to one per index base
+        '''
         filename = nb.rename_from_file.fileGet()
-        if filename:
+        wrap = nb.rename_from_file.wrapGet()
+
+        if os.path.exists(filename):
             with open(filename, 'r') as f:
                 lines = f.readlines()
-                name = lines[idx]
-
+                lines_count = len(lines)
+                try:
+                    if wrap:
+                        name = lines[idx % lines_count]
+                    else:
+                        name = lines[idx]
+                except IndexError:
+                    pass
         return name
 
 
@@ -3127,6 +3158,7 @@ class Rename:
     @staticmethod
     def Full_Reset(*args, **kwargs):
         ''' Calls all resetWidget Methods '''
+        nb.rename_from_file.resetWidget()
         nb.reg_exp.resetWidget()
         nb.name_basic.resetWidget()
         nb.replace.resetWidget()
@@ -4386,6 +4418,7 @@ if __name__ == '__main__':
 
     # Initialize the treeview
     folder_treeview.refreshView()
+    # Initialize the global key bindings
     Root_Binds()
 
     root.config(menu=menu_bar.menubar)
