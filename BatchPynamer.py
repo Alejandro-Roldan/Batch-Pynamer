@@ -34,6 +34,7 @@ try:
     import PIL
     import PIL.ImageTk
 
+    # Set a flag
     METADATA_IMPORT = True
 
 except ImportError:
@@ -98,6 +99,34 @@ PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
 # if no argument was passed
 try:
     PATH = sys.argv[1]
+    # When more than 1 argument is provided raise an AttributeError
+    if len(sys.argv) > 2:
+        raise AttributeError
+    # When the given path doesnt exists raise a FileNotFoundError
+    elif not os.path.exists(PATH):
+        raise FileNotFoundError
+    # When it exists but its not a directory raise a NotADirectoryError
+    elif not os.path.isdir(PATH):
+        raise NotADirectoryError
+    # When you dont have permission to read or write that directory raise
+    # a PermissionError
+    elif not (os.access(PATH, os.R_OK) or os.access(PATH, os.W_OK)):
+        raise PermissionError
+# When finding an AttributeError exit the program with an error message
+except AttributeError:
+    sys.exit('ERROR:\n\t- Too many arguments. Program expected 1 (a valid '\
+                'path), got {} instead.'.format(len(sys.argv) - 1))
+# When finding a FileNotFoundError exit the program with an error message
+except FileNotFoundError:
+    sys.exit('ERROR:\n\t- The given path "{}" doesn\'t exists.'.format(PATH))
+# When finding a NotADirectoryError exit the program with an error message
+except NotADirectoryError:
+    sys.exit('ERROR:\n\t- The given path "{}" isn\'t a directory.'.format(PATH))
+# When finding a PermissionError exit the program with an error message
+except PermissionError:
+    sys.exit('ERROR:\n\t- You don\'t have permission to access the given path'\
+                ' "{}".'.format(PATH))
+# When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
     # PATH = '/'
@@ -124,7 +153,7 @@ else:
     CONFIG_FOLDER_PATH = None
 
 # Configparser object for loading the commands
-if CONFIG_FOLDER_PATH:
+if CONFIG_FOLDER_PATH is not None:
     COMMAND_CONF_FILE = CONFIG_FOLDER_PATH + 'commands.conf'
     COMMAND_CONF = configparser.ConfigParser()
     COMMAND_CONF.read(COMMAND_CONF_FILE)
@@ -295,7 +324,7 @@ class Top_Menu:
 
         # Rename from Bottom to Top
         self.file_menu.add_checkbutton(
-                                    label='When Renaming: from Bottom to Top',
+                                    label='Activate renaming from Bottom to Top',
                                     variable=self.rename_bot_top
                                     )
 
@@ -1070,7 +1099,7 @@ class Rename_From_File:     # (0)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='e')
+        self.reset_button.grid(column=2, row=2, sticky='e', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -1089,7 +1118,7 @@ class Rename_From_File:     # (0)
     def resetWidget(self, *args, **kwargs):
         ''' Resets each and all data variables inside the widget '''
         self.file.set('')
-        self.wrap.set('')
+        self.wrap.set(False)
 
     def setCommand(self, var_dict, *args, **kwargs):
         '''
@@ -1169,7 +1198,7 @@ class Reg_Exp:  # (1)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='se')
+        self.reset_button.grid(column=2, row=2, sticky='se', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -1341,7 +1370,7 @@ class Name_Basic:   # (2)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='e')
+        self.reset_button.grid(column=2, row=2, sticky='e', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -1449,7 +1478,7 @@ class Replace:  # (3)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='e')
+        self.reset_button.grid(column=2, row=2, sticky='e', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -1560,7 +1589,7 @@ class Case:     # (4)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=1, sticky='e')
+        self.reset_button.grid(column=2, row=1, sticky='e', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -1793,7 +1822,7 @@ class Remove:   # (5)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=20, row=20, sticky='w')
+        self.reset_button.grid(column=20, row=20, sticky='w', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -2146,7 +2175,7 @@ class Move_Copy_Parts:  # (6)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=10, row=1, sticky='w')
+        self.reset_button.grid(column=10, row=1, sticky='w', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -2333,7 +2362,7 @@ class Add_To_String:    # (7)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=20, row=20, sticky='w')
+        self.reset_button.grid(column=20, row=20, sticky='w', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -2467,7 +2496,7 @@ class Append_Folder_Name:   # (8)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=20, row=20, sticky='w')
+        self.reset_button.grid(column=20, row=20, sticky='w', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -2668,7 +2697,7 @@ class Numbering:    # (9)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=20, row=20, sticky='w')
+        self.reset_button.grid(column=20, row=20, sticky='w', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -2873,7 +2902,7 @@ class Extension_Rep:    # (10)
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=2, row=2, sticky='w')
+        self.reset_button.grid(column=2, row=2, sticky='w', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -3066,7 +3095,7 @@ class Filters_Widget:
                                         text="R",
                                         command=self.resetWidget
                                         )
-        self.reset_button.grid(column=10, row=1, sticky='nw')
+        self.reset_button.grid(column=10, row=1, sticky='nw', padx=2, pady=2)
 
         self.bindEntries()
 
@@ -4120,23 +4149,23 @@ def Scandir_Recursive(path, mask=re.compile(''), ext_tuple=[],
         If the depth is -1 execute maximum recursiveness.
     '''
     tree = []
-    # loop through scandir
-    for entry in os.scandir(path):
-        # BIIIG filter logic check to add entries
-        if (mask.match(entry.name) and
-            (not ext_tuple or entry.name.endswith(ext_tuple)) and
-            ((folders and entry.is_dir(follow_symlinks=False)) or
-            (files and entry.is_file())) and
-            (hidden or not entry.name.startswith('.')) and
-            (min_len <= len(entry.name) <= max_len)):
+    
+    try:
+        # Loop through scandir
+        for entry in os.scandir(path):
+            # BIIIG filter logic check to add entries
+            if (mask.match(entry.name) and
+                (not ext_tuple or entry.name.endswith(ext_tuple)) and
+                ((folders and entry.is_dir(follow_symlinks=False)) or
+                (files and entry.is_file())) and
+                (hidden or not entry.name.startswith('.')) and
+                (min_len <= len(entry.name) <= max_len)):
 
-            tree.append(entry)
+                tree.append(entry)
 
-        # When entry.is_dir
-        if (entry.is_dir(follow_symlinks=False) and
-            (hidden or not entry.name.startswith('.'))):
-            # Try calling the function again inside the directory
-            try:
+            # When entry.is_dir
+            if (entry.is_dir(follow_symlinks=False) and
+                (hidden or not entry.name.startswith('.'))):
                 # If depth is already 0 skip and continue with the next step
                 # of the loop
                 if depth == 0:
@@ -4155,6 +4184,7 @@ def Scandir_Recursive(path, mask=re.compile(''), ext_tuple=[],
                 elif depth == -1:
                     next_depth = -1
 
+                # Call the function again inside the directory
                 sub_tree = Scandir_Recursive(entry.path, mask=mask,
                                                 ext_tuple=ext_tuple,
                                                 folders=folders, files=files,
@@ -4164,9 +4194,9 @@ def Scandir_Recursive(path, mask=re.compile(''), ext_tuple=[],
 
                 tree = tree + sub_tree
 
-            # Unless it catches any of this errors
-            except (FileNotFoundError, NotADirectoryError, PermissionError):
-                pass
+    # Unless it catches any of this errors
+    except (FileNotFoundError, NotADirectoryError, PermissionError):
+        pass
 
     return tree
 
