@@ -3,6 +3,7 @@ V. 06.00:
 	- Change the insertNode to get the entry instead of the values
 	- Added an origin node in the folder treeview
 	- Added option for when renaming from a file to wrap over once all the items in the file have been used
+	- Added a Reset button to the filtering widget
 	- Change order for some menu options
 	- Added a few key bindings for refreshing the views that had been forgotten to be added although the accelerators where there.
 	- Removed unused classes

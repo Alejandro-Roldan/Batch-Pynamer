@@ -100,6 +100,15 @@ try:
     PATH = sys.argv[1]
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -763,7 +772,7 @@ class FileNavigator:
         name = os.path.basename(path)
 
         # Set info msg
-        inf_bar.lastActionRefresh('Copied "{}" Path to Clipboard'.format(name))
+        inf_bar.lastActionRefresh('Copied "{}" Path to Clipboard'.format(name))        
 
     def insertNode(self, entry, tag='', *args, **kwargs):
         ''' Create nodes '''
@@ -3050,23 +3059,16 @@ class Filters_Widget:
                                     )
         self.name_len_max_spin.grid(column=9, row=1, sticky='w')
 
-        self.bindEntries()
+        # Reset, button
+        self.reset_button = ttk.Button(
+                                        self.lf,
+                                        width=2,
+                                        text="R",
+                                        command=self.resetWidget
+                                        )
+        self.reset_button.grid(column=10, row=1, sticky='nw')
 
-    def bindEntries(self, *args, **kwargs):
-        ''' Defines the binded actions '''
-        self.mask_entry.bind('<FocusOut>', fn_treeview.refreshView)
-        self.mask_entry.bind('<Return>', fn_treeview.refreshView)
-        self.ext_entry.bind('<FocusOut>', fn_treeview.refreshView)
-        self.ext_entry.bind('<Return>', fn_treeview.refreshView)
-        self.folders.trace_add('write', fn_treeview.refreshView)
-        self.files.trace_add('write', fn_treeview.refreshView)
-        self.hidden.trace_add('write', fn_treeview.refreshView)
-        self.hidden.trace_add('write', folder_treeview.refreshView)
-        self.files_before_dirs.trace_add('write', fn_treeview.refreshView)
-        self.reverse.trace_add('write', fn_treeview.refreshView)
-        self.min_len.trace_add('write', fn_treeview.refreshView)
-        self.max_len.trace_add('write', fn_treeview.refreshView)
-        self.depth.trace_add('write', fn_treeview.refreshView)
+        self.bindEntries()
 
     def maskGet(self, *args, **kwargs):
         return self.mask.get()
@@ -3097,6 +3099,34 @@ class Filters_Widget:
 
     def depthGet(self, *args, **kwargs):
         return self.depth.get()
+
+    def bindEntries(self, *args, **kwargs):
+        ''' Defines the binded actions '''
+        self.mask_entry.bind('<FocusOut>', fn_treeview.refreshView)
+        self.mask_entry.bind('<Return>', fn_treeview.refreshView)
+        self.ext_entry.bind('<FocusOut>', fn_treeview.refreshView)
+        self.ext_entry.bind('<Return>', fn_treeview.refreshView)
+        self.folders.trace_add('write', fn_treeview.refreshView)
+        self.files.trace_add('write', fn_treeview.refreshView)
+        self.hidden.trace_add('write', fn_treeview.refreshView)
+        self.hidden.trace_add('write', folder_treeview.refreshView)
+        self.files_before_dirs.trace_add('write', fn_treeview.refreshView)
+        self.reverse.trace_add('write', fn_treeview.refreshView)
+        self.min_len.trace_add('write', fn_treeview.refreshView)
+        self.max_len.trace_add('write', fn_treeview.refreshView)
+        self.depth.trace_add('write', fn_treeview.refreshView)
+
+    def resetWidget(self, *args, **kwargs):
+        self.mask.set('')
+        self.ext.set('')
+        self.folders.set(True)
+        self.files.set(True)
+        self.hidden.set(False)
+        self.files_before_dirs.set(False)
+        self.reverse.set(False)
+        self.min_len.set(0)
+        self.max_len.set(MAX_NAME_LEN)
+        self.depth.set(0)
 
 
 class Rename:
