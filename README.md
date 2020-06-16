@@ -6,6 +6,8 @@ It can also change and use metadata for flac, mp3 and mp4 files. If you don't ha
 It can probably run on Windows and Mac mostly without issue, but it hasn't been tested.
 
 
+### The Wiki has how every option, menu and key works
+
 Program Screenshots
 -------------------
 ![screenshot](/doc/BatchPynamer-Rename_Screen.png?raw=true "Program Screenshot for the Rename Tab")
@@ -34,4 +36,3 @@ Installing
 
 Download the BatchPynamer.py file and execute it.
 As long as you have the dependencies it should work out of the box.
-
