@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import time
+
 import sys
 import os
 import pathlib
@@ -129,15 +129,6 @@ except PermissionError:
 # When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
-    PATH = '/'
-    # PATH = '/home'
-    # PATH = '/home/Jupiter'
-    # PATH = '/home/Jupiter/Music'
-    # PATH = '/home/Mars/Music'
-    # PATH = '/home/Jupiter/Musiclol'
-    # PATH = '/home/Jupiter/MusicTrials'
-    # PATH = '/media'
-    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
