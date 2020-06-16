@@ -129,6 +129,15 @@ except PermissionError:
 # When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -723,20 +732,15 @@ class FileNavigator:
 
     def selectAll(self, *args, **kwargs):
         ''' Select all children items'''
-        start = time.time()
         self.tree_folder.selection_set(self.tree_folder.get_children())
-        print('all: ', time.time() - start)
 
     def deselectAll(self, *args, **kwargs):
         ''' Deselect all selected items '''
-        start = time.time()
         self.tree_folder.selection_set()
-        print('deselect: ', time.time() - start)
 
     def invertSelection(self, *args, **kwargs):
         ''' Inverts the selection '''
         # Get all children
-        start = time.time()
         all_items = self.tree_folder.get_children()
 
         # Get current selection
@@ -746,7 +750,6 @@ class FileNavigator:
 
         # Set inverted as the new selection
         self.selectionSet(inverted)
-        print('invert: ', time.time() - start)
 
     def deleteChildren(self, *args, **kwargs):
         ''' Delete already existing nodes in the folder view '''
@@ -818,9 +821,11 @@ class FileNavigator:
 
     def refreshView(self, event=None, path='', tree=[], *args, **kwargs):
         ''' Get the folder path and update the treeview '''
-        # Get selected folder's path
-        path = folder_treeview.selectedItem()
-        # When the path isn't set use the active_path
+        # If the path hasn't been given in the function call
+        if not path:
+            # Get selected folder's path
+            path = folder_treeview.selectedItem()
+        # When the path is still not set use the active_path
         if not path:
             path = self.active_path
 
@@ -918,7 +923,7 @@ class DirEntryFrame:
         folder_path = self.folderDirGet()
         # Check if the path is a valid directory
         if os.path.isdir(folder_path):
-            fn_treeview.refreshView(folder_path)
+            fn_treeview.refreshView(path=folder_path)
         else:
             inf_bar.lastActionRefresh('Not a Valid Directory')
             self.folderDirSet()
