@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import time
 import sys
 import os
 import pathlib
@@ -129,6 +129,15 @@ except PermissionError:
 # When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
+    PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    # PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -360,14 +369,14 @@ class Top_Menu:
 
         # Refresh Files
         self.file_menu.add_command(
-                                    label='Refresh Files',
+                                    label='Refresh File View',
                                     command=fn_treeview.refreshView,
                                     accelerator='F5'
                                     )
 
         # Refresh Tree
         self.file_menu.add_command(
-                                    label='Refresh Tree',
+                                    label='Refresh Directory Browser',
                                     command=dir_entry_frame.folderNavRefresh,
                                     accelerator='Ctrl+F5'
                                     )
@@ -378,7 +387,8 @@ class Top_Menu:
         # Exit
         self.file_menu.add_command(
                                     label='Exit',
-                                    command=root.quit
+                                    command=root.quit,
+                                    accelerator='Ctrl+Esc'
                                     )
 
     def renameBotTopGet(self, *args, **kwargs):
@@ -444,7 +454,8 @@ class Top_Menu:
         # Apply selected command
         self.command_menu.add_command(
                                         label='Apply Selected Command',
-                                        command=Rename.Apply_Command
+                                        command=Rename.Apply_Command,
+                                        accelerator='Ctrl+Y'
                                         )
 
         # Delete selected command
@@ -556,7 +567,7 @@ class TreeNavigator:
                                 xscroll=xsb_tree_nav.set
                                 )
         # Title of the Treeview
-        self.tree_nav.heading('#0', text='Browse Files', anchor='w')
+        self.tree_nav.heading('#0', text='Directory Browser', anchor='w')
         self.tree_nav.column('#0', width=280)
         # Treeview and the scrollbars placing
         self.tree_nav.grid(row=0, column=0)
@@ -652,14 +663,15 @@ class TreeNavigator:
             Close focused node, deletes all children and inserts an empty node
         '''
         path = self.tree_nav.focus()
-        # Close focused node
-        self.tree_nav.item(path, open=False)
-        # Delete children nodes of the focused node
-        self.deleteChildren(path)
+        if path:
+            # Close focused node
+            self.tree_nav.item(path, open=False)
+            # Delete children nodes of the focused node
+            self.deleteChildren(path)
 
-        # Reinsert an empty node
-        self.tree_nav.insert(path, 'end')
-        self.nodes[path] = path
+            # Reinsert an empty node
+            self.tree_nav.insert(path, 'end')
+            self.nodes[path] = path
 
 
 class FileNavigator:
@@ -720,24 +732,30 @@ class FileNavigator:
 
     def selectAll(self, *args, **kwargs):
         ''' Select all children items'''
+        start = time.time()
         self.tree_folder.selection_set(self.tree_folder.get_children())
+        print('all: ', time.time() - start)
 
     def deselectAll(self, *args, **kwargs):
         ''' Deselect all selected items '''
+        start = time.time()
         self.tree_folder.selection_set()
+        print('deselect: ', time.time() - start)
 
     def invertSelection(self, *args, **kwargs):
         ''' Inverts the selection '''
         # Get all children
+        start = time.time()
         all_items = self.tree_folder.get_children()
 
         # Get current selection
-        selected = self.selectedItems()
+        selected = set(self.selectedItems())
         # Create a list of items from all_items that aren't in selected
         inverted = [item for item in all_items if item not in selected]
 
         # Set inverted as the new selection
         self.selectionSet(inverted)
+        print('invert: ', time.time() - start)
 
     def deleteChildren(self, *args, **kwargs):
         ''' Delete already existing nodes in the folder view '''
@@ -969,8 +987,8 @@ class ChangesNotebook:
         self.case = Case(self.nb_rename_frame)
         # Remove (5)
         self.remove = Remove(self.nb_rename_frame)
-        # Move/Copy Parts (6)
-        self.move_copy_parts = Move_Copy_Parts(self.nb_rename_frame)
+        # Move Parts (6)
+        self.Move_Parts = Move_Parts(self.nb_rename_frame)
         # Add (7)
         self.add_to_string = Add_To_String(self.nb_rename_frame)
         # Append Folder Name (8)
@@ -1726,7 +1744,7 @@ class Remove:   # (5)
         self.rm_words_entry.grid(column=1, row=2, sticky='ew')
 
         # Remove character(s), entry
-        ttk.Label(self.lf, text='Chars').grid(column=2, row=2, sticky='ew')
+        ttk.Label(self.lf, text='Chars.').grid(column=2, row=2, sticky='ew')
         self.rm_chars_entry = ttk.Entry(
                                         self.lf,
                                         width=5,
@@ -1765,7 +1783,7 @@ class Remove:   # (5)
         # Remove chars, checkbutton
         self.chars_check = ttk.Checkbutton(
                                             self.lf,
-                                            text='Chars',
+                                            text='Chars.',
                                             variable=self.chars,
                                             )
         self.chars_check.grid(column=1, row=4)
@@ -2022,9 +2040,9 @@ class Remove:   # (5)
             # If the combobox is not in 'Special' do the regular crops
             if crop_pos != 'Special':
                 name_tuple = name.partition(crop_this)
-                if crop_pos == 'Before':
+                if crop_pos == 'Before' and name_tuple[2]:
                     name = name_tuple[2]
-                elif crop_pos == 'After':
+                elif crop_pos == 'After' and name_tuple[0]:
                     name = name_tuple[0]
             else:
                 # Create a regular expresion from the given string
@@ -2083,7 +2101,7 @@ class Remove:   # (5)
         return name
 
 
-class Move_Copy_Parts:  # (6)
+class Move_Parts:  # (6)
     '''
         Draws the move/copy parts widget. Inside rename notebook.
         6th thing to change.
@@ -2096,7 +2114,7 @@ class Move_Copy_Parts:  # (6)
             - Entry to write a separator
     '''
     def __init__(self, master, *args, **kwargs):
-        self.lf = ttk.Labelframe(master, text='Move/Copy Parts (6)')
+        self.lf = ttk.Labelframe(master, text='Move Parts (6)')
         self.lf.grid(column=0, row=2, columnspan=3, sticky='nsew')
 
         # Variable defs
@@ -2119,7 +2137,7 @@ class Move_Copy_Parts:  # (6)
         self.ori_pos_combo.current(0)
 
         # Copy n characters, spinbox
-        ttk.Label(self.lf, text="Chars").grid(column=2, row=0)
+        ttk.Label(self.lf, text="Chars.").grid(column=2, row=0)
         self.ori_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
@@ -2141,7 +2159,7 @@ class Move_Copy_Parts:  # (6)
         self.end_pos_combo.current(0)
 
         # Paste in n position, spinbox
-        ttk.Label(self.lf, text="Pos").grid(column=6, row=0)
+        ttk.Label(self.lf, text="Pos.").grid(column=6, row=0)
         self.end_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
@@ -2231,19 +2249,19 @@ class Move_Copy_Parts:  # (6)
             Sets the variable fields according to the loaded
             command dictionary
         '''
-        self.ori_pos.set(var_dict['move_copy_parts_ori_pos'])
-        self.ori_n.set(var_dict['move_copy_parts_ori_n'])
-        self.end_pos.set(var_dict['move_copy_parts_end_pos'])
-        self.end_n.set(var_dict['move_copy_parts_end_n'])
-        self.sep.set(var_dict['move_copy_parts_sep'])
+        self.ori_pos.set(var_dict['move_parts_ori_pos'])
+        self.ori_n.set(var_dict['move_parts_ori_n'])
+        self.end_pos.set(var_dict['move_parts_end_pos'])
+        self.end_n.set(var_dict['move_parts_end_n'])
+        self.sep.set(var_dict['move_parts_sep'])
 
     @staticmethod
     def appendVarValToDict(dict_={}, *args, **kwargs):
-        dict_['move_copy_parts_ori_pos'] = nb.move_copy_parts.oriPosGet()
-        dict_['move_copy_parts_ori_n'] = nb.move_copy_parts.oriNGet()
-        dict_['move_copy_parts_end_pos'] = nb.move_copy_parts.endPosGet()
-        dict_['move_copy_parts_end_n'] = nb.move_copy_parts.endNGet()
-        dict_['move_copy_parts_sep'] = nb.move_copy_parts.sepGet()
+        dict_['move_parts_ori_pos'] = nb.Move_Parts.oriPosGet()
+        dict_['move_parts_ori_n'] = nb.Move_Parts.oriNGet()
+        dict_['move_parts_end_pos'] = nb.Move_Parts.endPosGet()
+        dict_['move_parts_end_n'] = nb.Move_Parts.endNGet()
+        dict_['move_parts_sep'] = nb.Move_Parts.sepGet()
 
     @staticmethod
     def Move_Copy_Action(name, *args, **kwargs):
@@ -2251,11 +2269,11 @@ class Move_Copy_Parts:  # (6)
             Copies and pastes the selected characters to the selected
             position.
         '''
-        ori_pos = nb.move_copy_parts.oriPosGet()
-        ori_n = nb.move_copy_parts.oriNGet()
-        end_pos = nb.move_copy_parts.endPosGet()
-        end_n = nb.move_copy_parts.endNGet()
-        sep = nb.move_copy_parts.sepGet()
+        ori_pos = nb.Move_Parts.oriPosGet()
+        ori_n = nb.Move_Parts.oriNGet()
+        end_pos = nb.Move_Parts.endPosGet()
+        end_n = nb.Move_Parts.endNGet()
+        sep = nb.Move_Parts.sepGet()
 
         if ori_pos == 'Start':
             if end_pos == 'End':
@@ -2445,6 +2463,7 @@ class Append_Folder_Name:   # (8)
 
         # Variable defs
         self.name_pos = tk.StringVar()
+        self.pos = tk.IntVar()
         self.sep = tk.StringVar()
         self.levels = tk.IntVar()
 
@@ -2454,23 +2473,34 @@ class Append_Folder_Name:   # (8)
                                         self.lf,
                                         width=5,
                                         state='readonly',
-                                        values=('Prefix', 'Suffix'),
+                                        values=('Prefix', 'Suffix', 'Position'),
                                         textvariable=self.name_pos
                                         )
         self.name_pos_combo.grid(column=1, row=0, sticky='ew')
         self.name_pos_combo.current(0)
 
+        # Folders levels, spinbox
+        ttk.Label(self.lf, text='Pos.').grid(column=2, row=0, sticky='ew')
+        self.levels_spin = ttk.Spinbox(
+                                    self.lf,
+                                    width=3,
+                                    from_=-MAX_NAME_LEN,
+                                    to=MAX_NAME_LEN,
+                                    textvariable=self.pos
+                                    )
+        self.levels_spin.grid(column=3, row=0)
+
         # Separator, entry
-        ttk.Label(self.lf, text='Sep.').grid(column=2, row=0, sticky='ew')
+        ttk.Label(self.lf, text='Sep.').grid(column=4, row=0, sticky='ew')
         self.sep_entry = ttk.Entry(
                                     self.lf,
                                     width=5,
                                     textvariable=self.sep
                                     )
-        self.sep_entry.grid(column=3, row=0, sticky='ew')
+        self.sep_entry.grid(column=5, row=0, sticky='ew')
 
         # Folders levels, spinbox
-        ttk.Label(self.lf, text='Levels').grid(column=4, row=0, sticky='ew')
+        ttk.Label(self.lf, text='Levels').grid(column=6, row=0, sticky='ew')
         self.levels_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
@@ -2478,7 +2508,7 @@ class Append_Folder_Name:   # (8)
                                     to=500,
                                     textvariable=self.levels
                                     )
-        self.levels_spin.grid(column=5, row=0)
+        self.levels_spin.grid(column=7, row=0)
 
         # Reset, button
         self.reset_button = ttk.Button(
@@ -2494,6 +2524,9 @@ class Append_Folder_Name:   # (8)
     def namePosGet(self, *args, **kwargs):
         return self.name_pos.get()
 
+    def posGet(self, *args, **kwargs):
+        return self.pos.get()
+
     def sepGet(self, *args, **kwargs):
         return self.sep.get()
 
@@ -2507,6 +2540,7 @@ class Append_Folder_Name:   # (8)
 
         # Calls to update the new name column
         self.name_pos.trace_add('write', fn_treeview.showNewName)
+        self.pos.trace_add('write', fn_treeview.showNewName)
         self.sep.trace_add('write', fn_treeview.showNewName)
         self.levels.trace_add('write', fn_treeview.showNewName)
 
@@ -2520,6 +2554,7 @@ class Append_Folder_Name:   # (8)
     def resetWidget(self, *args, **kwargs):
         ''' Resets each and all data variables inside the widget. '''
         self.name_pos.set('Prefix')
+        self.pos.set(0)
         self.sep.set('')
         self.levels.set(0)
 
@@ -2529,12 +2564,14 @@ class Append_Folder_Name:   # (8)
             command dictionary
         '''
         self.name_pos.set(var_dict['append_folder_name_name_pos'])
+        self.sep.set(var_dict['append_folder_name_pos'])
         self.sep.set(var_dict['append_folder_name_sep'])
         self.levels.set(var_dict['append_folder_name_levels'])
 
     @staticmethod
     def appendVarValToDict(dict_={}, *args, **kwargs):
         dict_['append_folder_name_name_pos'] = nb.append_folder_name.namePosGet()
+        dict_['append_folder_name_pos'] = nb.append_folder_name.posGet()
         dict_['append_folder_name_sep'] = nb.append_folder_name.sepGet()
         dict_['append_folder_name_levels'] = nb.append_folder_name.levelsGet()
 
@@ -2556,6 +2593,9 @@ class Append_Folder_Name:   # (8)
             if sep:
                 # Remove the extra trailing separator
                 name = name[:-len(sep)]
+        elif name_pos == 'Position':
+            pos = nb.append_folder_name.posGet()
+            name = name[:pos] + sep + folder_full + name[pos:]
 
         return name
 
@@ -2606,7 +2646,7 @@ class Numbering:    # (9)
         self.mode_combo.current(0)
 
         # At position, spinbox
-        ttk.Label(self.lf, text='at').grid(column=2, row=0, sticky='ew')
+        ttk.Label(self.lf, text='At').grid(column=2, row=0, sticky='ew')
         self.at_n_spin = ttk.Spinbox(
                                     self.lf,
                                     width=3,
@@ -2642,7 +2682,7 @@ class Numbering:    # (9)
         # But this is not a bug from my end
 
         # Padding of possible 0s, spinbox
-        ttk.Label(self.lf, text='Pad').grid(column=0, row=2, sticky='ew')
+        ttk.Label(self.lf, text='Pad.').grid(column=0, row=2, sticky='ew')
         self.pad_spin = ttk.Spinbox(
                                 self.lf,
                                 width=3,
@@ -3205,7 +3245,7 @@ class Rename:
         nb.replace.resetWidget()
         nb.case.resetWidget()
         nb.remove.resetWidget()
-        nb.move_copy_parts.resetWidget()
+        nb.Move_Parts.resetWidget()
         nb.add_to_string.resetWidget()
         nb.append_folder_name.resetWidget()
         nb.numbering.resetWidget()
@@ -3214,7 +3254,7 @@ class Rename:
         inf_bar.lastActionRefresh('Full Reset')
 
     @staticmethod
-    def Apply_Command(command_name=None, *args, **kwargs):
+    def Apply_Command(event, command_name=None, *args, **kwargs):
         '''
             Directly applies a command or a chain of commands.
         '''
@@ -3250,7 +3290,7 @@ class Rename:
                 # last_rename list to get what are the new names
                 fn_treeview.selectionSet(last_rename.newNameListGet())
                 # Call Apply_Command with next_step
-                Rename.Apply_Command(command_name=next_step)
+                Rename.Apply_Command(event=None, command_name=next_step)
 
             # Show that it finished
             inf_msg = 'Applied "{}" Command'.format(command_name)
@@ -3939,7 +3979,7 @@ class Save_Command_Name_Window:
         self.prev_step = tk.StringVar()
 
         # Extended Replace, entry
-        txt = 'Choose a Name for The New Command (only letters)'
+        txt = 'Choose a Name for The New Command'
         ttk.Label(self.frame, text=txt).grid(column=0, row=0, columnspan=2, sticky='w')
         self.name_entry = ttk.Entry(
                                     self.frame,
@@ -4075,7 +4115,7 @@ def Create_Var_Val_Dict(*args, **kwargs):
     Replace.appendVarValToDict(var_val_dict)
     Case.appendVarValToDict(var_val_dict)
     Remove.appendVarValToDict(var_val_dict)
-    Move_Copy_Parts.appendVarValToDict(var_val_dict)
+    Move_Parts.appendVarValToDict(var_val_dict)
     Add_To_String.appendVarValToDict(var_val_dict)
     Append_Folder_Name.appendVarValToDict(var_val_dict)
     Numbering.appendVarValToDict(var_val_dict)
@@ -4115,7 +4155,7 @@ def Set_Command_Call(dict_={}, *args, **kwargs):
     nb.replace.setCommand(dict_)
     nb.case.setCommand(dict_)
     nb.remove.setCommand(dict_)
-    nb.move_copy_parts.setCommand(dict_)
+    nb.Move_Parts.setCommand(dict_)
     nb.add_to_string.setCommand(dict_)
     nb.append_folder_name.setCommand(dict_)
     nb.numbering.setCommand(dict_)
@@ -4140,7 +4180,7 @@ def Scandir_Recursive(path, mask=re.compile(''), ext_tuple=[],
         If the depth is -1 execute maximum recursiveness.
     '''
     tree = []
-    
+
     try:
         # Loop through scandir
         for entry in os.scandir(path):
@@ -4294,7 +4334,7 @@ def New_Naming(name, idx, path, *args, **kwargs):
     name = Replace.Replace_Action(name)                         # (3)
     name = Case.Case_Change(name)                               # (4)
     name = Remove.Remove_Rename(name)                           # (5)
-    name = Move_Copy_Parts.Move_Copy_Action(name)               # (6)
+    name = Move_Parts.Move_Copy_Action(name)                    # (6)
     name = Add_To_String.Add_Rename(name)                       # (7)
     name = Append_Folder_Name.Append_Folder_Rename(name, path)  # (8)
     name = Numbering.Numbering_Rename(name, idx)                # (9)
@@ -4404,6 +4444,10 @@ def Root_Binds(*args, **kwargs):
     # Command
     root.bind('<Control-e>', Load_Command_Call)
     root.bind('<Control-E>', Load_Command_Call)
+    root.bind('<Control-y>', Rename.Apply_Command)
+    root.bind('<Control-Y>', Rename.Apply_Command)
+    # Exit
+    root.bind('<Control-Escape>', lambda event: root.quit())
 
 
 ###################################
