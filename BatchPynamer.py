@@ -1,5 +1,24 @@
 #!/usr/bin/env python3
 
+''' Copyright 2019, 2020 Alejandro Roldán '''
+
+'''
+    This file is part of Batch Pynamer.
+
+    Batch Pynamer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Batch Pynamer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Batch Pynamer.  If not, see <https://www.gnu.org/licenses/>.
+'''
+
 import sys
 import os
 import pathlib
@@ -129,6 +148,15 @@ except PermissionError:
 # When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -3241,7 +3269,7 @@ class Rename:
         inf_bar.lastActionRefresh('Full Reset')
 
     @staticmethod
-    def Apply_Command(event, command_name=None, *args, **kwargs):
+    def Apply_Command(event=None, command_name=None, *args, **kwargs):
         '''
             Directly applies a command or a chain of commands.
         '''

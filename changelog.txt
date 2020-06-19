@@ -12,12 +12,13 @@ V. 06.00:
 	- Added error handling for when giving a path to the program from the terminal
 	- Removed unused classes
 	- Fixed performance issue when selecting, deselecting and inverting selection of many many elements
-	- Fixed Bug where trying to access a folder from the direntryframe wouldn't work
+	- Fixed Bug where trying to access a folder from the Dir_Entry_Frame wouldn't work
 	- Fixed bug where trying to add an image to the metadata would fail
 	- Fixed bug where reseting wouldn't reset the rename from file widget
 	- Fixed bug where it would raise an accesibility error and it wouldn't get catched
 	- Fixed bug where using the Crop option from the Remove (5) group would remove everything if there was no occurrence of what we wanted to remove
 	- Fixed bug where undoing rename with nothing selected in the folder_view would remove the whole folder_view
+	- Fixed bug when applying command from button wouldn't work
 	- Cleaned code for readability
 
 V. 05.08:
