@@ -6,7 +6,8 @@ It can also change and use metadata for flac, mp3 and mp4 files. If you don't ha
 It can probably run on Windows and Mac mostly without issue, but it hasn't been tested.
 
 
-### The Wiki has how every option, menu and key works
+### The Wiki has how every option, menu and key works!
+Check the wiki
 
 Program Screenshots
 -------------------
