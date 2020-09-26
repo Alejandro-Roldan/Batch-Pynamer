@@ -117,7 +117,8 @@ PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
 # Get the path from the arguments in the program call or use a default path
 # if no argument was passed
 try:
-    PATH = sys.argv[1]
+    # Make sure the path doesn't have a trailing backslash to avoid errors
+    PATH = sys.argv[1].rstrip('/')
     # When more than 1 argument is provided raise an AttributeError
     if len(sys.argv) > 2:
         raise AttributeError
@@ -148,7 +149,15 @@ except PermissionError:
 # When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
-
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
 # Get the maximum filename lenght * 2 in the active drive
 MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
@@ -1244,6 +1253,7 @@ class Reg_Exp:  # (1)
         self.ex_match_reg_text = tk.Text(
                                             self.ex_w_frame,
                                             bg='white',
+                                            fg='black',
                                             relief='sunken'
                                             )
         self.ex_match_reg_text.grid(column=0, row=1, sticky='ew')
@@ -1254,6 +1264,7 @@ class Reg_Exp:  # (1)
         self.ex_replace_with_text = tk.Text(
                                             self.ex_w_frame,
                                             bg='white',
+                                            fg='black',
                                             relief='sunken'
                                             )
         self.ex_replace_with_text.grid(column=0, row=3, sticky='ew')

@@ -19,6 +19,7 @@ V. 06.00:
 	- Fixed bug where using the Crop option from the Remove (5) group would remove everything if there was no occurrence of what we wanted to remove
 	- Fixed bug where undoing rename with nothing selected in the folder_view would remove the whole folder_view
 	- Fixed bug when applying command from button wouldn't work
+	- Fixed bug where calling the program with the path as an argument would fail if the path had a trailing slash
 	- Cleaned code for readability
 
 V. 05.08:
