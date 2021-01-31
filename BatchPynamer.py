@@ -67,7 +67,7 @@ except ImportError:
         - Error Frame
         - Last Rename
 
-        - Menubar
+        - Menubar - Top_Menu
         - Tree System Navigation
         - File Folder Navigation
         - Directory entry for File Folder Navigation
@@ -89,7 +89,7 @@ except ImportError:
 
         - Metadata listentries frame
         - Metadata image frame
-        - Metadata changes applier frame
+        - Metadata buttons frame
 
         - Config, logs & commands classes and functions
 
@@ -108,17 +108,22 @@ GLOBAL CONSTANTS
 
 
 APP_NAME = 'Batch Pynamer'
-APP_VER = 6.00
+APP_VER = 7.00
 TITLE = '{}-V{}'.format(APP_NAME, APP_VER)
 
 PROJECT_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer'
+WIKI_URL = 'https://github.com/Alejandro-Roldan/Batch-Pynamer/wiki'
 
 
 # Get the path from the arguments in the program call or use a default path
 # if no argument was passed
 try:
     # Make sure the path doesn't have a trailing backslash to avoid errors
-    PATH = sys.argv[1].rstrip('/')
+    # Except if its the root directory
+    if sys.argv[1] != '/':
+        PATH = sys.argv[1].rstrip('/')
+    else:
+        PATH = '/'
     # When more than 1 argument is provided raise an AttributeError
     if len(sys.argv) > 2:
         raise AttributeError
@@ -149,9 +154,18 @@ except PermissionError:
 # When there was no path given from the terminal default to the user path
 except IndexError:
     PATH = os.path.expanduser('~')
+    # PATH = '/'
+    # PATH = '/home'
+    # PATH = '/home/Jupiter'
+    PATH = '/home/Jupiter/Music'
+    # PATH = '/home/Mars/Music'
+    # PATH = '/home/Jupiter/Musiclol'
+    # PATH = '/home/Jupiter/MusicTrials'
+    # PATH = '/media'
+    # PATH = '/media/MERCURY'
 
-# Get the maximum filename lenght * 2 in the active drive
-MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)*2
+# Get the maximum filename lenght in the active drive
+MAX_NAME_LEN = (os.statvfs(PATH).f_namemax)
 
 # Configuration folder path depending on OS
 if sys.platform == 'linux':
@@ -177,7 +191,7 @@ WIDGET CREATION CLASSES
 ###################################
 
 
-class VerticalScrolledFrame(ttk.Frame):
+class Vertical_Scrolled_Frame(ttk.Frame):
     '''
         A pure Tkinter scrollable frame that actually works!
         * Use the 'interior' attribute to place widgets inside the scrollable frame
@@ -187,7 +201,7 @@ class VerticalScrolledFrame(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
 
-        # create a canvas object and a vertical scrollbar for scrolling it
+        # Create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = ttk.Scrollbar(self, orient='vertical')
         vscrollbar.pack(fill='y', side='right', expand='false')
         canvas = tk.Canvas(
@@ -199,44 +213,96 @@ class VerticalScrolledFrame(ttk.Frame):
         canvas.pack(side='left', fill='both', expand='true')
         vscrollbar.config(command=canvas.yview)
 
-        # reset the view
+        # Reset the view
         canvas.xview_moveto(0)
         canvas.yview_moveto(0)
 
-        # create a frame inside the canvas which will be scrolled with it
+        # Create a frame inside the canvas which will be scrolled with it
         self.interior = interior = ttk.Frame(canvas)
         interior_id = canvas.create_window(0, 0, window=interior,
                                            anchor='nw')
 
-        # track changes to the canvas and frame width and sync them,
+
+        # Track changes to the canvas and frame width and sync them,
         # also updating the scrollbar
         def _configure_interior(event):
-            # update the scrollbars to match the size of the inner frame
+            # Update the scrollbars to match the size of the inner frame
             size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
             canvas.config(scrollregion="0 0 %s %s" % size)
             if interior.winfo_reqwidth() != canvas.winfo_width():
-                # update the canvas's width to fit the inner frame
+                # Update the canvas's width to fit the inner frame
                 canvas.config(width=interior.winfo_reqwidth())
         interior.bind('<Configure>', _configure_interior)
 
         def _configure_canvas(event):
             if interior.winfo_reqwidth() != canvas.winfo_width():
-                # update the inner frame's width to fill the canvas
+                # Update the inner frame's width to fill the canvas
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
 
+        def _on_mousewheel(event):
+            '''
+                Transform the delta event to either 1 or -1
+                The mousewheel buttons return an event object with the x and
+                y coordinates of the mouse, and in each case:
+                The mousewheel a delta with the value of the overall position
+                of the mousewheel.
+                The button-4/5 a num with which button was pressed.
+            '''
+            def delta(event):
+                '''
+                    When the event.num is 5 (down) or delta is negative value
+                    return a 1, else return -1
+                '''
+                if event.num == 5 or event.delta < 0:
+                    return 1 
+                return -1 
+
+            # Get the direction of the scroll and apply it
+            direction = delta(event)
+            canvas.yview_scroll(direction, "units")
+
+        def _bound_to_mousewheel(event):
+            '''
+                What to bind to the mousewheel
+                The <MouseWheel> event is for windows
+                While the <Button-4/5> is for linux
+            '''
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+            canvas.bind_all("<Button-4>", _on_mousewheel)
+            canvas.bind_all("<Button-5>", _on_mousewheel)
+
+        def _unbound_to_mousewheel(event):
+            ''' Unbind the mouswheel '''
+            canvas.unbind_all("<MouseWheel>")
+            canvas.unbind_all("<Button-4>")
+            canvas.unbind_all("<Button-5>")
+
+        def _binds():
+            '''
+                Only bind the mousewheel when over the widget and unbind when
+                not over it
+            '''
+            canvas.bind('<Enter>', _bound_to_mousewheel)
+            canvas.bind('<Leave>', _unbound_to_mousewheel)
+        _binds()
+
 
 class Error_Frame:
+    ''' Error frame with an error message and an "Okay" button '''
     def __init__(self, error_desc='', *args, **kwargs):
+        # Create a new window
         self.error_frame = tk.Toplevel(root, bg='gray85')
         self.error_frame.title('Error Window')
         self.error_frame.attributes('-type', 'dialog')
 
+        # Label with error description
         ttk.Label(
                     self.error_frame,
                     text='Error: {}'.format(error_desc)
                     ).grid(column=0, row=0, padx=5, pady=5)
 
+        # Okay button destroys the window
         ttk.Button(
                     self.error_frame,
                     text="Okay",
@@ -245,30 +311,43 @@ class Error_Frame:
 
 
 class Last_Rename:
+    '''
+        A last rename object that saves the previous renames and
+        gives the ability to undo the changes
+
+        A list of tuples where tuple[0] is the old name and
+        tuple[1] the new name
+    '''
     def __init__(self, *args, **kwargs):
         self.last_rename_list = []
 
     def appendRenamePair(self, past_name, new_name, *args, **kwargs):
+        ''' Appending new items '''
         pair_tuple = (past_name, new_name)
         self.last_rename_list.append(pair_tuple)
 
         return pair_tuple
 
     def lastRenameListGet(self, *args, **kwargs):
+        ''' Return the last rename array '''
         return self.last_rename_list
 
     def lastNameListGet(self, *args, **kwargs):
+        ''' Return the old name in the last rename '''
         last_name_list = list(last_name[0] for last_name in self.last_rename_list)
         return last_name_list
 
     def newNameListGet(self, *args, **kwargs):
+        ''' Return the selected new name in the last rename '''
         new_name_list = list(new_name[1] for new_name in self.last_rename_list)
         return new_name_list
 
     def clear(self, *args, **kwargs):
+        ''' Clear the last rename array '''
         self.last_rename_list = []
 
     def __str__(self, *args, **kwargs):
+        ''' Define how to print the oobject '''
         return str(self.last_rename_list)
 
 
@@ -296,7 +375,9 @@ class Top_Menu:
         if not CONFIG_FOLDER_PATH:
             self.menubar.entryconfigure(index=3, state='disable')
 
-        self.menubar.add_command(label='About', command=self.openProjectUrl)
+        # self.menubar.add_command(label='About', command=self.openProjectUrl)
+        self.aboutMenu()
+        self.menubar.add_cascade(label="About", menu=self.about_menu)
 
         self.metadataDisable()
 
@@ -385,11 +466,18 @@ class Top_Menu:
                                     accelerator='F5'
                                     )
 
-        # Refresh Tree
+        # Refresh Focused Node in Tree
         self.file_menu.add_command(
-                                    label='Refresh Directory Browser',
-                                    command=dir_entry_frame.folderNavRefresh,
+                                    label='Refresh Focused Node',
+                                    command=dir_entry_frame.focusFolderRefresh,
                                     accelerator='Ctrl+F5'
+                                    )
+
+        # Refresh Whole Tree
+        self.file_menu.add_command(
+                                    label='Refresh Full Directory Browser',
+                                    command=dir_entry_frame.folderNavRefresh,
+                                    accelerator='Ctrl+Shift+F5'
                                     )
 
         # Separator
@@ -507,17 +595,42 @@ class Top_Menu:
                                                 value=command_name
                                                 )
 
+    def aboutMenu(self, *args, **kwargs):
+        ''' About Menu Dropdown '''
+        # Create the menu
+        self.about_menu = tk.Menu(
+                                        self.menubar,
+                                        tearoff=0,
+                                        bg='gray75',
+                                        foreground='black'
+                                        )
+
+        # GitHub
+        self.about_menu.add_command(
+                                        label='Project',
+                                        command=self.openProjectUrl
+                                        )
+
+        # Wiki
+        self.about_menu.add_command(
+                                        label='Help',
+                                        command=self.openWikiUrl
+                                        )
+
     def renameEnable(self, *args, **kwargs):
+        ''' Enable the rename menu options when on the rename page '''
         self.file_menu.entryconfigure(index=0, state='active')
         self.file_menu.entryconfigure(index=1, state='active')
         self.file_menu.entryconfigure(index=2, state='active')
 
     def renameDisable(self, *args, **kwargs):
+        ''' Disable the rename menu options when not in the rename page '''
         self.file_menu.entryconfigure(index=0, state='disable')
         self.file_menu.entryconfigure(index=1, state='disable')
         self.file_menu.entryconfigure(index=2, state='disable')
 
     def metadataEnable(self, *args, **kwargs):
+        ''' Enable the metadata menu options when on the metadata page '''
         if METADATA_IMPORT:
             self.file_menu.entryconfigure(index=5, state='active')
             self.file_menu.entryconfigure(index=6, state='active')
@@ -526,6 +639,7 @@ class Top_Menu:
             self.file_menu.entryconfigure(index=9, state='active')
 
     def metadataDisable(self, *args, **kwargs):
+        ''' Disable the metadata menu options when not in the metadata page '''
         if METADATA_IMPORT:
             self.file_menu.entryconfigure(index=5, state='disable')
             self.file_menu.entryconfigure(index=6, state='disable')
@@ -534,14 +648,19 @@ class Top_Menu:
             self.file_menu.entryconfigure(index=9, state='disable')
 
     def selectedCommandGet(self, *args, **kwargs):
+        ''' Return the selected command name '''
         return self.selected_command.get()
 
     def openProjectUrl(self, *args, **kwargs):
-        ''' Open the Project Url when clicking the about menu option '''
+        ''' Open the Project Url '''
         webbrowser.open(PROJECT_URL)
 
+    def openWikiUrl(self, *args, **kwargs):
+        ''' Open the Wiki Url '''
+        webbrowser.open(WIKI_URL)
 
-class TreeNavigator:
+
+class Tree_Navigator:
     def __init__(self, master, path, *args, **kwargs):
         '''
         Draws the treeview of the file navigation:
@@ -599,7 +718,7 @@ class TreeNavigator:
         return self.tree_nav.focus()
 
     def deleteChildren(self, path='', *args, **kwargs):
-        ''' Delete already existing nodes in the folder view '''
+        ''' Delete all existing nodes in the folder view '''
         for child in self.tree_nav.get_children(path):
             self.tree_nav.delete(child)
 
@@ -685,7 +804,7 @@ class TreeNavigator:
             self.nodes[path] = path
 
 
-class FileNavigator:
+class File_Navigator:
     '''
     Draws the treeview of the files and folders inside the selected folder.
     '''
@@ -734,6 +853,7 @@ class FileNavigator:
         ''' Defines the binded actions '''
         # File Navigation bindings
         self.tree_folder.bind('<<TreeviewSelect>>', Populate_Fields)
+        # add='+' to not just rebind the action but to make it so both happen
         self.tree_folder.bind('<<TreeviewSelect>>', Call_For_Info_Bar, add='+')
         self.tree_folder.bind('<Button-3>', self.rightClickPathToClip)
 
@@ -779,14 +899,14 @@ class FileNavigator:
             following the renaming rules given inside the rename page of
             the notebook.
         '''
-        # get list of selected items iids
+        # Get list of selected items iids
         selection = self.selectedItems()
         for idx, path in enumerate(selection):
-            # get the old name
+            # Get the old name
             old_name = self.oldNameGet(path)
-            # transform the old name to the new name
+            # Transform the old name to the new name
             new_name = New_Naming(old_name, idx, path)
-            # changes the new name column
+            # Changes the new name column
             self.setNewName(path, new_name, old_name)
 
     def resetNewName(self, *args, **kwargs):
@@ -890,7 +1010,14 @@ class FileNavigator:
             inf_bar.lastActionRefresh('Refreshed File View')
 
 
-class DirEntryFrame:
+class Dir_Entry_Frame:
+    '''
+        Draws a entry field that has the active directory path, and that can
+        be used to go to an specific directory directly by writing on it and
+        using ENTER.
+        It also has a R button to refresh the directory navigator.
+        One click refreshes the active node, two the whole tree.
+    '''
     def __init__(self, master, *args, **kwargs):
         self.frame = ttk.Frame(master)
         self.frame.grid(column=0, row=0, columnspan=2, sticky='w'+'e')
@@ -903,8 +1030,7 @@ class DirEntryFrame:
         self.folder_nav_refresh_button = ttk.Button(
                                                     self.frame,
                                                     width=2,
-                                                    text="R",
-                                                    command=self.folderNavRefresh
+                                                    text="R"
                                                     )
         self.folder_nav_refresh_button.grid(column=0, row=0, sticky='w')
 
@@ -919,11 +1045,18 @@ class DirEntryFrame:
 
     def bindEntries(self, *args, **kwargs):
         self.folder_dir_entry.bind('<Return>', self.openFolderTreeNav)
+        self.folder_nav_refresh_button.bind('<Button-1>', self.focusFolderRefresh)
+        self.folder_nav_refresh_button.bind('<Double-1>', self.folderNavRefresh)
 
     def folderNavRefresh(self, *args, **kwargs):
         ''' Refreshes the folder navigation treeview '''
         folder_treeview.refreshView()
         inf_bar.lastActionRefresh('Refreshed Browse Files Treeview')
+
+    def focusFolderRefresh(self, *args, **kwargs):
+        ''' Refreshes the focused folder in the navigation treeview '''
+        folder_treeview.updateNode()
+        inf_bar.lastActionRefresh('Refreshed Focused Directory in Treeview')
 
     def folderDirSet(self, *args, **kwargs):
         folder_path = fn_treeview.active_path
@@ -940,7 +1073,7 @@ class DirEntryFrame:
             self.folderDirSet()
 
 
-class ChangesNotebook:
+class Changes_Notebook:
     '''
         Draws the Notebook.
         It has the following pages:
@@ -954,8 +1087,9 @@ class ChangesNotebook:
         self.nb = ttk.Notebook(master)
         self.nb.grid(column=0, row=1)
         self.nb_rename = ttk.Frame(self.nb)
-        self.nb_metadata = ttk.Frame(self.nb, padding='3 3 3 3')
+        self.nb_metadata = ttk.Frame(self.nb, padding='5 5 5 5')
         self.nb_metadata.columnconfigure(0, weight=1)
+        self.nb_metadata.rowconfigure(0, weight=1)
 
         # Add the rename page and call the widgets that go inside
         self.nb.add(self.nb_rename, text='Rename')
@@ -1021,9 +1155,11 @@ class ChangesNotebook:
     def metadataNbPage(self, master, *args, **kwargs):
         ''' Calls to draw the matadata widgets '''
         self.nb_metadata_frame = ttk.Frame(master)
-        self.nb_metadata_frame.grid(sticky='w'+'e')
+        self.nb_metadata_frame.grid(sticky='nswe')
         self.nb_metadata_frame.columnconfigure(0, weight=1)
         self.nb_metadata_frame.columnconfigure(1, weight=1)
+        self.nb_metadata_frame.rowconfigure(0, weight=1)
+
 
         # Entries with the Metadata
         self.metadata_list_entries = Metadata_ListEntries(self.nb_metadata_frame)
@@ -1039,7 +1175,12 @@ class ChangesNotebook:
         self.nb.bind('<<NotebookTabChanged>>', Populate_Fields)
 
 
-class InfoBar:
+class Info_Bar:
+    '''
+        A bar that displays information at the bottom of the window:
+        - Number of items displayed in the File Navigator, and selected items
+        - Relevant information messages (errors, last completed action...)
+    '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Frame(master)
         self.lf.grid(column=0, row=2, sticky='w'+'e')
@@ -1066,12 +1207,19 @@ class InfoBar:
         self.action_label.grid(column=1, row=0, sticky='w'+'e', ipady=2, padx=4)
 
     def numItemsRefresh(self, *args, **kwargs):
+        ''' Number of items refresher '''
+        # Get the children of the fileview and length of that list
         num_items = len(fn_treeview.tree_folder.get_children())
+        # Get the selected items of the fileview and its length
         num_sel_items = len(fn_treeview.selectedItems())
+        # Message to display
         items_text = '{} items ({} selected)'.format(num_items, num_sel_items)
+        # Set the text variable with the message
         self.items_text_var.set(items_text)
 
     def lastActionRefresh(self, action, *args, **kwargs):
+        ''' Display a message, passed in the action variable '''
+        # Set the text variable with the message
         self.action_text_var.set(action)
 
 
@@ -1083,6 +1231,14 @@ RENAME CLASSES
 
 
 class Rename_From_File:     # (0)
+    '''
+        Draws the Rename from file widget. Inside the rename notebook.
+        This takes priority over anything else
+        It has:
+            - An entry to enter the path to the text file to rename from
+            - A checkbutton to select if you want to wrap around once the end
+            of the file is reached
+    '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Rename From File (0)')
         self.lf.grid(column=0, row=0, sticky='nsew')
@@ -1091,7 +1247,7 @@ class Rename_From_File:     # (0)
         self.file = tk.StringVar()
         self.wrap = tk.BooleanVar()
 
-        # Chose case, combobox
+        # Filename, entry
         ttk.Label(self.lf, text="Filename").grid(column=0, row=0, sticky='w')
         self.file_entry = ttk.Entry(
                                     self.lf,
@@ -1100,7 +1256,7 @@ class Rename_From_File:     # (0)
                                     )
         self.file_entry.grid(column=1, row=0, sticky='ew')
 
-        # Match case, checkbutton
+        # Wrap, checkbutton
         self.wrap_check = ttk.Checkbutton(
                                             self.lf,
                                             text='Wrap',
@@ -1173,6 +1329,18 @@ class Rename_From_File:     # (0)
 
 
 class Reg_Exp:  # (1)
+    '''
+        Draws the Regular Expressions widget. Inside the rename notebook.
+        1st thing to change.
+        It has:
+            - An entry to write the regular expression to match
+            - An entry to write what the name should be
+            - A button to extend the fields in a new window, which has:
+                - A writeable text field for the regular expression to match
+                - A writable text field for what the name should be
+                - A button to close that window and write the content of the
+                text fields to the entries.
+    '''
     def __init__(self, master, *args, **kwargs):
         self.lf = ttk.Labelframe(master, text='Regular Expressions (1)')
         self.lf.grid(column=1, row=0, sticky='nsew')
@@ -2015,17 +2183,20 @@ class Remove:   # (5)
         rm_words = nb.remove.rmWordsGet()
         rm_chars = nb.remove.rmCharsGet()
 
-        # removes the words first
-        name = name.split()
+        # Only try this if theres somethin in rm_words, otherwise it would
+        # have to transform the string into lists and loop through the whole
+        # name of each selected item everytime
+        if rm_words:
+            # Create list of words to remove, splitted spaces
+            rm_words = rm_words.split()
+            # Create a list out of the name string, splitted spaces
+            name_list = name.split()
 
-        # If the value doesnt exist it raises a ValueError
-        try:
-            # Needs the while to remove all ocurences of the word
-            while rm_words in name:
-                name.remove(rm_words)
-        except ValueError:
-            pass
-        name = ' '.join(name)
+            # Use list comprehension to loop trough the name (as a list) and
+            # create an output list with the words that are Not inside the
+            # rm_words list, then join the list into a str with
+            # spaces inbetween
+            name = ' '.join([word for word in name_list if word not in rm_words])
 
         # Removes every apparition of all chars in the str by themselves
         for chara in rm_chars:
@@ -2045,7 +2216,7 @@ class Remove:   # (5)
         crop_this = nb.remove.cropThisGet()
 
         # If this field is empty do nothing
-        if crop_this != '':
+        if crop_this:
             # If the combobox is not in 'Special' do the regular crops
             if crop_pos != 'Special':
                 name_tuple = name.partition(crop_this)
@@ -2073,10 +2244,14 @@ class Remove:   # (5)
         if digits:
             for char in string.digits:
                 name = name.replace(char, '')
+        # Remove double spaces for single space
         if d_s:
             name = name.replace('  ', ' ')
-        if accents:     # not sure how this bit works (from stackoverflow)
+        # Replace accents for their no accented counterpart
+        if accents:
+            # Not sure how this thing works (from stackoverflow)
             nfkd_form = unicodedata.normalize('NFKD', name)
+            # Annoying syntax to not exceed line limit
             name = ''.join(
                 [c for c in nfkd_form if not unicodedata.combining(c)]
                 )
@@ -2447,8 +2622,23 @@ class Add_To_String:    # (7)
         suffix = nb.add_to_string.suffixGet()
         word_space = nb.add_to_string.wordSpaceGet()
 
+        # Add prefix
         name = prefix + name
-        name = name[:at_pos] + insert_this + name[at_pos:]
+
+        # If blocks to determine where to write the sub str
+        # To be able to do it seamlessly it needs different ways to act
+        # depending on the position
+        if at_pos == 0:
+            name = insert_this + name
+        elif at_pos == -1 or at_pos >= len(name):
+            name = name + insert_this
+        elif at_pos > 0:
+            name = name[:at_pos] + insert_this + name[at_pos:]
+        elif at_pos < -1:
+            at_pos += 1
+            name = name[:at_pos] + insert_this + name[at_pos:]
+
+        # Add suffix
         name = name + suffix
 
         if word_space:  # add a space before each capital letter
@@ -2590,21 +2780,45 @@ class Append_Folder_Name:   # (8)
         sep = nb.append_folder_name.sepGet()
         levels = nb.append_folder_name.levelsGet()
 
-        folders = path.split('/')
-        folder_full = ''
-        for i in range(2, levels + 2):
-            folder_full = folders[-i] + sep + folder_full
+        # Active when the level is at least 1
+        if levels > 0:
+            # Split the directory into a list with each folder
+            folders = path.split('/')
+            # Initilize the full folder name
+            folder_full = ''
+            # Loop for each directory level, start at 2 to skip an empty level
+            # and the active level (the item itself)
+            for i in range(2, levels + 2):
+                # Error handling for setting a level higher than folders are
+                try:
+                    folder_full = folders[-i] + sep + folder_full
+                except IndexError:
+                    pass
 
-        if name_pos == 'Prefix':
-            name = folder_full + name
-        elif name_pos == 'Suffix':
-            name = name + sep + folder_full
-            if sep:
+            if name_pos == 'Prefix':
+                name = folder_full + name
+            elif name_pos == 'Suffix':
+                name = name + sep + folder_full
                 # Remove the extra trailing separator
-                name = name[:-len(sep)]
-        elif name_pos == 'Position':
-            pos = nb.append_folder_name.posGet()
-            name = name[:pos] + sep + folder_full + name[pos:]
+                if sep:
+                    name = name[:-len(sep)]
+            elif name_pos == 'Position':
+                pos = nb.append_folder_name.posGet()
+                # If blocks to determine where to write the sub str
+                # To be able to do it seamlessly it needs different ways to act
+                # depending on the position
+                if pos == 0:
+                    name = folder_full + name
+                elif pos == -1 or pos >= len(name):
+                    name = name + sep + folder_full
+                    # Remove the extra trailing separator
+                    if sep:
+                        name = name[:-len(sep)]
+                elif pos > 0:
+                    name = name[:pos] + sep + folder_full + name[pos:]
+                elif pos < -1:
+                    pos += 1
+                    name = name[:pos] + sep + folder_full + name[pos:]
 
         return name
 
@@ -2830,7 +3044,7 @@ class Numbering:    # (9)
         # Calculate what number we are in taking into account the step and
         # the starting number
         n = idx + start_num + (incr_num - 1) * idx
-        # change the number to string and whatever base we selected
+        # Change the number to string and whatever base we selected
         n = Numbering.Numbering_Create(n)
 
         if mode == 'Prefix':
@@ -2840,7 +3054,18 @@ class Numbering:    # (9)
         elif mode == 'Both':
             name = n + sep + name + sep + n
         elif mode == 'Position':
-            name = name[:at_n] + sep + n + sep + name[at_n:]
+            # If blocks to determine where to write the separators and how to
+            # act depending on where we have to write it to make it seem
+            # seamless
+            if at_n == 0:
+                name = n + sep + name
+            elif at_n == -1 or at_n >= len(name):
+                name = name + sep + n
+            elif at_n > 0:
+                name = name[:at_n] + sep + n + sep + name[at_n:]
+            elif at_n < -1:
+                at_n += 1
+                name = name[:at_n] + sep + n + sep + name[at_n:]
 
         return name
 
@@ -2856,7 +3081,7 @@ class Numbering:    # (9)
         type_base = nb.numbering.typeBaseGet()
         pad = nb.numbering.padGet()
 
-        # number cases
+        # Number cases
         if type_base == 'Base 10':
             n = str(n)
             n = n.rjust(pad, '0')
@@ -2873,9 +3098,9 @@ class Numbering:    # (9)
             n = n[2:]
             n = n.rjust(pad, '0')
 
-        # letter cases
+        # Letter cases
         else:
-            # uses a cycle variable to know how many times it has to loop
+            # Uses a cycle variable to know how many times it has to loop
             # ex: 1 -> A, 27 -> AA, 53 -> BA
             cycle = n // 26
             letter_n = ''
@@ -3362,7 +3587,7 @@ class Rename:
 
         # When to reverse the naming items list so as to skip naming problems
         # like with recursiveness naming a folder before the files in it so
-        # then the files can't be renamed because the path pointer doen't
+        # then the files can't be renamed because the path pointer doesn't
         # exists. Optimized the boolean function
         # A=menu_bar.renameBotTopGet()
         # B=nb.filters.depthGet()
@@ -3379,11 +3604,15 @@ class Rename:
 
             print('Rename:')
             for path in sel_paths:
-                path_tuple = path.rpartition('/')
+                directory, slash, old_name = path.rpartition('/')
                 name = fn_treeview.tree_folder.set(path, '#1')
-                new_path = path_tuple[0] + path_tuple[1] + name
+                # Only rename if the old name is different from the new name
+                if name != old_name:
+                    new_path = directory + slash + name
 
-                System_Rename(path, new_path)
+                    System_Rename(path, new_path)
+                else:
+                    print('"{}" New name is the same as old name'.format(path))
             print()
 
             Refresh_Treeviews()
@@ -3404,19 +3633,26 @@ METADATA CLASSES
 
 
 class Metadata_ListEntries:
+    '''
+        Draws the Metadata List entries. Inside metadata notebook.
+        It has:
+            - A Vertical Scrollable Frame with the list of metadata entries
+            - A New Tag name entry
+            - An Add button to add the new tag
+    '''
     def __init__(self, master, *args, **kwargs):
         self.frame = ttk.Frame(master)
         self.frame.grid(column=0, row=0, sticky='nsw')
 
-        self.frame.grid(sticky='n'+'s')
         self.frame.rowconfigure(0, weight=1)
         self.frame.columnconfigure(1, weight=1)
 
-        self.field_frame = VerticalScrolledFrame(self.frame)
+        self.field_frame = Vertical_Scrolled_Frame(self.frame)
         self.field_frame.grid(
                                 column=0, row=0, columnspan=3,
                                 pady=3, sticky='nsw'
                                 )
+
 
         self.new_tag_name = tk.StringVar()
 
@@ -3501,7 +3737,6 @@ class Metadata_ListEntries:
             return self.meta_dict
 
         except TypeError:
-            print('Not a Valid Audio File')
             self.metaDictReset()
             return self.meta_dict
 
@@ -3570,6 +3805,13 @@ class Metadata_ListEntries:
 
 
 class Metadata_Img:
+    '''
+        Draws the Metadata Image widget. Inside metadata notebook.
+        It has:
+            - An entry to write the path to the new image
+            - A X button to empty the new image entry
+            - A canvas to display the metadata image
+    '''
     def __init__(self, master, *args, **kwargs):
         self.frame = ttk.Frame(master)
         self.frame.grid(column=1, row=0, sticky='ns')
@@ -3628,20 +3870,23 @@ class Metadata_Img:
         # Error handling if theres no image
         try:
             selection = fn_treeview.selectedItems()
-            file = selection[0]
-            self.picture = Meta_Picture(file)
 
-            for file in selection:
-                img_comparison = Meta_Picture(file)
+            # Load the first image, and well use it to compare against
+            self.picture = Meta_Picture(selection[0])
 
-                # Checks against that first loaded image every other
-                # image in the selection. Becomes true when any of the other
-                # images are different
-                if img_comparison != self.picture:
-                    self.picture = None
-                    self.size_label.config(text='Different images')
+            # If the selected file isnt valid
+            if self.picture == 'not valid':
+                # set the size label to show such message
+                self.size_label.config(text='Not a valid file')
+                self.picture = None
 
-                    break
+            # Else if checks against that first loaded image every other image
+            # When it finds a diferent image breaks out of the loop and
+            # executes the if
+            elif not all(Meta_Picture(file) == self.picture for file in selection):
+                self.size_label.config(text='Different images')
+                self.picture = None
+
 
         except (IndexError, AttributeError):
             # Set the size label to show theres no image
@@ -3670,7 +3915,6 @@ class Metadata_Img:
 
         else:
             self.img.config(image=self.photo_image)
-            self.size_label.config(text='No Image/Different Images')
 
 
 class Apply_Changes:
@@ -3841,7 +4085,12 @@ class Apply_Changes:
             meta_audio.save()
 
     def allChangesCall(self, *args, **kwargs):
-        ''' Calls to both the metadata change and the image change '''
+        '''
+            Calls to both the metadata change and the image change
+            This is its own defined method and we dont just use the other two
+            methods one after the other so as not to loop through all the
+            items AND load their metadata twice
+        '''
         selection = fn_treeview.selectedItems()
         img_path = nb.metadata_img.imagePathGet()
         meta_dict = nb.metadata_list_entries.metaDictGet()
@@ -3908,6 +4157,8 @@ def Meta_Picture(file, *args, **kwargs):
             if 'APIC' in tag:
                 meta_picture = meta_audio.get(tag).data
                 break
+    else:
+        meta_picture = 'not valid'
 
     return meta_picture
 
@@ -3978,6 +4229,12 @@ CONFIG, LOGS & COMMAND FILES
 
 
 class Save_Command_Name_Window:
+    '''
+        Opens a window to save a command.
+        It has:
+            - A Name entry
+            - A Previous command dropdown. Lists all the already saved commads
+    '''
     def __init__(self, *args, **kwargs):
         self.frame = tk.Toplevel(root, bg='gray85')
         self.frame.title('Choose Name for Command')
@@ -4028,6 +4285,9 @@ class Save_Command_Name_Window:
                                         )
         self.save_button.grid(column=1, row=3)
 
+        for child in self.frame.winfo_children():
+            child.grid_configure(padx=2, pady=2)
+        
         self.bindEntries()
 
     def bindEntries(self, *args, **kwargs):
@@ -4036,8 +4296,8 @@ class Save_Command_Name_Window:
 
     def defocus(self, *args, **kwargs):
         '''
-        Clears the highlightning of the comboboxes inside this frame
-        whenever any of them changes value.
+            Clears the highlightning of the comboboxes inside this frame
+            whenever any of them changes value.
         '''
         self.steps_combo.selection_clear()
 
@@ -4045,20 +4305,31 @@ class Save_Command_Name_Window:
         return self.command_name.get()
 
     def prevStepGet(self, *args, **kwargs):
+        '''
+            Return the previous step dropdown value and returns an empty
+            string when its none
+        '''
         prev_step = self.prev_step.get()
-        if prev_step != 'None':
-            return prev_step
-        else:
-            return ''
+
+        if prev_step == 'None':
+            prev_step = ''
+
+        return prev_step
 
     def saveExit(self, *args, **kwargs):
+        '''
+            Saves the command to the configuration file and exits the window
+        '''
         command_name = self.commandNameGet()
         prev_step = self.prevStepGet()
 
+        # Check the command name is valid (alphanumeric)
         if not command_name.isalnum():
             Error_Frame('Invalid Name')
+        # Check its not already in use
         elif command_name in COMMAND_CONF:
             Error_Frame('Name Already in Use')
+        # Save command and edit the previous step
         else:
             Save_To_Command_File(command_name, prev_step)
             self.frame.destroy()
@@ -4073,7 +4344,7 @@ def Create_Config_Folder(path, *args, **kwargs):
 
 
 def Save_To_Command_File(command_name, prev_step='', *args, **kwargs):
-    ''' Saves the current entries varibales configuration as a command '''
+    ''' Saves the current entries variables configuration as a command '''
     # Get the current variable config
     command_dict = Create_Var_Val_Dict()
 
@@ -4095,7 +4366,7 @@ def Save_To_Command_File(command_name, prev_step='', *args, **kwargs):
 
 
 def Delete_Command(*args, **kwargs):
-    ''' Deletes seletec command from the command configuration file '''
+    ''' Deletes selected command from the command configuration file '''
     # Get selected command
     command_name = menu_bar.selectedCommandGet()
     # Pop it
@@ -4113,7 +4384,7 @@ def Delete_Command(*args, **kwargs):
 
 def Create_Var_Val_Dict(*args, **kwargs):
     '''
-        Call for each widget to retrive the variable values in their fields anc
+        Call for each widget to retrive the variable values in their fields and
         create a dictionary with the current configuration.
     '''
     var_val_dict = {}
@@ -4290,6 +4561,12 @@ def Populate_Fields(*args, **kwargs):
 
 
 def No_Duplicate_List(list_convert, *args, **kwargs):
+    '''
+        Return a list with no duplicated items
+        Typical way to do it would be to convert to set, but sets are not
+        ordered, meanwhile a dictionary can only have each key once and
+        are ordered (since python 3)
+    '''
     return list(dict.fromkeys(list_convert))
 
 
@@ -4316,6 +4593,7 @@ def Finish_Show_Working(inf_msg='Done', *args, **kwargs):
 
 
 def Call_For_Info_Bar(*args, **kwargs):
+    ''' A call to refresh the number of items in the info bar '''
     inf_bar.numItemsRefresh()
 
 
@@ -4331,8 +4609,8 @@ def Refresh_Treeviews(*args, **kwargs):
 
 def New_Naming(name, idx, path, *args, **kwargs):
     '''
-    Creates the new name going through all fields and making the changes
-    to the old_name string
+        Creates the new name going through all fields and making the changes
+        to the old_name string
     '''
     # Separate name and extension
     name, ext = De_Ext(name)
@@ -4363,9 +4641,9 @@ def New_Naming(name, idx, path, *args, **kwargs):
 
 def De_Ext(name, *args, **kwargs):
     '''
-    Removes the extension from the selected path.
-    Returns the name of the field and the extension separate.
-    If theres no extension returns an empty extension.
+        Removes the extension from the selected path.
+        Returns the name of the field and the extension separate.
+        If theres no extension returns an empty extension.
     '''
     file_name, dot, ext = name.rpartition('.')
     if file_name != '':
@@ -4394,8 +4672,11 @@ def Meta_Format(str_, path, *args, **kwargs):
 
             # Individually check and replace for each possible key in the dict
             # (need to do this because if you want to use curly braces in the
-            # string i would raise an error and would skip any actual editing)
+            # string it would raise an error and would skip any actual editing)
             for field in field_list:
+                # **variable unpacks a dictionary into keyword arguments
+                # eg: ['a':1, 'b':2] unpacks into function(a=1, b=2)
+                # (also *variable unpack a list/tuple into position arguments)
                 str_ = str_.replace(field, field.format(**metadata))
 
     return str_
@@ -4442,7 +4723,8 @@ def Root_Binds(*args, **kwargs):
     root.bind('<Control-Z>', Rename.Undo)
     # Refresh
     root.bind('<F5>', fn_treeview.refreshView)
-    root.bind('<Control-F5>', folder_treeview.refreshView)
+    root.bind('<Control-F5>', folder_treeview.updateNode)
+    root.bind('<Control-Shift-F5>', folder_treeview.refreshView)
     # Selection
     root.bind('<Control-a>', fn_treeview.selectAll)
     root.bind('<Control-A>', fn_treeview.selectAll)
@@ -4470,15 +4752,21 @@ if __name__ == '__main__':
     '''
     PROGRAM INITIALIZATION
     '''
+    # Try to create the configuration folder
     if CONFIG_FOLDER_PATH:
         Create_Config_Folder(CONFIG_FOLDER_PATH)
+
+    # Initialize last rename
     last_rename = Last_Rename()
 
     '''
     WINDOW INITIALIZATION
     '''
+    # Create the Tkinter window
     root = tk.Tk()
+    # Set title
     root.title(TITLE)
+    # Set window type to dialog to make it floating
     root.attributes('-type', 'dialog')  # makes the window a pop up/dialog
 
     '''
@@ -4489,22 +4777,22 @@ if __name__ == '__main__':
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
-    # Tree view & File view
+    ## Tree view & File view
     # Frame Creation for the folder treeview, file view and the directory entry
     f_t_view_frame = ttk.Frame(mainframe)
     f_t_view_frame.grid(column=0, row=0, sticky='w'+'e')
     f_t_view_frame.columnconfigure(1, weight=1)
-    fn_treeview = FileNavigator(f_t_view_frame)
-    folder_treeview = TreeNavigator(f_t_view_frame, path=PATH)
-    dir_entry_frame = DirEntryFrame(f_t_view_frame)
+    fn_treeview = File_Navigator(f_t_view_frame)
+    folder_treeview = Tree_Navigator(f_t_view_frame, path=PATH)
+    dir_entry_frame = Dir_Entry_Frame(f_t_view_frame)
 
-    # Extra Information Bar
-    inf_bar = InfoBar(mainframe)
+    ## Extra Information Bar
+    inf_bar = Info_Bar(mainframe)
 
-    # Notebook
-    nb = ChangesNotebook(mainframe)
+    ## Notebook
+    nb = Changes_Notebook(mainframe)
 
-    # Menubar
+    ## Menubar
     menu_bar = Top_Menu(root)
 
     # Set Padding around the window
@@ -4517,4 +4805,5 @@ if __name__ == '__main__':
     Root_Binds()
 
     root.config(menu=menu_bar.menubar)
+
     root.mainloop()

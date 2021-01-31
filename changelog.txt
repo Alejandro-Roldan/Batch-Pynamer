@@ -1,3 +1,24 @@
+V. 07.00:
+IMPORTANT NOTICE
+This will probably be the last full update. From now on I doubt any more utilities will be added and it will focus on maintenance and bug fixing.
+
+	- Added conditional to not try to change the name of an item when it's the same as it's old name.
+	- Extended the metadata notebooks page surface area to fill the space.
+	- Binded mousewheel inside the metadata list entries to the scrollbar.
+	- Added focused item tree navigator refresh with one click on the R button, and full refresh with double click
+	- Added menu option to refreshed focused node, accelerator and keybinds
+	- Changed the maximum filename lenght from twice the max in the drive type to the actual max
+	- Improved remove words method and made it work more as intended by being able to remove several words
+	- Added IndexError handling for appending the path folders
+	- Fixed bugs when using negative indexes to write sub string to the name in add_to_string, append_folder_name and numbering.
+	- Added comments
+	- Changed the syntax of how it checks if the selected files havce the same image (to something thats exactly the same but more concise)
+	- Added logic to show an apropiate message for each case scenario of the metadata images (no image, different images, not a valid file)
+	- Code cleanup
+	- Added number of lines to the changelog
+4810 lines
+
+
 V. 06.00:
 	- Highly optimized the treeview sorting. In previous versions the elements sorting was considerably slow (although only noticiable when there were many many items, specially when using the recursive option), so it has been completly changed to a much much faster implementation wich barely adds any overhead. This was achived by creating the list of items then sorting it then inserting the items in the treeview, rather than inserting the item to the treeview as they were read and then sorting the treeview by moving each item to a new index.
 	- Change the insertNode to get the entry instead of the values
@@ -21,6 +42,8 @@ V. 06.00:
 	- Fixed bug when applying command from button wouldn't work
 	- Fixed bug where calling the program with the path as an argument would fail if the path had a trailing slash
 	- Cleaned code for readability
+4537 lines
+
 
 V. 05.08:
 	- Added Renaming from file
@@ -29,19 +52,24 @@ V. 05.08:
 	- Changed filtering call to act for the mask and ext entries when losing focus from them, so as to not load the whole tree with each keystroke
 	- Added key bindings for menu options
 	- Added accelerators (display the key binding next to the menubar options)
+4365 lines
+
 
 V. 05.06:
 	- Implemented recursiveness to the file treeview
 	- Implemented filtering the file treeview (+ the folder treeview for hidden folders)
 	- Added a filtering treeview widget
 	- Cleaned code
+4245 lines
 
 
 V. 05.05:
 	- Optimized loading directories calls
 	- Added colors to rows, change to green when they change name (doesnt work because of bug from tkinter)
 	- Since we need a defined limit for the spinboxes I decided to add a check for filename length limit (and double it for safeness) and to use it instead of an arbitrary lenght number (also trying to rename to something beyond the filename lenght gets catched by the OsError handling that was already implemented for catching invalid chars)
-	
+4356 lines
+
+
 V. 05:
 	- Added the ability to hide and show hidden files instead of always showing them
 	- Added Display menu
@@ -50,6 +78,8 @@ V. 05:
 	- Aded Display Menu function to change directories before files and viceversa
 	- Added support for MP4 metadata
 	- Added enumerate where possible for more concise code
+4102 lines
+
 
 V. 04.05:
 	- Optimized code conditionals and error handling in the use of metadata values for the rename
@@ -61,6 +91,8 @@ V. 04.05:
 	- Changed the rename function to use os.rename() instead of shutil.move() (that technically uses os.rename under the hood) to better catch naming exceptions whith forbidden characters and the like
 	- Removed "import shutil" since it wasn't being used anymore
 	- Highly optimized treeview loading with "os.scandir"
+4048 lines
+
 
 V. 04:
 	- Changed project name to "Batch Pynamer"
@@ -68,11 +100,15 @@ V. 04:
 	- Added function to set the metadata's title and tracknumber from the filename (splits the filename at the first apparition of "-" and sets the first part to be the tracknumber and the second to be the title)
 	- Added File Menu Function to set the title and the tracknumber metadata
 	- Now when applying changes to the metadata it automatically reloads
+3954 lines
+
 
 V. 03.05:
 	- Added the ability to open the program in a specific folder calling it with the folder as an argument
 	- Set up a default PATH constant to fallback
 	- Changed path.split('/') to os.path.basename() and os.path.dirname() accordingly (which also allows to use in windows)
+3875 lines
+
 
 V. 03:
 	- Added the function to format the tracknumber metadata field to remove anything after "/" (inclusive) and add 0s left pading to have 2 digits
@@ -80,12 +116,16 @@ V. 03:
 	- Added ability to create new metadata tags
 	- Added Error Handling for ID3 when the tag doesn't have an valid name
 	- Ordered functions in new groups that make more sense
+3866 lines
+
 
 V. 02.08:
 	- Changed the configuration folder path to have a "/" at the end
 	- Fixed bug where the file menu option "Refresh Tree" would just empty the tree instead of refreshing it
 	- Fixed bug where you wouldn't be able to use the rename application without the metadata imports caused by the options in the menu bar
 	- Created Error class for trying to rename to an already existing file name
+3766 lines
+
 
 V. 02.07:
 	- Changed Naming convention for the main file to just be BatchRenamerpy.py
@@ -99,6 +139,8 @@ V. 02.07:
 	- Added Error Pop Up window
 	- Added several error handlings when there is no selection and corresponding info msgs
 	- Added code comments
+3730 lines
+
 
 V. 02.06:
 	- Fixed bug where the spinbox that should begin at 1 would initialize at 0. I have solved it for my program by adding a line right after creation that sets them to 1, but it's something that the tkinter developers should fix themselves. Now I remember that's why I used tk.spinbox instead of ttk.spinbox
@@ -107,6 +149,8 @@ V. 02.06:
 	- Added Info Bar Message when you refresh the folder navigation treeview
 	- Added Info Bar Message when you copy a file path with right click over it
 	- Added code comments
+2896 lines
+
 
 V. 02.05:
 	- Now it's possible to change MP3s metadata too
@@ -115,6 +159,8 @@ V. 02.05:
 	- Extended the treeviews to fill the whole horizontal space
 	- Metadata modules are now optional to run the program. If they are not installed you are still able to use the rest of the functionalities
 	- Untabbed comments where necessary so they don't hide when automatic code folding (a bit of a failure though, still folds the bullet points inside the comments)
+2841 lines
+
 
 V. 02:
 	- Added a scrollbar for the metadata entries widget so when a file has many entries it doesn't make a bigger window
@@ -124,35 +170,48 @@ V. 02:
 	- Removed extra imports that weren't being used
 	- Changed spinboxes from tk to ttk so they use the same color pallette as the rest of the program
 	- Extended the info bar across the whole window horizontally
+2742 lines
+
 
 V. 01.02:
 	- Added an info bar at the bottom to show number of items and number of selected items plus a last action message
 	- Optimized the number of for loops that the program goes trough
 	- Cleaner code, separated in more functions
+2574 lines
+
 
 V. 01.01:
 	- Created an entry list that stays in the ui constantly
 	- Organized the widgets in a more packed way
+2439 lines
+
 
 V. 01:
 	- Fixed bug where the metadata image wouldn't show
 	- First mostly Totally working version
 	- Cleaner code
+2398 lines
+
 
 V. b.1.0.3:
 	- Clean and organize the classes for an easier use and more object oriented
 	- Added permanent image display size
 	- Added entry for the new image to replace
 	- Added label to show metadata image size or if there is no image or different images in diferent selected files
+2379 lines
+
 
 V. a.0.2:
 	- Reorganize the functions and methods
 	- Create the Metadata structure and class
 	- Added metadata entries list
 	- Added metadata image
-	
+1944 lines
+
+
 V. a.0.1:
 	- First basic running version of the program
 	- All the rename widget created
 	- Treeview and file selection created
 	- Final Rename button created and working
+1860 lines
