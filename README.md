@@ -23,7 +23,7 @@ Dependencies
 
 For the metadata:
 
-* mutagen 
+* mutagen
 * Pillow
 
 You can install them using pip

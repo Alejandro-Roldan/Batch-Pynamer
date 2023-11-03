@@ -1,3 +1,8 @@
+V. 08.00:
+	- Refactored code into a more professional project
+	- Double Space removal deafults to true
+
+
 V. 07.00:
 IMPORTANT NOTICE
 This will probably be the last full update. From now on I doubt any more utilities will be added and it will focus on maintenance and bug fixing.
@@ -12,7 +17,7 @@ This will probably be the last full update. From now on I doubt any more utiliti
 	- Added IndexError handling for appending the path folders
 	- Fixed bugs when using negative indexes to write sub string to the name in add_to_string, append_folder_name and numbering.
 	- Added comments
-	- Changed the syntax of how it checks if the selected files havce the same image (to something thats exactly the same but more concise)
+	- Changed the syntax of how it checks if the selected files have the same image (to something thats exactly the same but more concise)
 	- Added logic to show an apropiate message for each case scenario of the metadata images (no image, different images, not a valid file)
 	- Code cleanup
 	- Added number of lines to the changelog
