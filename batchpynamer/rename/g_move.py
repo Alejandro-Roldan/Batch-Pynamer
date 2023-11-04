@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnIntVar, BpnStrVar
 
 
-class MoveParts(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (6)
+class MoveParts(BaseNamingWidget, ttk.LabelFrame):  # (6)
     """
     Draws the move/copy parts widget. Inside rename notebook.
     6th thing to change.
@@ -34,11 +34,11 @@ class MoveParts(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (6)
 
         # Variable defs
         self.fields = self.Fields(
-            move_parts_ori_pos=(tk.StringVar(), ("None", "Start", "End")),
-            move_parts_ori_n=(tk.IntVar(), 0),
-            move_parts_end_pos=(tk.StringVar(), ("Start", "End", "Position")),
-            move_parts_end_n=(tk.IntVar(), 0),
-            move_parts_sep=(tk.StringVar(), ""),
+            move_parts_ori_pos=BpnComboVar(("None", "Start", "End")),
+            move_parts_ori_n=BpnIntVar(0),
+            move_parts_end_pos=BpnComboVar(("Start", "End", "Position")),
+            move_parts_end_n=BpnIntVar(0),
+            move_parts_sep=BpnStrVar(""),
         )
 
         # Copy from, combobox
@@ -47,18 +47,17 @@ class MoveParts(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (6)
             self,
             width=5,
             state="readonly",
-            values=self.fields.move_parts_ori_pos.default,
+            values=self.fields.move_parts_ori_pos.options,
             textvariable=self.fields.move_parts_ori_pos,
         )
         self.ori_pos_combo.grid(column=1, row=0, sticky="ew")
-        self.ori_pos_combo.current(0)
 
         # Copy n characters, spinbox
         ttk.Label(self, text="Chars.").grid(column=2, row=0)
         self.ori_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.move_parts_ori_n,
         )
         self.ori_n_spin.grid(column=3, row=0)
@@ -69,18 +68,17 @@ class MoveParts(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (6)
             self,
             width=5,
             state="readonly",
-            values=self.fields.move_parts_end_pos.default,
+            values=self.fields.move_parts_end_pos.options,
             textvariable=self.fields.move_parts_end_pos,
         )
         self.end_pos_combo.grid(column=5, row=0, sticky="ew")
-        self.end_pos_combo.current(0)
 
         # Paste in n position, spinbox
         ttk.Label(self, text="Pos.").grid(column=6, row=0)
         self.end_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.move_parts_end_n,
         )
         self.end_n_spin.grid(column=7, row=0)
@@ -100,23 +98,6 @@ class MoveParts(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (6)
 
         self.fields.move_parts_ori_n.trace_add("write", self.fromAddTo)
         self.fields.move_parts_end_n.trace_add("write", self.fromAddTo)
-
-        # calls to update the new name column
-        self.fields.move_parts_ori_pos.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.move_parts_ori_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.move_parts_end_pos.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.move_parts_end_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.move_parts_sep.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
     def fromAddTo(self, *args, **kwargs):
         """

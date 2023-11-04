@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnComboVar
 
 
-class Case(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (4)
+class Case(BaseNamingWidget, ttk.LabelFrame):  # (4)
     """
     Draws the Case changer widget. Inside rename notebook.
     4th thing to change.
@@ -28,11 +28,9 @@ class Case(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (4)
         super().tk_init()
 
         # Variable defs
-        # self.case_case_want = tk.StringVar()
         self.fields = self.Fields(
-            case_case_want=(
-                tk.StringVar(),
-                ("Same", "Upper Case", "Lower Case", "Title", "Sentence"),
+            case_case_want=BpnComboVar(
+                ("Same", "Upper Case", "Lower Case", "Title", "Sentence")
             ),
         )
 
@@ -42,22 +40,12 @@ class Case(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (4)
             self,
             width=10,
             state="readonly",
-            values=self.fields.case_case_want.default,
+            values=self.fields.case_case_want.options,
             textvariable=self.fields.case_case_want,
         )
         self.case_combo.grid(column=1, row=0, sticky="ew")
-        self.case_combo.current(0)
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """Defines the binded actions"""
-        super().bindEntries()
-
-        # Calls to update the new name column
-        self.fields.case_case_want.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def case_change(name, fields_dict):

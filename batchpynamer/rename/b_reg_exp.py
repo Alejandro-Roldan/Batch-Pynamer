@@ -2,12 +2,12 @@ import re  # regular expressions
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets, mainwindow
+from ..basewidgets import BaseNamingWidget, BpnStrVar
 
 
-class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
+class RenameFromRegExp(BaseNamingWidget, ttk.LabelFrame):  # (1)
     """
     Draws the Regular Expressions widget. Inside the rename notebook.
     1st thing to change.
@@ -35,8 +35,8 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
 
         # Variable defs
         self.fields = self.Fields(
-            reg_exp_match_reg=(tk.StringVar(), ""),
-            reg_exp_replace_with=(tk.StringVar(), ""),
+            reg_exp_match_reg=BpnStrVar(""),
+            reg_exp_replace_with=BpnStrVar(""),
         )
 
         # Match, entry
@@ -67,24 +67,12 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
 
         self.bindEntries()
 
-    def bindEntries(self):
-        """Defines the binded actions"""
-        super().bindEntries()
-
-        # Calls to update the new name column
-        self.fields.reg_exp_match_reg.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.reg_exp_replace_with.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-
     def extendedRegExp(self, *args, **kwargs):
         """
         Create a pop up window with extended entries for the
         regular expressions and a button 'Done' that saves the changes
         """
-        self.ex_w_frame = tk.Toplevel(mainwindow.root, bg="gray85")
+        self.ex_w_frame = tk.Toplevel(bpn.root, bg="gray85")
         self.ex_w_frame.title("Extended Regular Expression Window")
         self.ex_w_frame.attributes("-type", "dialog")
 

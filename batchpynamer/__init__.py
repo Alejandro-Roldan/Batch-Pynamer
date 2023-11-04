@@ -1,29 +1,8 @@
+import configparser
 import os
 import sys
-import configparser
 
 import batchpynamer
-
-from .info_bar import Info_Bar
-from .notebook import Changes_Notebook
-from .rename.rename import LastRename
-from .rename.a_from_file import RenameFromFile
-from .rename.b_reg_exp import RenameFromRegExp
-from .rename.c_name_basic import NameBasic
-from .rename.d_replace import Replace
-from .rename.e_case import Case
-from .rename.f_remove import Remove
-from .rename.g_move import MoveParts
-from .rename.h_add_to_str import AddToStr
-from .rename.i_add_folder_name import AddFolderName
-from .rename.j_numbering import Numbering
-from .rename.k_ext_replace import ExtReplace
-from .trees.trees import (
-    Directory_Entry_Frame,
-    Directory_Navigator,
-    File_Navigator,
-)
-from .trees.filtering import FiltersWidget
 
 # Information
 __license__ = "GPL3"
@@ -78,14 +57,42 @@ def __init__():
     pass
 
 
+def init_tk_root():
+    from tkinter import Tk
+
+    global root
+    root = Tk()
+
+
 # TODO: this can probably be moved outside and get rid of the hook by having
 # the rename classes init Fields vars inside tk_init
-def tk_init_hook():
+def tk_init_post_hook():
     """Hook to call AFTER the tk root has been created
 
     Globalizes the widget to be able to access their methods and vars from
     other widgets without caring for widget creation order
     """
+
+    from .info_bar import Info_Bar
+    from .notebook import Changes_Notebook
+    from .rename.a_from_file import RenameFromFile
+    from .rename.b_reg_exp import RenameFromRegExp
+    from .rename.c_name_basic import NameBasic
+    from .rename.d_replace import Replace
+    from .rename.e_case import Case
+    from .rename.f_remove import Remove
+    from .rename.g_move import MoveParts
+    from .rename.h_add_to_str import AddToStr
+    from .rename.i_add_folder_name import AddFolderName
+    from .rename.j_numbering import Numbering
+    from .rename.k_ext_replace import ExtReplace
+    from .rename.rename import LastRename
+    from .trees.filtering import FiltersWidget
+    from .trees.trees import (
+        Directory_Entry_Frame,
+        Directory_Navigator,
+        File_Navigator,
+    )
 
     # Last Rename Object
     global last_rename

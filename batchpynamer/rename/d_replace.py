@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
-class Replace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (3)
+class Replace(BaseNamingWidget, ttk.LabelFrame):  # (3)
     """
     Draws the replace widget. Inside rename notebook. 3rd thing to change.
     It has:
@@ -30,9 +30,9 @@ class Replace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (3)
 
         # Variable defs
         self.fields = self.Fields(
-            replace_replace_this=(tk.StringVar(), ""),
-            replace_replace_with=(tk.StringVar(), ""),
-            replace_match_case=(tk.BooleanVar(), False),
+            replace_replace_this=BpnStrVar(""),
+            replace_replace_with=BpnStrVar(""),
+            replace_match_case=BpnBoolVar(False),
         )
 
         # Replace this, entry
@@ -62,21 +62,6 @@ class Replace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (3)
         self.match_case_check.grid(column=0, row=2)
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """Defines the binded actions"""
-        super().bindEntries()
-
-        # Calls to update the new name column
-        self.fields.replace_replace_this.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.replace_replace_with.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.replace_match_case.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def replace_action(name, fields_dict):

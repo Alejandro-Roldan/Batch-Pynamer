@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnStrVar
 
 
-class NameBasic(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (2)
+class NameBasic(BaseNamingWidget, ttk.LabelFrame):  # (2)
     """
     Draws the Name widget. Inside the rename notebook. 2nd thing to change.
     It has:
@@ -33,11 +33,10 @@ class NameBasic(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (2)
 
         # Variable defs
         self.fields = self.Fields(
-            name_basic_name_opt=(
-                tk.StringVar(),
-                ("Keep", "Remove", "Reverse", "Fixed"),
+            name_basic_name_opt=BpnComboVar(
+                ("Keep", "Remove", "Reverse", "Fixed")
             ),
-            name_basic_fixed_name=(tk.StringVar(), ""),
+            name_basic_fixed_name=BpnStrVar(""),
         )
 
         # Chose case, combobox
@@ -46,11 +45,10 @@ class NameBasic(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (2)
             self,
             width=10,
             state="readonly",
-            values=self.fields.name_basic_name_opt.default,
+            values=self.fields.name_basic_name_opt.options,
             textvariable=self.fields.name_basic_name_opt,
         )
         self.name_opt_combo.grid(column=1, row=0, sticky="ew")
-        self.name_opt_combo.current(0)
 
         # Replace this, entry
         self.fixed_name_entry = ttk.Entry(
@@ -61,18 +59,6 @@ class NameBasic(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (2)
         self.fixed_name_entry.grid(column=1, row=1, sticky="ew")
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """Defines the binded actions"""
-        super().bindEntries()
-
-        # Calls to update the new name column
-        self.fields.name_basic_name_opt.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.name_basic_fixed_name.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def name_basic_rename(name, fields_dict):

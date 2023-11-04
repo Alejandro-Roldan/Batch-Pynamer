@@ -2,12 +2,12 @@ import string
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnIntVar, BpnStrVar
 
 
-class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
+class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
     """
     Draws the numbering widget. Inside the rename notebook. 9th thing
     to change.
@@ -42,17 +42,15 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
 
         # Variable defs
         self.fields = self.Fields(
-            numbering_mode=(
-                tk.StringVar(),
-                ("None", "Prefix", "Suffix", "Both", "Position"),
+            numbering_mode=BpnComboVar(
+                ("None", "Prefix", "Suffix", "Both", "Position")
             ),
-            numbering_at_n=(tk.IntVar(), 0),
-            numbering_start_num=(tk.IntVar(), 0),
-            numbering_incr_num=(tk.IntVar(value=1), 1),
-            numbering_pad=(tk.IntVar(value=1), 1),
-            numbering_sep=(tk.StringVar(), ""),
-            numbering_type_base=(
-                tk.StringVar(),
+            numbering_at_n=BpnIntVar(0),
+            numbering_start_num=BpnIntVar(0),
+            numbering_incr_num=BpnIntVar(1),
+            numbering_pad=BpnIntVar(1),
+            numbering_sep=BpnStrVar(""),
+            numbering_type_base=BpnComboVar(
                 (
                     "Base 10",
                     "Base 2",
@@ -60,7 +58,7 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
                     "Base 16",
                     "Upper Case Letters",
                     "Lower Case Letters",
-                ),
+                )
             ),
         )
 
@@ -70,19 +68,18 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
             self,
             width=5,
             state="readonly",
-            values=self.fields.numbering_mode.default,
+            values=self.fields.numbering_mode.options,
             textvariable=self.fields.numbering_mode,
         )
         self.mode_combo.grid(column=1, row=0, sticky="ew")
-        self.mode_combo.current(0)
 
         # At position, spinbox
         ttk.Label(self, text="At").grid(column=2, row=0, sticky="ew")
         self.at_n_spin = ttk.Spinbox(
             self,
             width=3,
-            from_=-batchpynamer.MAX_NAME_LEN,
-            to=batchpynamer.MAX_NAME_LEN,
+            from_=-bpn.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.numbering_at_n,
         )
         self.at_n_spin.grid(column=3, row=0)
@@ -92,7 +89,7 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
         self.start_num_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.numbering_start_num,
         )
         self.start_num_spin.grid(column=1, row=1)
@@ -103,14 +100,10 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
             self,
             width=3,
             from_=1,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.numbering_incr_num,
         )
         self.incr_num_spin.grid(column=3, row=1)
-        # TKINTER BUG
-        # The ttk.spinbox doesn't begin in the minimun value thats set
-        # Solution would be to set it to the desired number as initialization
-        # But this is not a bug from my end
 
         # Padding of possible 0s, spinbox
         ttk.Label(self, text="Pad.").grid(column=0, row=2, sticky="ew")
@@ -118,14 +111,10 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
             self,
             width=3,
             from_=1,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.numbering_pad,
         )
         self.pad_spin.grid(column=1, row=2)
-        # TKINTER BUG
-        # The ttk.spinbox doesn't begin in the minimun value thats set
-        # Solution would be to set it to the desired number as initialization
-        # But this is not a bug from my end
 
         # Separator, entry
         ttk.Label(self, text="Sep.").grid(column=2, row=2, sticky="ew")
@@ -140,40 +129,12 @@ class Numbering(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (9)
             self,
             width=5,
             state="readonly",
-            values=self.fields.numbering_type_base.default,
+            values=self.fields.numbering_type_base.options,
             textvariable=self.fields.numbering_type_base,
         )
         self.type_base_combo.grid(column=1, row=3, columnspan=3, sticky="ew")
-        self.type_base_combo.current(0)
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """What to execute when the bindings happen."""
-        super().bindEntries()
-
-        # calls to update the new name column
-        self.fields.numbering_mode.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.numbering_at_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.numbering_start_num.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.numbering_incr_num.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.numbering_pad.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.numbering_sep.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.numbering_type_base.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def numbering_rename(name, idx, fields_dict):

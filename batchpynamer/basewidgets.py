@@ -1,7 +1,9 @@
+import tkinter as tk
 from tkinter import BooleanVar as tkBooleanVar
 from tkinter import StringVar as tkStringVar
 from tkinter import ttk
-import tkinter as tk
+
+import batchpynamer as bpn
 
 
 class PopUpWindow(tk.Toplevel):
@@ -62,16 +64,16 @@ class BaseWidget:
 class BaseNamingWidget(BaseWidget):
     class Fields:
         def __init__(self, **fields):
-            for field in fields:
-                # When accessing the var_name return the tk_var
-                self.__dict__[field] = fields[field][0]
-                # And have var_name.default for the default values
-                self.__dict__[field].default = fields[field][1]
+            self.__dict__.update(fields)
 
         def get_all(self):
             return {
                 field: self.__dict__[field].get() for field in self.__dict__
             }
+
+        def reset_all(self):
+            for field in self.__dict__:
+                self.__dict__[field].reset()
 
     def tk_init(self, reset_column_row: tuple = (2, 2)):
         """Creates the reset button"""
@@ -96,6 +98,12 @@ class BaseNamingWidget(BaseWidget):
             if isinstance(self.__dict__[var], ttk.Combobox):
                 self.__dict__[var].bind("<<ComboboxSelected>>", self.defocus)
 
+        # Call update new name when each fields are written on
+        for field in self.fields.__dict__:
+            self.fields.__dict__[field].trace_add(
+                "write", bpn.fn_treeview.showNewName
+            )
+
     def defocus(self, event=None):
         """
         Clears the highlightning of the comboboxes inside the instance
@@ -105,16 +113,10 @@ class BaseNamingWidget(BaseWidget):
             if isinstance(self.__dict__[var], ttk.Combobox):
                 self.__dict__[var].selection_clear()
 
+    # TODO: This can be handled to a Fields method
     def resetWidget(self):
         """Resets fields to defined default value"""
-        for field in self.fields.__dict__:
-            # Extract default value and if its a tuple, its first element
-            val = (
-                self.fields.__dict__[field].default[0]
-                if isinstance(self.fields.__dict__[field].default, tuple)
-                else self.fields.__dict__[field].default
-            )
-            self.fields.__dict__[field].set(val)
+        self.fields.reset_all()
 
     def setCommand(self, var_dict):
         """Sets the proper rename class child fields from the whole dict"""
@@ -127,3 +129,33 @@ class BaseNamingWidget(BaseWidget):
     @staticmethod
     def appendVarValToDict(dict_: dict = {}):
         raise NotImplementedError
+
+
+class BpnVar:
+    def __init__(self, default_val):
+        self.default = default_val
+        super().__init__(bpn.root, default_val)
+
+    def reset(self):
+        self.set(self.default)
+
+
+class BpnIntVar(BpnVar, tk.IntVar):
+    def __init__(self, default_val: int):
+        super().__init__(default_val)
+
+
+class BpnStrVar(BpnVar, tk.StringVar):
+    def __init__(self, default_val: str):
+        super().__init__(default_val)
+
+
+class BpnComboVar(BpnStrVar):
+    def __init__(self, default_val: tuple):
+        self.options = default_val
+        super().__init__(default_val[0])
+
+
+class BpnBoolVar(BpnVar, tk.BooleanVar):
+    def __init__(self, default_val: bool):
+        super().__init__(default_val)

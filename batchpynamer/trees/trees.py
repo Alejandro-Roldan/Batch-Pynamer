@@ -5,11 +5,12 @@ from tkinter import ttk
 
 from scandirrecursive.scandirrecursive import scandir_recursive_sorted
 
-import batchpynamer
-from batchpynamer import mainwindow
+import batchpynamer as bpn
 
 from .. import basewidgets
 from ..rename import rename
+
+# from batchpynamer import mainwindow
 
 
 class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
@@ -61,9 +62,7 @@ class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
         self.tree_nav.bind("<<TreeviewOpen>>", self.openNode)
         self.tree_nav.bind(
             "<<TreeviewSelect>>",
-            lambda x: batchpynamer.fn_treeview.refreshView(
-                path=self.selectedItem()
-            ),
+            lambda x: bpn.fn_treeview.refreshView(path=self.selectedItem()),
         )
 
     def selectedItem(self):
@@ -108,7 +107,7 @@ class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
             self.tree_nav.delete(self.tree_nav.get_children(path))
 
             # Get if we need to show hidden folders
-            hidden = batchpynamer.filters_widget.fields.hidden.get()
+            hidden = bpn.filters_widget.fields.hidden.get()
             # hidden = False
             # Get folders and sort them
             scanned_dir = scandir_recursive_sorted(
@@ -121,7 +120,7 @@ class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
     def refreshView(self, *args):
         path = self.path
         # Get if hidden folders are active
-        hidden = batchpynamer.filters_widget.fields.hidden.get()
+        hidden = bpn.filters_widget.fields.hidden.get()
         # hidden = False
 
         # Delete all children and reset Treeview
@@ -202,7 +201,7 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
         """Defines the binded actions"""
         # File Navigation bindings
         self.tree_folder.bind(
-            "<<TreeviewSelect>>", batchpynamer.changes_notebook.populate_fields
+            "<<TreeviewSelect>>", bpn.changes_notebook.populate_fields
         )
         # add='+' to not just rebind the action but to make it so both happen
         self.tree_folder.bind("<<TreeviewSelect>>", self.infoBarCall, add="+")
@@ -211,7 +210,7 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
     def infoBarCall(self, event=None):
         """Refresh the number of items in the info bar"""
         # self.info_bar.numItemsRefresh(
-        batchpynamer.info_bar.numItemsRefresh(
+        bpn.info_bar.numItemsRefresh(
             num_items=len(self.tree_folder.get_children()),
             num_sel_items=len(self.selectedItems()),
         )
@@ -287,9 +286,9 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
         # Get the path of the item in the row under the cursor position
         path = self.tree_folder.identify_row(event.y)
         # Clear the clipboard
-        root.clipboard_clear()
+        bpn.root.clipboard_clear()
         # Copy path to clipboard
-        root.clipboard_append(path)
+        bpn.root.clipboard_append(path)
         # Get the file/directory name to use in info msg
         name = os.path.basename(path)
 
@@ -323,7 +322,7 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
         # selected) don't try to load it
         if path:
             # Get the filters values
-            filters_dict = batchpynamer.filters_widget.fields.get_all()
+            filters_dict = bpn.filters_widget.fields.get_all()
 
             # Transform the list of extensions into a tuple and add a . before the
             # extension to make sure that its an extension and not just that the
@@ -343,12 +342,12 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
 
             # Call info set actions
             self.active_path = path
-            batchpynamer.info_bar.numItemsRefresh(
+            bpn.info_bar.numItemsRefresh(
                 num_items=len(self.tree_folder.get_children()),
                 num_sel_items=len(self.selectedItems()),
             )
-            batchpynamer.dir_entry_frame.folderDirSet()
-            batchpynamer.info_bar.lastActionRefresh("Refreshed File View")
+            bpn.dir_entry_frame.folderDirSet()
+            bpn.info_bar.lastActionRefresh("Refreshed File View")
 
 
 class Directory_Entry_Frame(basewidgets.BaseWidget, ttk.Frame):
@@ -408,24 +407,22 @@ class Directory_Entry_Frame(basewidgets.BaseWidget, ttk.Frame):
     def folderNavRefresh(self, *args, **kwargs):
         """Refreshes the folder navigation treeview"""
         # self.folder_treeview.refreshView()
-        batchpynamer.folder_treeview.refreshView()
+        bpn.folder_treeview.refreshView()
         # self.info_bar.lastActionRefresh("Refreshed Browse Files Treeview")
-        batchpynamer.info_bar.lastActionRefresh(
-            "Refreshed Browse Files Treeview"
-        )
+        bpn.info_bar.lastActionRefresh("Refreshed Browse Files Treeview")
 
     def focusFolderRefresh(self, *args, **kwargs):
         """Refreshes the focused folder in the navigation treeview"""
         # self.folder_treeview.updateNode()
-        batchpynamer.folder_treeview.updateNode()
+        bpn.folder_treeview.updateNode()
         # self.info_bar.lastActionRefresh(
-        batchpynamer.info_bar.lastActionRefresh(
+        bpn.info_bar.lastActionRefresh(
             "Refreshed Focused Directory in Treeview"
         )
 
     def folderDirSet(self, *args, **kwargs):
         # folder_path = self.fn_treeview.active_path
-        folder_path = batchpynamer.fn_treeview.active_path
+        folder_path = bpn.fn_treeview.active_path
         self.folder_dir.set(folder_path)
 
     def openFolderTreeNav(self, *args, **kwags):
@@ -434,18 +431,18 @@ class Directory_Entry_Frame(basewidgets.BaseWidget, ttk.Frame):
         # Check if the path is a valid directory
         if os.path.isdir(folder_path):
             # self.fn_treeview.refreshView(path=folder_path)
-            batchpynamer.fn_treeview.refreshView(path=folder_path)
+            bpn.fn_treeview.refreshView(path=folder_path)
         else:
             # self.info_bar.lastActionRefresh("Not a Valid Directory")
-            batchpynamer.info_bar.lastActionRefresh("Not a Valid Directory")
+            bpn.info_bar.lastActionRefresh("Not a Valid Directory")
             self.folderDirSet()
 
 
 def Refresh_Treeviews(*args, **kwargs):
     """Refreshes Both Treeviews"""
     # Update the file view
-    batchpynamer.fn_treeview.refreshView()
+    bpn.fn_treeview.refreshView()
     # Update the folder view
-    batchpynamer.folder_treeview.updateNode()
+    bpn.folder_treeview.updateNode()
 
-    batchpynamer.info_bar.lastActionRefresh("Refreshed Both Treeviews")
+    bpn.info_bar.lastActionRefresh("Refreshed Both Treeviews")

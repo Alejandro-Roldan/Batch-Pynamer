@@ -2,9 +2,9 @@ import tkinter as tk
 import webbrowser  # for the About menu
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from . import mainwindow, metadata, basewidgets, commands
+from . import basewidgets, commands, metadata
 from .rename import rename
 
 
@@ -25,7 +25,7 @@ class TopMenu(tk.Menu):
         # Only create the command menu if there is a configuration folder
         self.commandMenu()
         self.add_cascade(label="Commands", menu=self.command_menu)
-        if not batchpynamer.CONFIG_FOLDER_PATH:
+        if not bpn.CONFIG_FOLDER_PATH:
             self.entryconfigure(index=3, state="disable")
 
         self.aboutMenu()
@@ -76,7 +76,7 @@ class TopMenu(tk.Menu):
 
         # Create the metadata menu options only if the metadata modification
         # is active (the dependencies have been exported)
-        # if batchpynamer.METADATA_IMPORT:
+        # if bpn.METADATA_IMPORT:
         #     # Apply Metadata Changes
         #     self.file_menu.add_command(
         #         label="Apply Metadata Changes",
@@ -112,21 +112,21 @@ class TopMenu(tk.Menu):
         # Refresh Files
         self.file_menu.add_command(
             label="Refresh File View",
-            command=batchpynamer.fn_treeview.refreshView,
+            command=bpn.fn_treeview.refreshView,
             accelerator="F5",
         )
 
         # Refresh Focused Node in Tree
         self.file_menu.add_command(
             label="Refresh Focused Node",
-            command=batchpynamer.dir_entry_frame.focusFolderRefresh,
+            command=bpn.dir_entry_frame.focusFolderRefresh,
             accelerator="Ctrl+F5",
         )
 
         # Refresh Whole Tree
         self.file_menu.add_command(
             label="Refresh Full Directory Browser",
-            command=batchpynamer.dir_entry_frame.folderNavRefresh,
+            command=bpn.dir_entry_frame.folderNavRefresh,
             accelerator="Ctrl+Shift+F5",
         )
 
@@ -136,7 +136,7 @@ class TopMenu(tk.Menu):
         # Exit
         self.file_menu.add_command(
             label="Exit",
-            command=mainwindow.root.quit,
+            command=bpn.root.quit,
             accelerator="Ctrl+Esc",
         )
 
@@ -153,21 +153,21 @@ class TopMenu(tk.Menu):
         # Select All
         self.selection_menu.add_command(
             label="Select All",
-            command=batchpynamer.fn_treeview.selectAll,
+            command=bpn.fn_treeview.selectAll,
             accelerator="Ctrl+A",
         )
 
         # Deselect All
         self.selection_menu.add_command(
             label="Deselect All",
-            command=batchpynamer.fn_treeview.deselectAll,
+            command=bpn.fn_treeview.deselectAll,
             accelerator="Ctrl+D",
         )
 
         # Invert Selection
         self.selection_menu.add_command(
             label="Invert Selection",
-            command=batchpynamer.fn_treeview.invertSelection,
+            command=bpn.fn_treeview.invertSelection,
             accelerator="Ctrl+I",
         )
 
@@ -184,7 +184,7 @@ class TopMenu(tk.Menu):
         # Save current variable values entries as command
         self.command_menu.add_command(
             label="Save Field States to Command",
-            command=lambda: commands.SaveCommandNameWindow(mainwindow.root),
+            command=lambda: commands.SaveCommandNameWindow(bpn.root),
         )
 
         # Load selected command
@@ -212,7 +212,7 @@ class TopMenu(tk.Menu):
 
         # Only try to load the commands if there is a path to the
         # commands configuration file
-        if batchpynamer.CONFIG_FOLDER_PATH:
+        if bpn.CONFIG_FOLDER_PATH:
             self.updateCommandListMenu()
 
         # Separator
@@ -227,7 +227,7 @@ class TopMenu(tk.Menu):
         """Deletes the already existing items and updates the view"""
         self.command_select_menu.delete(0, "end")
         # Read the commands config and create a radio button for each command
-        for command_name in batchpynamer.COMMAND_CONF.sections():
+        for command_name in bpn.COMMAND_CONF.sections():
             self.command_select_menu.add_radiobutton(
                 label=command_name,
                 variable=self.selected_command,
@@ -263,7 +263,7 @@ class TopMenu(tk.Menu):
 
     def metadataEnable(self, *args, **kwargs):
         """Enable the metadata menu options when on the metadata page"""
-        if batchpynamer.METADATA_IMPORT:
+        if bpn.METADATA_IMPORT:
             self.file_menu.entryconfigure(index=5, state="active")
             self.file_menu.entryconfigure(index=6, state="active")
             self.file_menu.entryconfigure(index=7, state="active")
@@ -272,7 +272,7 @@ class TopMenu(tk.Menu):
 
     def metadataDisable(self, *args, **kwargs):
         """Disable the metadata menu options when not in the metadata page"""
-        if batchpynamer.METADATA_IMPORT:
+        if bpn.METADATA_IMPORT:
             self.file_menu.entryconfigure(index=5, state="disable")
             self.file_menu.entryconfigure(index=6, state="disable")
             self.file_menu.entryconfigure(index=7, state="disable")

@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnIntVar, BpnStrVar
 
 
-class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
+class AddFolderName(BaseNamingWidget, ttk.LabelFrame):  # (8)
     """
     Draws the Append Folder Name. Inside the rename notebook. 8th thing to
     change.
@@ -31,13 +31,12 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
 
         # Variable defs
         self.fields = self.Fields(
-            add_folder_name_name_pos=(
-                tk.StringVar(),
-                ("Prefix", "Suffix", "Position"),
+            add_folder_name_name_pos=BpnComboVar(
+                ("Prefix", "Suffix", "Position")
             ),
-            add_folder_name_pos=(tk.IntVar(), 0),
-            add_folder_name_sep=(tk.StringVar(), ""),
-            add_folder_name_levels=(tk.IntVar(), 0),
+            add_folder_name_pos=BpnIntVar(0),
+            add_folder_name_sep=BpnStrVar(""),
+            add_folder_name_levels=BpnIntVar(0),
         )
 
         # Name, combobox
@@ -46,19 +45,18 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
             self,
             width=5,
             state="readonly",
-            values=self.fields.add_folder_name_name_pos.default,
+            values=self.fields.add_folder_name_name_pos.options,
             textvariable=self.fields.add_folder_name_name_pos,
         )
         self.name_pos_combo.grid(column=1, row=0, sticky="ew")
-        self.name_pos_combo.current(0)
 
         # Folders add_folder_name_levels, spinbox
         ttk.Label(self, text="Pos.").grid(column=2, row=0, sticky="ew")
         self.levels_spin = ttk.Spinbox(
             self,
             width=3,
-            from_=-batchpynamer.MAX_NAME_LEN,
-            to=batchpynamer.MAX_NAME_LEN,
+            from_=-bpn.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.add_folder_name_pos,
         )
         self.levels_spin.grid(column=3, row=0)
@@ -84,24 +82,6 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
         self.levels_spin.grid(column=7, row=0)
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """What to execute when the bindings happen."""
-        super().bindEntries()
-
-        # Calls to update the new name column
-        self.fields.add_folder_name_name_pos.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_folder_name_pos.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_folder_name_sep.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_folder_name_levels.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def add_folder_rename(name, path, fields_dict):

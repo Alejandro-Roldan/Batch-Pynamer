@@ -2,12 +2,12 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
-class RenameFromFile(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (0)
+class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
     """
     Draws the Rename from file widget. Inside the rename notebook.
     This takes priority over anything else
@@ -31,8 +31,8 @@ class RenameFromFile(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (0)
 
         # Variable defs
         self.fields = self.Fields(
-            rename_from_file_file=(tk.StringVar(), ""),
-            rename_from_file_wrap=(tk.BooleanVar(), False),
+            rename_from_file_file=BpnStrVar(""),
+            rename_from_file_wrap=BpnBoolVar(False),
         )
 
         # Filename, entry
@@ -53,18 +53,6 @@ class RenameFromFile(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (0)
         self.wrap_check.grid(column=0, row=1)
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """Defines the binded actions"""
-        super().bindEntries()
-
-        # Calls to update the new name column
-        self.fields.rename_from_file_file.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.rename_from_file_wrap.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def rename_from_file_rename(name, idx, fields_dict):

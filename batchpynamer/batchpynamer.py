@@ -23,9 +23,8 @@ import os
 import pathlib
 import sys
 
-import batchpynamer
+import batchpynamer as bpn
 
-# from . import constants
 from . import mainwindow
 
 
@@ -102,11 +101,11 @@ def _run():
     """
     PROGRAM INITIALIZATION
     """
-    batchpynamer.OG_PATH = start_Path_Handling(sys.argv)
+    bpn.OG_PATH = start_Path_Handling(sys.argv)
 
     # Try to create the configuration folder
-    if batchpynamer.CONFIG_FOLDER_PATH:
-        create_Config_Folder(batchpynamer.CONFIG_FOLDER_PATH)
+    if bpn.CONFIG_FOLDER_PATH:
+        create_Config_Folder(bpn.CONFIG_FOLDER_PATH)
 
     # Initialize last rename
     # last_rename = Last_Rename()

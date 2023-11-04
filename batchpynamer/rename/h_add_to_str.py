@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnBoolVar, BpnIntVar, BpnStrVar
 
 
-class AddToStr(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (7)
+class AddToStr(BaseNamingWidget, ttk.LabelFrame):  # (7)
     """
     Draws the Add widget. Inside the rename notebook. 7th thing to change.
     It has:
@@ -34,11 +34,11 @@ class AddToStr(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (7)
 
         # Variable defs
         self.fields = self.Fields(
-            add_to_str_prefix=(tk.StringVar(), ""),
-            add_to_str_insert_this=(tk.StringVar(), ""),
-            add_to_str_at_pos=(tk.IntVar(), 0),
-            add_to_str_suffix=(tk.StringVar(), ""),
-            add_to_str_word_space=(tk.BooleanVar(), False),
+            add_to_str_prefix=BpnStrVar(""),
+            add_to_str_insert_this=BpnStrVar(""),
+            add_to_str_at_pos=BpnIntVar(0),
+            add_to_str_suffix=BpnStrVar(""),
+            add_to_str_word_space=BpnBoolVar(False),
         )
 
         # Prefix, entry
@@ -64,8 +64,8 @@ class AddToStr(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (7)
         self.at_pos_spin = ttk.Spinbox(
             self,
             width=3,
-            from_=-batchpynamer.MAX_NAME_LEN,
-            to=batchpynamer.MAX_NAME_LEN,
+            from_=-bpn.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.add_to_str_at_pos,
         )
         self.at_pos_spin.grid(column=1, row=2)
@@ -88,26 +88,6 @@ class AddToStr(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (7)
         self.word_space_check.grid(column=0, row=4)
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """What to execute when the bindings happen."""
-        super().bindEntries()
-        # calls to update the new name column
-        self.fields.add_to_str_prefix.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_to_str_insert_this.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_to_str_at_pos.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_to_str_suffix.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.add_to_str_word_space.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def add_rename(name, fields_dict):

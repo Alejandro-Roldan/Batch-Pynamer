@@ -27,5 +27,5 @@ setup(
     },
     package_data={},
     zip_safe=False,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )

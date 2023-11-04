@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnStrVar
 
 
-class ExtReplace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (10)
+class ExtReplace(BaseNamingWidget, ttk.LabelFrame):  # (10)
     """
     Draws the extension replacer widget. Inside rename notebook.
     10th thing to change.
@@ -37,8 +37,7 @@ class ExtReplace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (10)
 
         # Variable defs
         self.fields = self.Fields(
-            ext_replace_change_ext=(
-                tk.StringVar(),
+            ext_replace_change_ext=BpnComboVar(
                 (
                     "Same",
                     "Lower",
@@ -47,9 +46,9 @@ class ExtReplace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (10)
                     "Extra",
                     "Fixed",
                     "Remove",
-                ),
+                )
             ),
-            ext_replace_fixed_ext=(tk.StringVar(), ""),
+            ext_replace_fixed_ext=BpnStrVar(""),
         )
 
         # Change Extension, combobox
@@ -57,11 +56,10 @@ class ExtReplace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (10)
             self,
             width=10,
             state="readonly",
-            values=self.fields.ext_replace_change_ext.default,
+            values=self.fields.ext_replace_change_ext.options,
             textvariable=self.fields.ext_replace_change_ext,
         )
         self.change_ext_combo.grid(column=0, row=0, sticky="ew")
-        self.change_ext_combo.current(0)
 
         # Replace extension with, entry
         self.fixed_ext_entry = ttk.Entry(
@@ -72,18 +70,6 @@ class ExtReplace(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (10)
         self.fixed_ext_entry.grid(column=1, row=0, sticky="ew")
 
         self.bindEntries()
-
-    def bindEntries(self):
-        """Defines the binded actions"""
-        super().bindEntries()
-
-        # calls to update the new name column
-        self.fields.ext_replace_change_ext.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.ext_replace_fixed_ext.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
 
 def ext_rename(ext, fields_dict):

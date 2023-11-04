@@ -4,12 +4,18 @@ import tkinter as tk
 import unicodedata
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import (
+    BaseNamingWidget,
+    BpnBoolVar,
+    BpnComboVar,
+    BpnIntVar,
+    BpnStrVar,
+)
 
 
-class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
+class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
     """
     Draws the Remove widget. Inside rename notebook. 5th thing to change.
     It has:
@@ -45,20 +51,20 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
 
         # Variable defs
         self.fields = self.Fields(
-            remove_first_n=(tk.IntVar(), 0),
-            remove_last_n=(tk.IntVar(), 0),
-            remove_from_n=(tk.IntVar(), 0),
-            remove_to_n=(tk.IntVar(), 0),
-            remove_rm_words=(tk.StringVar(), ""),
-            remove_rm_chars=(tk.StringVar(), ""),
-            remove_crop_pos=(tk.StringVar(), ("Before", "After", "Special")),
-            remove_crop_this=(tk.StringVar(), ""),
-            remove_digits=(tk.BooleanVar(), False),
-            remove_d_s=(tk.BooleanVar(), True),
-            remove_accents=(tk.BooleanVar(), False),
-            remove_chars=(tk.BooleanVar(), False),
-            remove_sym=(tk.BooleanVar(), False),
-            remove_lead_dots=(tk.StringVar(), ("None", ".", "..")),
+            remove_first_n=BpnIntVar(0),
+            remove_last_n=BpnIntVar(0),
+            remove_from_n=BpnIntVar(0),
+            remove_to_n=BpnIntVar(0),
+            remove_rm_words=BpnStrVar(""),
+            remove_rm_chars=BpnStrVar(""),
+            remove_crop_pos=BpnComboVar(("Before", "After", "Special")),
+            remove_crop_this=BpnStrVar(""),
+            remove_digits=BpnBoolVar(False),
+            remove_d_s=BpnBoolVar(True),
+            remove_accents=BpnBoolVar(False),
+            remove_chars=BpnBoolVar(False),
+            remove_sym=BpnBoolVar(False),
+            remove_lead_dots=BpnComboVar(("None", ".", "..")),
         )
 
         # Remove first n characters, spinbox
@@ -66,7 +72,7 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.first_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.remove_first_n,
         )
         self.first_n_spin.grid(column=1, row=0)
@@ -76,7 +82,7 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.last_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.remove_last_n,
         )
         self.last_n_spin.grid(column=3, row=0)
@@ -86,7 +92,7 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.from_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.remove_from_n,
         )
         self.from_n_spin.grid(column=1, row=1)
@@ -96,7 +102,7 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.to_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.remove_to_n,
         )
         self.to_n_spin.grid(column=3, row=1)
@@ -125,12 +131,10 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
             self,
             width=5,
             state="readonly",
-            # values=("Before", "After", "Special"),
-            values=self.fields.remove_crop_pos.default,
+            values=self.fields.remove_crop_pos.options,
             textvariable=self.fields.remove_crop_pos,
         )
         self.crop_combo.grid(column=1, row=3, sticky="ew")
-        self.crop_combo.current(0)
 
         # Crop, entry
         self.crop_this_entry = ttk.Entry(
@@ -171,8 +175,6 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
             variable=self.fields.remove_d_s,
         )
         self.d_s_check.grid(column=0, row=5)
-        # Set it True as default
-        self.fields.remove_d_s.set(self.fields.remove_d_s.default)
 
         # Remove accents, checkbutton
         self.accents_check = ttk.Checkbutton(
@@ -188,11 +190,10 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
             self,
             width=5,
             state="readonly",
-            values=self.fields.remove_lead_dots.default,
+            values=self.fields.remove_lead_dots.options,
             textvariable=self.fields.remove_lead_dots,
         )
         self.lead_dots_combo.grid(column=1, row=6, sticky="ew")
-        self.lead_dots_combo.current(0)
 
         self.bindEntries()
 
@@ -202,50 +203,6 @@ class Remove(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (5)
         # When updating from_n value makes sure its not bigger than remove_to_n
         self.fields.remove_from_n.trace_add("write", self.fromAddTo)
         self.fields.remove_to_n.trace_add("write", self.fromAddTo)
-
-        # Calls to update the new name column
-        self.fields.remove_first_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_last_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_from_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_to_n.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_rm_words.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_rm_chars.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_crop_pos.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_crop_this.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_digits.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_d_s.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_accents.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_chars.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_sym.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
-        self.fields.remove_lead_dots.trace_add(
-            "write", batchpynamer.fn_treeview.showNewName
-        )
 
     def fromAddTo(self, *args, **kwargs):
         """

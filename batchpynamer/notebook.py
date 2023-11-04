@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
 from . import basewidgets, metadata
 from .rename import rename
@@ -37,7 +37,7 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
         self.add(self.nb_metadata, text="Metadata")
         # Call the widgets that go inside only if the modules were
         # installed and imported properly
-        if batchpynamer.METADATA_IMPORT:
+        if bpn.METADATA_IMPORT:
             self.metadataNbPage(self.nb_metadata)
         else:
             self.tab(1, state="disable")
@@ -57,27 +57,27 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
         self.nb_rename_frame.grid(sticky="nsew")
 
         # Rename from File (0)
-        batchpynamer.rename_from_file.tk_init(self.nb_rename_frame)
+        bpn.rename_from_file.tk_init(self.nb_rename_frame)
         # # Regular Expressions (1)
-        batchpynamer.rename_from_reg_exp.tk_init(self.nb_rename_frame)
+        bpn.rename_from_reg_exp.tk_init(self.nb_rename_frame)
         # Name (2)
-        batchpynamer.name_basic.tk_init(self.nb_rename_frame)
+        bpn.name_basic.tk_init(self.nb_rename_frame)
         # Replace (3)
-        batchpynamer.replace.tk_init(self.nb_rename_frame)
+        bpn.replace.tk_init(self.nb_rename_frame)
         # Case (4)
-        batchpynamer.case.tk_init(self.nb_rename_frame)
+        bpn.case.tk_init(self.nb_rename_frame)
         # Remove (5)
-        batchpynamer.remove.tk_init(self.nb_rename_frame)
+        bpn.remove.tk_init(self.nb_rename_frame)
         # Move Parts (6)
-        batchpynamer.move_parts.tk_init(self.nb_rename_frame)
+        bpn.move_parts.tk_init(self.nb_rename_frame)
         # Add (7)
-        batchpynamer.add_to_str.tk_init(self.nb_rename_frame)
+        bpn.add_to_str.tk_init(self.nb_rename_frame)
         # Append Folder Name (8)
-        batchpynamer.add_folder_name.tk_init(self.nb_rename_frame)
+        bpn.add_folder_name.tk_init(self.nb_rename_frame)
         # Numbering (9)
-        batchpynamer.numbering.tk_init(self.nb_rename_frame)
+        bpn.numbering.tk_init(self.nb_rename_frame)
         # Extension (10)
-        batchpynamer.ext_replace.tk_init(self.nb_rename_frame)
+        bpn.ext_replace.tk_init(self.nb_rename_frame)
 
         # Bottom Frame for Filters and Rename buttons
         self.nb_bottom_frame = ttk.Frame(self.nb_rename_frame)
@@ -86,7 +86,7 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
         )
         self.nb_bottom_frame.columnconfigure(0, weight=1)
         # Filters
-        batchpynamer.filters_widget.tk_init(self.nb_bottom_frame)
+        bpn.filters_widget.tk_init(self.nb_bottom_frame)
         # Rename
         self.rename = rename.Rename(self.nb_bottom_frame)
 
@@ -126,20 +126,20 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
 
         if tab == "Rename":
             # Shows new naming
-            batchpynamer.fn_treeview.resetNewName()
-            batchpynamer.fn_treeview.showNewName()
+            bpn.fn_treeview.resetNewName()
+            bpn.fn_treeview.showNewName()
             # Enables the menu options for renaming
-            batchpynamer.menu_bar.renameEnable()
+            bpn.menu_bar.renameEnable()
             # Disables the menu options for metadata
-            # batchpynamer.menu_bar.metadataDisable()
+            # bpn.menu_bar.metadataDisable()
 
         elif tab == "Metadata":
             # Stops showing new name
-            batchpynamer.fn_treeview.resetNewName()
+            bpn.fn_treeview.resetNewName()
             # Enables loading metadata
-            batchpynamer.metadata_list_entries.metadataSelect()
-            batchpynamer.metadata_img.imageShow()
+            bpn.metadata_list_entries.metadataSelect()
+            bpn.metadata_img.imageShow()
             # Enables the menu options for metadata
-            # batchpynamer.menu_bar.metadataEnable()
+            # bpn.menu_bar.metadataEnable()
             # Disables the menu options for renaming
-            batchpynamer.menu_bar.renameDisable()
+            bpn.menu_bar.renameDisable()

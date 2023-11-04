@@ -1,11 +1,10 @@
 import os
-
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
-from .. import info_bar, commands
-from .. import basewidgets
+import batchpynamer as bpn
+
+from .. import basewidgets, commands, info_bar
 from ..trees import trees
 
 # Cant import files with numbers directly so use
@@ -103,7 +102,7 @@ class Rename(basewidgets.BaseWidget, ttk.Frame):
             column=0, row=1, padx=1, pady=1, sticky="e"
         )
         # Disable the button if no path to where commands are stored
-        if not batchpynamer.CONFIG_FOLDER_PATH:
+        if not bpn.CONFIG_FOLDER_PATH:
             self.load_command_button.config(state="disable")
 
         self.reset_button = ttk.Button(self, text="Reset", command=full_reset)
@@ -125,13 +124,13 @@ def apply_command(event=None, command_name=None, *args, **kwargs):
     Directly applies a command or a chain of commands.
     """
     # Clear the last_rename list
-    batchpynamer.last_rename.clear()
+    bpn.last_rename.clear()
     # Save what the variable fields are right now
     var_val_dict_in_use = all_fields_get()
 
     # Gets the selected command if a command_name wasn't provided
     if not command_name:
-        command_name = batchpynamer.menu_bar.selectedCommandGet()
+        command_name = bpn.menu_bar.selectedCommandGet()
 
     # Apply only if the selected command isn't the default (no changes)
     if command_name != "DEFAULT":
@@ -140,7 +139,7 @@ def apply_command(event=None, command_name=None, *args, **kwargs):
 
         # Get the variables values dict from the config command file under
         # the selected command name
-        var_val_dict = dict(batchpynamer.COMMAND_CONF.items(command_name))
+        var_val_dict = dict(bpn.COMMAND_CONF.items(command_name))
 
         # Set that variable values dict in the fields
         commands.set_command_call(var_val_dict)
@@ -154,9 +153,7 @@ def apply_command(event=None, command_name=None, *args, **kwargs):
         if next_step:
             # Select the items that were previously selected based on the
             # last_rename list to get what are the new names
-            batchpynamer.fn_treeview.selectionSet(
-                batchpynamer.last_rename.newNameListGet()
-            )
+            bpn.fn_treeview.selectionSet(bpn.last_rename.newNameListGet())
             # Call Apply_Command with next_step
             apply_command(event=None, command_name=next_step)
 
@@ -181,7 +178,7 @@ def undo_rename(*args, **kwargs):
     # doesnt affect this one and gets stuck in an infinite loop changing
     # back and forth
     # Undo the changes starting with the last one and going up
-    last_rename_list = reversed(batchpynamer.last_rename.lastRenameListGet())
+    last_rename_list = reversed(bpn.last_rename.lastRenameListGet())
 
     # Try to undo the changes only if there are changes to undo
     if last_rename_list:
@@ -205,19 +202,19 @@ def undo_rename(*args, **kwargs):
         info_bar.finish_show_working(inf_msg="Finished Undo Operation")
 
         # Clear the last rename list pairs
-        batchpynamer.last_rename.clear()
+        bpn.last_rename.clear()
 
     # Else show msg
     else:
-        batchpynamer.info_bar.lastActionRefresh("No Changes to Undo")
+        bpn.info_bar.lastActionRefresh("No Changes to Undo")
 
 
 def final_rename(*args, **kwargs):
     """Change the selected items names according to the entry fields"""
     # Clear the last_rename action list
-    batchpynamer.last_rename.clear()
+    bpn.last_rename.clear()
     # Get selected items
-    sel_paths = list(batchpynamer.fn_treeview.selectedItems())
+    sel_paths = list(bpn.fn_treeview.selectedItems())
 
     # When to reverse the naming items list so as to skip naming problems
     # like with recursiveness naming a folder before the files in it so
@@ -228,11 +225,11 @@ def final_rename(*args, **kwargs):
     # C=nb.filters.reverseGet()
     # F(A,B,C)=~BA+B~C
     if (
-        not batchpynamer.filters_widget.fields.depth.get()
-        and batchpynamer.menu_bar.renameBotTopGet()
+        not bpn.filters_widget.fields.depth.get()
+        and bpn.menu_bar.renameBotTopGet()
     ) or (
-        batchpynamer.filters_widget.fields.depth.get()
-        and not batchpynamer.filters_widget.fields.reverse.get()
+        bpn.filters_widget.fields.depth.get()
+        and not bpn.filters_widget.fields.reverse.get()
     ):
         sel_paths = reversed(sel_paths)
 
@@ -244,7 +241,7 @@ def final_rename(*args, **kwargs):
         print("Rename:")
         for path in sel_paths:
             directory, slash, old_name = path.rpartition("/")
-            name = batchpynamer.fn_treeview.tree_folder.set(path, "#1")
+            name = bpn.fn_treeview.tree_folder.set(path, "#1")
             # Only rename if the old name is different from the new name
             if name != old_name:
                 new_path = directory + slash + name
@@ -261,7 +258,7 @@ def final_rename(*args, **kwargs):
 
     # Else show a msg that there is no selection
     else:
-        batchpynamer.info_bar.lastActionRefresh("No Selected Items")
+        bpn.info_bar.lastActionRefresh("No Selected Items")
 
 
 def system_rename(file, new_path, *args, **kwargs):
@@ -269,83 +266,69 @@ def system_rename(file, new_path, *args, **kwargs):
     if not os.path.exists(new_path):
         try:
             os.rename(file, new_path)
-            batchpynamer.last_rename.appendRenamePair(file, new_path)
+            bpn.last_rename.appendRenamePair(file, new_path)
 
             print("{} -> {}".format(file, new_path))
 
         # Catch exceptions for invalid filenames
         except OSError:
             msg = "Couldn't rename file {}.\nInvalid characters".format(file)
-            Error_Frame(error_desc=msg)
-            batchpynamer.info_bar.lastActionRefresh(
+            basewidgets.ErrorFrame(bpn.root, error_desc=msg)
+            bpn.info_bar.lastActionRefresh(
                 "Couldn't Rename file. Invalid characters"
             )
 
         except FileNotFoundError:
             msg = "Couldn't rename file {}.\nFile not found".format(file)
-            Error_Frame(error_desc=msg)
-            batchpynamer.info_bar.lastActionRefresh(
+            basewidgets.ErrorFrame(bpn.root, error_desc=msg)
+            bpn.info_bar.lastActionRefresh(
                 "Couldn't Rename file. File not found"
             )
 
     # If path already exists don't write over it and skip it
     else:
         msg = "Couldn't rename file {}.\nPath already exists".format(file)
-        Error_Frame(error_desc=msg)
-        inf_bar.lastActionRefresh("Couldn't Rename file. Path already exists")
+        basewidgets.ErrorFrame(bpn.root, error_desc=msg)
+        bpn.info_bar.lastActionRefresh(
+            "Couldn't Rename file. Path already exists"
+        )
 
 
 def full_reset(*args, **kwargs):
     """Calls all resetWidget Methods"""
-    batchpynamer.rename_from_file.resetWidget()
-    batchpynamer.rename_from_reg_exp.resetWidget()
-    batchpynamer.name_basic.resetWidget()
-    batchpynamer.replace.resetWidget()
-    batchpynamer.case.resetWidget()
-    batchpynamer.remove.resetWidget()
-    batchpynamer.move_parts.resetWidget()
-    batchpynamer.add_to_str.resetWidget()
-    batchpynamer.add_folder_name.resetWidget()
-    batchpynamer.numbering.resetWidget()
-    batchpynamer.ext_replace.resetWidget()
+    bpn.rename_from_file.resetWidget()
+    bpn.rename_from_reg_exp.resetWidget()
+    bpn.name_basic.resetWidget()
+    bpn.replace.resetWidget()
+    bpn.case.resetWidget()
+    bpn.remove.resetWidget()
+    bpn.move_parts.resetWidget()
+    bpn.add_to_str.resetWidget()
+    bpn.add_folder_name.resetWidget()
+    bpn.numbering.resetWidget()
+    bpn.ext_replace.resetWidget()
 
-    batchpynamer.info_bar.lastActionRefresh("Full Reset")
+    bpn.info_bar.lastActionRefresh("Full Reset")
 
 
 def all_fields_get():
     return {
-        **batchpynamer.rename_from_file.fields.get_all(),
-        **batchpynamer.rename_from_reg_exp.fields.get_all(),
-        **batchpynamer.name_basic.fields.get_all(),
-        **batchpynamer.replace.fields.get_all(),
-        **batchpynamer.case.fields.get_all(),
-        **batchpynamer.remove.fields.get_all(),
-        **batchpynamer.move_parts.fields.get_all(),
-        **batchpynamer.add_to_str.fields.get_all(),
-        **batchpynamer.add_folder_name.fields.get_all(),
-        **batchpynamer.numbering.fields.get_all(),
-        **batchpynamer.ext_replace.fields.get_all(),
+        **bpn.rename_from_file.fields.get_all(),
+        **bpn.rename_from_reg_exp.fields.get_all(),
+        **bpn.name_basic.fields.get_all(),
+        **bpn.replace.fields.get_all(),
+        **bpn.case.fields.get_all(),
+        **bpn.remove.fields.get_all(),
+        **bpn.move_parts.fields.get_all(),
+        **bpn.add_to_str.fields.get_all(),
+        **bpn.add_folder_name.fields.get_all(),
+        **bpn.numbering.fields.get_all(),
+        **bpn.ext_replace.fields.get_all(),
     }
 
 
 def new_naming_visual(name, idx, path):
-    return new_naming(
-        name,
-        idx,
-        path,
-        # **batchpynamer.rename_from_file.fields.get_all(),
-        # **batchpynamer.rename_from_reg_exp.fields.get_all(),
-        # **batchpynamer.name_basic.fields.get_all(),
-        # **batchpynamer.replace.fields.get_all(),
-        # **batchpynamer.case.fields.get_all(),
-        # **batchpynamer.remove.fields.get_all(),
-        # **batchpynamer.move_parts.fields.get_all(),
-        # **batchpynamer.add_to_str.fields.get_all(),
-        # **batchpynamer.add_folder_name.fields.get_all(),
-        # **batchpynamer.numbering.fields.get_all(),
-        # **batchpynamer.ext_replace.fields.get_all(),
-        **all_fields_get(),
-    )
+    return new_naming(name, idx, path, **all_fields_get())
 
 
 def new_naming(name, idx, path, **fields_dict):
@@ -374,7 +357,7 @@ def new_naming(name, idx, path, **fields_dict):
 
     # Format any metadata fields that have been added to the name
     # (only if the metadata modules were imported)
-    # if batchpynamer.METADATA_IMPORT:
+    # if bpn.METADATA_IMPORT:
     #     name = Meta_Format(name, path)
 
     return name

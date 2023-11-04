@@ -34,3 +34,7 @@ AttributeError: 'NoneType' object has no attribute 'groups'
 ```
 
 * Check if we can defocus the spinboxes when removing focus lol
+
+* add logging
+
+* import basewidgets as bw (or just import the class needed which just should be 1 in each file)

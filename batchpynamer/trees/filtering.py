@@ -1,12 +1,12 @@
-from tkinter import ttk
 import tkinter as tk
+from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
 
-from .. import basewidgets
+from ..basewidgets import BaseNamingWidget, BpnBoolVar, BpnIntVar, BpnStrVar
 
 
-class FiltersWidget(basewidgets.BaseNamingWidget, ttk.LabelFrame):
+class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
     """
     Draws the filter widget. Inside rename notebook.
     It has:
@@ -36,19 +36,16 @@ class FiltersWidget(basewidgets.BaseNamingWidget, ttk.LabelFrame):
 
         # Variable defs
         self.fields = self.Fields(
-            mask=(tk.StringVar(), ""),
-            ext=(tk.StringVar(), ""),
-            folders=(tk.BooleanVar(value=True), True),
-            files=(tk.BooleanVar(value=True), True),
-            hidden=(tk.BooleanVar(value=False), False),
-            files_before_dirs=(tk.BooleanVar(value=False), False),
-            reverse=(tk.BooleanVar(value=False), False),
-            min_name_len=(tk.IntVar(value=0), 0),
-            max_name_len=(
-                tk.IntVar(value=batchpynamer.MAX_NAME_LEN),
-                batchpynamer.MAX_NAME_LEN,
-            ),
-            depth=(tk.IntVar(value=0), 0),
+            mask=BpnStrVar(""),
+            ext=BpnStrVar(""),
+            folders=BpnBoolVar(True),
+            files=BpnBoolVar(True),
+            hidden=BpnBoolVar(False),
+            files_before_dirs=BpnBoolVar(False),
+            reverse=BpnBoolVar(False),
+            min_name_len=BpnIntVar(0),
+            max_name_len=BpnIntVar(bpn.MAX_NAME_LEN),
+            depth=BpnIntVar(0),
         )
 
         # Regular expression mask, entry
@@ -115,7 +112,7 @@ class FiltersWidget(basewidgets.BaseNamingWidget, ttk.LabelFrame):
             self,
             width=3,
             from_=-1,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.depth,
         )
         self.depth_spin.grid(column=5, row=0)
@@ -128,7 +125,7 @@ class FiltersWidget(basewidgets.BaseNamingWidget, ttk.LabelFrame):
         self.name_len_min_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.min_name_len,
         )
         self.name_len_min_spin.grid(column=7, row=1, sticky="w")
@@ -138,45 +135,29 @@ class FiltersWidget(basewidgets.BaseNamingWidget, ttk.LabelFrame):
         self.name_len_max_spin = ttk.Spinbox(
             self,
             width=3,
-            to=batchpynamer.MAX_NAME_LEN,
+            to=bpn.MAX_NAME_LEN,
             textvariable=self.fields.max_name_len,
         )
         self.name_len_max_spin.grid(column=9, row=1, sticky="w")
 
         self.bindEntries()
 
-    def bindEntries(self, *args, **kwargs):
-        """Defines the binded actions"""
-        self.mask_entry.bind(
-            "<FocusOut>", batchpynamer.fn_treeview.refreshView
-        )
-        self.mask_entry.bind("<Return>", batchpynamer.fn_treeview.refreshView)
-        self.ext_entry.bind("<FocusOut>", batchpynamer.fn_treeview.refreshView)
-        self.ext_entry.bind("<Return>", batchpynamer.fn_treeview.refreshView)
-        self.fields.folders.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.files.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.hidden.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.hidden.trace_add(
-            "write", batchpynamer.folder_treeview.refreshView
-        )
-        self.fields.files_before_dirs.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.reverse.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.min_name_len.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.max_name_len.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
-        self.fields.depth.trace_add(
-            "write", batchpynamer.fn_treeview.refreshView
-        )
+    def bindEntries(self):
+        """Redefined"""
+        # Refresh files view when updating fields
+        for field in self.fields.__dict__:
+            # Except "mask" and "ext" fields
+            if field != "mask" and field != "ext":
+                self.fields.__dict__[field].trace_add(
+                    "write", bpn.fn_treeview.refreshView
+                )
+
+        # Those are updated when we finish changing them
+        # (instead of with each keystroke)
+        self.mask_entry.bind("<FocusOut>", bpn.fn_treeview.refreshView)
+        self.mask_entry.bind("<Return>", bpn.fn_treeview.refreshView)
+        self.ext_entry.bind("<FocusOut>", bpn.fn_treeview.refreshView)
+        self.ext_entry.bind("<Return>", bpn.fn_treeview.refreshView)
+
+        # Refresh folders view
+        self.fields.hidden.trace_add("write", bpn.folder_treeview.refreshView)

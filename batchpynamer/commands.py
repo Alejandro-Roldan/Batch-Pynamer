@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer
+import batchpynamer as bpn
+
 from . import basewidgets, menubar
 from .rename import rename
 
@@ -31,7 +32,7 @@ class SaveCommandNameWindow(basewidgets.PopUpWindow):
         self.name_entry.focus()
 
         # Previous Step, combobox
-        steps_list = batchpynamer.COMMAND_CONF.sections()
+        steps_list = bpn.COMMAND_CONF.sections()
         steps_list.insert(0, "")
         txt = "Select Previous Step"
         ttk.Label(self, text=txt).grid(column=0, row=2, sticky="w")
@@ -82,7 +83,7 @@ class SaveCommandNameWindow(basewidgets.PopUpWindow):
         if not command_name.isalnum():
             basewidgets.ErrorFrame("Invalid Name")
         # Check its not already in use
-        elif command_name in batchpynamer.COMMAND_CONF:
+        elif command_name in bpn.COMMAND_CONF:
             basewidgets.ErrorFrame("Name Already in Use")
         # Save command and edit the previous step
         else:
@@ -97,70 +98,70 @@ def save_to_command_file(command_name, prev_step=""):
     command_dict = rename.all_fields_get()
 
     # Added to the configparser object
-    batchpynamer.COMMAND_CONF[command_name] = command_dict
+    bpn.COMMAND_CONF[command_name] = command_dict
     # If a previous step was selected modify the previous step adding the
     # next_step
     if prev_step:
-        batchpynamer.COMMAND_CONF[prev_step]["next_step"] = command_name
+        bpn.COMMAND_CONF[prev_step]["next_step"] = command_name
 
     # Save changes
-    with open(batchpynamer.COMMAND_CONF_FILE, "w") as conf_file:
-        batchpynamer.COMMAND_CONF.write(conf_file)
+    with open(bpn.COMMAND_CONF_FILE, "w") as conf_file:
+        bpn.COMMAND_CONF.write(conf_file)
 
     # Update command menu list and show info msg
-    batchpynamer.menu_bar.updateCommandListMenu()
+    bpn.menu_bar.updateCommandListMenu()
     inf_msg = 'Saved Field States as Command "{}"'.format(command_name)
-    batchpynamer.info_bar.lastActionRefresh(inf_msg)
+    bpn.info_bar.lastActionRefresh(inf_msg)
 
 
 def delete_command(*args, **kwargs):
     """Deletes selected command from the command configuration file"""
     # Get selected command
-    command_name = batchpynamer.menu_bar.selectedCommandGet()
+    command_name = bpn.menu_bar.selectedCommandGet()
     # Pop it
-    batchpynamer.COMMAND_CONF.pop(command_name)
+    bpn.COMMAND_CONF.pop(command_name)
 
     # Save changes
-    with open(batchpynamer.COMMAND_CONF_FILE, "w") as conf_file:
-        batchpynamer.COMMAND_CONF.write(conf_file)
+    with open(bpn.COMMAND_CONF_FILE, "w") as conf_file:
+        bpn.COMMAND_CONF.write(conf_file)
 
     # Update the command list in the menu and show info msg
-    batchpynamer.menu_bar.updateCommandListMenu()
+    bpn.menu_bar.updateCommandListMenu()
     inf_msg = 'Deleted "{}" Command'.format(command_name)
-    batchpynamer.info_bar.lastActionRefresh(inf_msg)
+    bpn.info_bar.lastActionRefresh(inf_msg)
 
 
 def load_command_call(*args, **kwargs):
     """Loads the selected command to the entries fields"""
-    command_name = batchpynamer.menu_bar.selectedCommandGet()
+    command_name = bpn.menu_bar.selectedCommandGet()
 
     # If the selected command isn't the default loads the dictionary from the
     # configuration file
     if command_name != "DEFAULT":
-        var_val_dict = dict(batchpynamer.COMMAND_CONF.items(command_name))
+        var_val_dict = dict(bpn.COMMAND_CONF.items(command_name))
 
         # Call to set the dictionary
         set_command_call(var_val_dict)
 
         # Show info msg
         inf_msg = 'Loaded "{}" Fields Configuration'.format(command_name)
-        batchpynamer.info_bar.lastActionRefresh(inf_msg)
+        bpn.info_bar.lastActionRefresh(inf_msg)
 
     # Else show an error info msg
     else:
-        batchpynamer.info_bar.lastActionRefresh("No selected Command")
+        bpn.info_bar.lastActionRefresh("No selected Command")
 
 
 def set_command_call(fields_dict):
     """Call each widget to set the entries values from the given dict"""
-    batchpynamer.rename_from_file.setCommand(fields_dict)
-    batchpynamer.rename_from_reg_exp.setCommand(fields_dict)
-    batchpynamer.name_basic.setCommand(fields_dict)
-    batchpynamer.replace.setCommand(fields_dict)
-    batchpynamer.case.setCommand(fields_dict)
-    batchpynamer.remove.setCommand(fields_dict)
-    batchpynamer.move_parts.setCommand(fields_dict)
-    batchpynamer.add_to_str.setCommand(fields_dict)
-    batchpynamer.add_folder_name.setCommand(fields_dict)
-    batchpynamer.numbering.setCommand(fields_dict)
-    batchpynamer.ext_replace.setCommand(fields_dict)
+    bpn.rename_from_file.setCommand(fields_dict)
+    bpn.rename_from_reg_exp.setCommand(fields_dict)
+    bpn.name_basic.setCommand(fields_dict)
+    bpn.replace.setCommand(fields_dict)
+    bpn.case.setCommand(fields_dict)
+    bpn.remove.setCommand(fields_dict)
+    bpn.move_parts.setCommand(fields_dict)
+    bpn.add_to_str.setCommand(fields_dict)
+    bpn.add_folder_name.setCommand(fields_dict)
+    bpn.numbering.setCommand(fields_dict)
+    bpn.ext_replace.setCommand(fields_dict)
