@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
@@ -18,7 +17,10 @@ class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
     """
 
     def __init__(self):
-        pass
+        self.fields = self.Fields(
+            rename_from_file_file=BpnStrVar(""),
+            rename_from_file_wrap=BpnBoolVar(False),
+        )
 
     def tk_init(self, master):
         super().__init__(
@@ -30,10 +32,10 @@ class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
         super().tk_init()
 
         # Variable defs
-        self.fields = self.Fields(
-            rename_from_file_file=BpnStrVar(""),
-            rename_from_file_wrap=BpnBoolVar(False),
-        )
+        # self.fields = self.Fields(
+        #     rename_from_file_file=BpnStrVar(""),
+        #     rename_from_file_wrap=BpnBoolVar(False),
+        # )
 
         # Filename, entry
         ttk.Label(self, text="Filename").grid(column=0, row=0, sticky="w")
@@ -52,7 +54,7 @@ class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
         )
         self.wrap_check.grid(column=0, row=1)
 
-        self.bindEntries()
+        self.bindings()
 
 
 def rename_from_file_rename(name, idx, fields_dict):

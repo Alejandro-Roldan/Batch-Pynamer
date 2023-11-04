@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -92,7 +91,7 @@ class AddToStr(BaseNamingWidget, ttk.LabelFrame):  # (7)
         )
         self.word_space_check.grid(column=0, row=4)
 
-        self.bindEntries()
+        self.bindings()
 
 
 def add_rename(name, fields_dict):

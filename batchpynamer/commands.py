@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
-from batchpynamer import basewidgets as bw, menubar
+from batchpynamer import basewidgets as bw
+from batchpynamer import menubar
 from batchpynamer.notebook.rename import rename
 
 
@@ -64,7 +64,7 @@ class SaveCommandNameWindow(bw.PopUpWindow, bw.BaseFieldsWidget):
         for child in self.winfo_children():
             child.grid_configure(padx=2, pady=2)
 
-        self.bindEntries()
+        self.bindings()
 
     def saveExit(self, *args, **kwargs):
         """

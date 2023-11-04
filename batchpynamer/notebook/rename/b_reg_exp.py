@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import BaseNamingWidget, BpnStrVar
 
 
@@ -65,7 +64,7 @@ class RenameFromRegExp(BaseNamingWidget, ttk.LabelFrame):  # (1)
         )
         extended_button.grid(column=1, row=2, sticky="w")
 
-        self.bindEntries()
+        self.bindings()
 
     def extendedRegExp(self, *args, **kwargs):
         """

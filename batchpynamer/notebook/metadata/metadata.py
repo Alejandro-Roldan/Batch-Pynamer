@@ -1,5 +1,8 @@
 # Image manipulation imports
+import os
+import tkinter as tk
 from io import BytesIO
+from tkinter import ttk
 
 import PIL
 import PIL.ImageTk
@@ -12,8 +15,13 @@ from mutagen.flac import Picture as FlacPicture
 from mutagen.id3 import APIC, ID3
 from mutagen.mp3 import MP3
 
+import batchpynamer as bpn
+from batchpynamer import basewidgets as bw
+from batchpynamer import info_bar
+from batchpynamer.notebook.metadata import utils
 
-class Apply_Changes:
+
+class MetadataApplyChanges(bw.BaseWidget, ttk.Frame):
     """
     Apply chnages widget. Inside the metadata notebook.
     It has:
@@ -22,12 +30,14 @@ class Apply_Changes:
         - Button to apply both
     """
 
-    def __init__(self, master, *args, **kwargs):
-        self.frame = ttk.Frame(master)
-        self.frame.grid(column=2, row=0, sticky="se")
+    def __init__(self):
+        pass
+
+    def tk_init(self, master):
+        super().__init__(master, column=2, row=0, sticky="se")
 
         self.apply_meta_button = ttk.Button(
-            self.frame,
+            self,
             width=10,
             text="Apply Meta",
             command=self.metaChangesCall,
@@ -35,12 +45,12 @@ class Apply_Changes:
         self.apply_meta_button.grid(column=0, row=0, sticky="e")
 
         self.apply_img_button = ttk.Button(
-            self.frame, width=10, text="Apply Img", command=self.imgChangesCall
+            self, width=10, text="Apply Img", command=self.imgChangesCall
         )
         self.apply_img_button.grid(column=0, row=1, sticky="e")
 
         self.apply_all_button = ttk.Button(
-            self.frame, width=10, text="Apply All", command=self.allChangesCall
+            self, width=10, text="Apply All", command=self.allChangesCall
         )
         self.apply_all_button.grid(column=0, row=2, sticky="e")
 
@@ -49,23 +59,23 @@ class Apply_Changes:
         Calls the procedure to only change metadata tags.
         Loads the new values from the list of entries and sets them up.
         """
-        selection = fn_treeview.selectedItems()
-        meta_dict = nb.metadata_list_entries.metaDictGet()
+        selection = bpn.fn_treeview.selectedItems()
+        meta_dict = bpn.metadata_list_entries.metaDictGet()
 
         # Show that its in the process
-        Show_Working()
+        info_bar.show_working()
 
         for item in selection:
-            meta_audio = Meta_Audio(item)
+            meta_audio = utils.meta_audio_get(item)
             for key in meta_dict:
-                value = nb.metadata_list_entries.metaDictTextGet(key)
+                value = bpn.metadata_list_entries.metaDictTextGet(key)
 
                 self.applyMetaChanges(meta_audio, key, value)
 
         # Reload after the changes
-        Populate_Fields()
+        bpn.changes_notebook.populate_fields()
         # Show that its finish
-        Finish_Show_Working(inf_msg="Metadata Changed")
+        info_bar.finish_show_working(inf_msg="Metadata Changed")
 
     def applyMetaChanges(self, meta_audio, key, value, *args, **kwargs):
         """
@@ -88,7 +98,7 @@ class Apply_Changes:
                             key
                         )
                     )
-                    Error_Frame(msg)
+                    bw.ErrorFrame(msg)
 
             # Delete empty values only when they exist in the metadata
             # of the file
@@ -103,11 +113,11 @@ class Apply_Changes:
         Loads the new image and then iterates over each item setting
         the picture.
         """
-        selection = fn_treeview.selectedItems()
-        img_path = nb.metadata_img.imagePathGet()
+        selection = bpn.fn_treeview.selectedItems()
+        img_path = bpn.metadata_img.imagePathGet()
 
         # Show that its in the process
-        Show_Working()
+        info_bar.show_working()
 
         if img_path.endswith((".jpg", ".jpeg", ".png")) and os.path.exists(
             img_path
@@ -124,9 +134,9 @@ class Apply_Changes:
                     self.applyImgChangesMP3(meta_audio, apic)
 
         # Reload after the changes
-        Populate_Fields()
+        bpn.changes_notebook.populate_fields()
         # Show that its finish
-        Finish_Show_Working(inf_msg="Image Changed")
+        info_bar.finish_show_working(inf_msg="Image Changed")
 
     def loadImage(self, img_path, *args, **kwargs):
         """
@@ -189,12 +199,12 @@ class Apply_Changes:
         methods one after the other so as not to loop through all the
         items AND load their metadata twice
         """
-        selection = fn_treeview.selectedItems()
-        img_path = nb.metadata_img.imagePathGet()
-        meta_dict = nb.metadata_list_entries.metaDictGet()
+        selection = bpn.fn_treeview.selectedItems()
+        img_path = bpn.metadata_img.imagePathGet()
+        meta_dict = bpn.metadata_list_entries.metaDictGet()
 
         # Show that its in the process
-        Show_Working()
+        info_bar.show_working()
 
         if img_path.endswith(("jpg", "jpeg", "png")) and os.path.exists(
             img_path
@@ -213,17 +223,17 @@ class Apply_Changes:
                 self.applyImgChangesMP3(meta_audio, apic)
 
             # Load the metadata for flacs and easyid3 for mp3s
-            meta_audio = Meta_Audio(item)
+            meta_audio = utils.meta_audio_get(item)
             # Change the metadata tags
             for key in meta_dict:
-                value = nb.metadata_list_entries.metaDictTextGet(key)
+                value = bpn.metadata_list_entries.metaDictTextGet(key)
 
                 self.applyMetaChanges(meta_audio, key, value)
 
         # Reload after the changes
-        Populate_Fields()
+        bpn.changes_notebook.populate_fields()
         # Show that its finish
-        Finish_Show_Working(inf_msg="Metadata and Image Changed")
+        info_bar.finish_show_working(inf_msg="Metadata and Image Changed")
 
 
 def initialize_metadata_Nb_Page(self, master):
@@ -235,35 +245,37 @@ def initialize_metadata_Nb_Page(self, master):
     self.nb_metadata_frame.rowconfigure(0, weight=1)
 
     # Entries with the Metadata
-    self.metadata_list_entries = Metadata_ListEntries(self.nb_metadata_frame)
+    self.metadata_list_entries = bpn.metadata_list_entries(
+        self.nb_metadata_frame
+    )
     # Attached Image
-    self.metadata_img = Metadata_Img(self.nb_metadata_frame)
+    self.metadata_img = bpn.metadata_img(self.nb_metadata_frame)
     # Apply buttons
-    self.apply_changes = Apply_Changes(self.nb_metadata_frame)
+    self.apply_changes = bpn.metadata_apply_changes(self.nb_metadata_frame)
 
 
-def metadata_rename_format(str_, path, *args, **kwargs):
-    """Format the string with the values from the metadata dictionary"""
-    # Only load the metadata if the string contains '{' and '}'
-    if ("{" and "}") in str_:
-        meta_audio = Meta_Audio(path)
+# def metadata_rename_format(str_, path, *args, **kwargs):
+#     """Format the string with the values from the metadata dictionary"""
+#     # Only load the metadata if the string contains '{' and '}'
+#     if ("{" and "}") in str_:
+#         meta_audio = utils.meta_audio_get(path)
 
-        # If the past function returned something (it was a valid file)
-        if meta_audio:
-            # Get a dict that's the same as meta_audio but only the first
-            # item of each key (because the metadata is a dict of lists)
-            metadata = {item: meta_audio[item][0] for item in meta_audio}
-            # Get a list of the keys in the dict adding the string between
-            # curly braces
-            field_list = ["{" + key + "}" for key in metadata.keys()]
+#         # If the past function returned something (it was a valid file)
+#         if meta_audio:
+#             # Get a dict that's the same as meta_audio but only the first
+#             # item of each key (because the metadata is a dict of lists)
+#             metadata = {item: meta_audio[item][0] for item in meta_audio}
+#             # Get a list of the keys in the dict adding the string between
+#             # curly braces
+#             field_list = ["{" + key + "}" for key in metadata.keys()]
 
-            # Individually check and replace for each possible key in the dict
-            # (need to do this because if you want to use curly braces in the
-            # string it would raise an error and would skip any actual editing)
-            for field in field_list:
-                # **variable unpacks a dictionary into keyword arguments
-                # eg: ['a':1, 'b':2] unpacks into function(a=1, b=2)
-                # (also *variable unpack a list/tuple into position arguments)
-                str_ = str_.replace(field, field.format(**metadata))
+#             # Individually check and replace for each possible key in the dict
+#             # (need to do this because if you want to use curly braces in the
+#             # string it would raise an error and would skip any actual editing)
+#             for field in field_list:
+#                 # **variable unpacks a dictionary into keyword arguments
+#                 # eg: ['a':1, 'b':2] unpacks into function(a=1, b=2)
+#                 # (also *variable unpack a list/tuple into position arguments)
+#                 str_ = str_.replace(field, field.format(**metadata))
 
-    return str_
+#     return str_

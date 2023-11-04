@@ -24,7 +24,6 @@ import pathlib
 import sys
 
 import batchpynamer as bpn
-
 from batchpynamer import mainwindow
 
 

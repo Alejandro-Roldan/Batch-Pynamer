@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import BaseNamingWidget, BpnComboVar
 
 
@@ -45,7 +44,7 @@ class Case(BaseNamingWidget, ttk.LabelFrame):  # (4)
         )
         self.case_combo.grid(column=1, row=0, sticky="ew")
 
-        self.bindEntries()
+        self.bindings()
 
 
 def case_change(name, fields_dict):

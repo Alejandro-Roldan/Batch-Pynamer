@@ -1,4 +1,12 @@
-class Metadata_ListEntries:
+import tkinter as tk
+from tkinter import ttk
+
+import batchpynamer as bpn
+from batchpynamer.basewidgets import BaseWidget, VerticalScrolledFrame
+from batchpynamer.notebook.metadata import utils
+
+
+class MetadataListEntries(BaseWidget, ttk.Frame):
     """
     Draws the Metadata List entries. Inside metadata notebook.
     It has:
@@ -7,33 +15,34 @@ class Metadata_ListEntries:
         - An Add button to add the new tag
     """
 
-    def __init__(self, master, *args, **kwargs):
-        self.frame = ttk.Frame(master)
-        self.frame.grid(column=0, row=0, sticky="nsw")
+    def __init__(self):
+        pass
 
-        self.frame.rowconfigure(0, weight=1)
-        self.frame.columnconfigure(1, weight=1)
+    def tk_init(self, master):
+        super().__init__(master, column=0, row=0, sticky="nsw")
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
-        self.field_frame = Vertical_Scrolled_Frame(self.frame)
+        self.field_frame = VerticalScrolledFrame(self)
         self.field_frame.grid(
             column=0, row=0, columnspan=3, pady=3, sticky="nsw"
         )
 
         self.new_tag_name = tk.StringVar()
 
-        ttk.Label(self.frame, text="New Tag Name").grid(
+        ttk.Label(self, text="New Tag Name").grid(
             column=0,
             row=1,
         )
         self.new_tag_name_entry = ttk.Entry(
-            self.frame,
+            self,
             textvariable=self.new_tag_name,
         )
         self.new_tag_name_entry.grid(column=1, row=1, sticky="w" + "e")
 
         # Add new tag, button
         self.add_field_button = ttk.Button(
-            self.frame, width=5, text="Add", command=self.createMetadataTag
+            self, width=5, text="Add", command=self.createMetadataTag
         )
         self.add_field_button.grid(column=2, row=1, sticky="se")
 
@@ -86,7 +95,7 @@ class Metadata_ListEntries:
         }
         try:
             for file in selection:
-                meta_audio = Meta_Audio(file)
+                meta_audio = utils.meta_audio_get(file)
 
                 for meta_item in meta_audio:
                     meta_value = meta_audio.get(meta_item)
@@ -98,7 +107,9 @@ class Metadata_ListEntries:
 
             for key in self.meta_dict:
                 # Remove duplicates
-                self.meta_dict[key] = No_Duplicate_List(self.meta_dict[key])
+                self.meta_dict[key] = utils.no_duplicate_list(
+                    self.meta_dict[key]
+                )
                 # List to string
                 str_value = self.metaValuesListToStr(self.meta_dict[key])
 
@@ -130,7 +141,7 @@ class Metadata_ListEntries:
         Resets the frame and repopulates with all the entries and
         their corresponding labels
         """
-        selection = fn_treeview.selectedItems()
+        selection = bpn.fn_treeview.selectedItems()
         self.entryFrameReset()
         self.getMetadata(selection)
         self.metadataEntriesCreate()
@@ -170,4 +181,4 @@ class Metadata_ListEntries:
 
         else:
             msg = "No name for the new tag. Please type a name"
-            inf_bar.lastActionRefresh(msg)
+            bpn.info_bar.lastActionRefresh(msg)

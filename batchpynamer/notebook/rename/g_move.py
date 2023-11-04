@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnComboVar,
@@ -95,11 +94,11 @@ class MoveParts(BaseNamingWidget, ttk.LabelFrame):  # (6)
         )
         self.sep_entry.grid(column=9, row=0)
 
-        self.bindEntries()
+        self.bindings()
 
-    def bindEntries(self):
+    def bindings(self):
         """Defines the binded actions"""
-        super().bindEntries()
+        super().bindings()
 
         self.fields.move_parts_ori_n.trace_add("write", self.fromAddTo)
         self.fields.move_parts_end_n.trace_add("write", self.fromAddTo)

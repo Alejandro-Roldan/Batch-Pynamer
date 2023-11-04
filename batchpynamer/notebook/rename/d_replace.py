@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
@@ -61,7 +60,7 @@ class Replace(BaseNamingWidget, ttk.LabelFrame):  # (3)
         )
         self.match_case_check.grid(column=0, row=2)
 
-        self.bindEntries()
+        self.bindings()
 
 
 def replace_action(name, fields_dict):

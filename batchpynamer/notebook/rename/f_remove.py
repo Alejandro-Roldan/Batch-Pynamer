@@ -5,7 +5,6 @@ import unicodedata
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -195,11 +194,11 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
         )
         self.lead_dots_combo.grid(column=1, row=6, sticky="ew")
 
-        self.bindEntries()
+        self.bindings()
 
-    def bindEntries(self):
+    def bindings(self):
         """What to execute when the bindings happen."""
-        super().bindEntries()
+        super().bindings()
         # When updating from_n value makes sure its not bigger than remove_to_n
         self.fields.remove_from_n.trace_add("write", self.fromAddTo)
         self.fields.remove_to_n.trace_add("write", self.fromAddTo)

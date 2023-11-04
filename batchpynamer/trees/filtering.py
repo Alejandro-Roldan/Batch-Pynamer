@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -145,9 +144,9 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
         )
         self.name_len_max_spin.grid(column=9, row=1, sticky="w")
 
-        self.bindEntries()
+        self.bindings()
 
-    def bindEntries(self):
+    def bindings(self):
         """Redefined"""
         # Refresh files view when updating fields
         for field in self.fields.__dict__:

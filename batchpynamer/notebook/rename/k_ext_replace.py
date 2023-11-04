@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import BaseNamingWidget, BpnComboVar, BpnStrVar
 
 
@@ -69,7 +68,7 @@ class ExtReplace(BaseNamingWidget, ttk.LabelFrame):  # (10)
         )
         self.fixed_ext_entry.grid(column=1, row=0, sticky="ew")
 
-        self.bindEntries()
+        self.bindings()
 
 
 def ext_rename(ext, fields_dict):

@@ -3,10 +3,9 @@ import webbrowser  # for the About menu
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer import basewidgets, commands
+from batchpynamer.notebook.metadata import metadata, utils
 from batchpynamer.notebook.rename import rename
-from batchpynamer.notebook.metadata import metadata
 
 
 class TopMenu(tk.Menu):
@@ -34,7 +33,7 @@ class TopMenu(tk.Menu):
 
         # self.changes_notebook.menu_bar = self
 
-        # self.metadataDisable()
+        self.metadataDisable()
 
     def fileMenu(self, *args, **kwargs):
         """File Menu Dropdown"""
@@ -77,38 +76,39 @@ class TopMenu(tk.Menu):
 
         # Create the metadata menu options only if the metadata modification
         # is active (the dependencies have been exported)
-        # if bpn.METADATA_IMPORT:
-        #     # Apply Metadata Changes
-        #     self.file_menu.add_command(
-        #         label="Apply Metadata Changes",
-        #         command=self.changes_notebook.apply_changes.metaChangesCall,
-        #     )
+        if bpn.METADATA_IMPORT:
+            # Apply Metadata Changes
+            self.file_menu.add_command(
+                label="Apply Metadata Changes",
+                command=bpn.metadata_apply_changes.metaChangesCall,
+            )
 
-        #     # Apply Image Metadata
-        #     self.file_menu.add_command(
-        #         label="Apply Image Metadata Change",
-        #         command=self.changes_notebook.apply_changes.imgChangesCall,
-        #     )
+            # Apply Image Metadata
+            self.file_menu.add_command(
+                label="Apply Image Metadata Change",
+                command=bpn.metadata_apply_changes.imgChangesCall,
+            )
 
-        #     # Apply Both Image & Metadata Changes
-        #     self.file_menu.add_command(
-        #         label="Apply Both Image & Metadata Changes",
-        #         command=self.changes_notebook.apply_changes.allChangesCall,
-        #     )
+            # Apply Both Image & Metadata Changes
+            self.file_menu.add_command(
+                label="Apply Both Image & Metadata Changes",
+                command=bpn.metadata_apply_changes.allChangesCall,
+            )
 
-        #     # Set the title and the tracknumber metadata from the filename
-        #     self.file_menu.add_command(
-        #         label='Set "title" & "tracknumber" from filename',
-        #         command=Title_Track_From_File,
-        #     )
+            # Set the title and the tracknumber metadata from the filename
+            self.file_menu.add_command(
+                label='Set "title" & "tracknumber" from filename',
+                command=utils.title_track_from_file,
+            )
 
-        #     # Format tracknumber metadata field
-        #     self.file_menu.add_command(
-        #         label='Format "tracknumber"', command=Format_Track_Num_Meta
-        #     )
+            # Format tracknumber metadata field
+            self.file_menu.add_command(
+                label='Format "tracknumber"',
+                command=utils.format_track_num_meta,
+            )
 
-        #     # Separator
-        #     self.file_menu.add_separator()
+            # Separator
+            self.file_menu.add_separator()
 
         # Refresh Files
         self.file_menu.add_command(

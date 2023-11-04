@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnComboVar,
@@ -139,7 +138,7 @@ class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
         )
         self.type_base_combo.grid(column=1, row=3, columnspan=3, sticky="ew")
 
-        self.bindEntries()
+        self.bindings()
 
 
 def numbering_rename(name, idx, fields_dict):

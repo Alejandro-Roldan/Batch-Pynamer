@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import BaseNamingWidget, BpnComboVar, BpnStrVar
 
 
@@ -58,7 +57,7 @@ class NameBasic(BaseNamingWidget, ttk.LabelFrame):  # (2)
         )
         self.fixed_name_entry.grid(column=1, row=1, sticky="ew")
 
-        self.bindEntries()
+        self.bindings()
 
 
 def name_basic_rename(name, fields_dict):

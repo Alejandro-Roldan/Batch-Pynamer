@@ -1,4 +1,26 @@
-class Metadata_Img:
+import tkinter as tk
+
+# Image manipulation imports
+from io import BytesIO
+from tkinter import ttk
+
+import PIL
+import PIL.ImageTk
+from mutagen.easyid3 import EasyID3, EasyID3KeyError
+from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
+
+# Change import name for code clarity
+from mutagen.flac import FLAC
+from mutagen.flac import Picture as FlacPicture
+from mutagen.id3 import APIC, ID3
+from mutagen.mp3 import MP3
+
+import batchpynamer as bpn
+from batchpynamer.basewidgets import BaseWidget
+from batchpynamer.notebook.metadata import utils
+
+
+class MetadataImg(BaseWidget, ttk.Frame):
     """
     Draws the Metadata Image widget. Inside metadata notebook.
     It has:
@@ -7,9 +29,11 @@ class Metadata_Img:
         - A canvas to display the metadata image
     """
 
-    def __init__(self, master, *args, **kwargs):
-        self.frame = ttk.Frame(master)
-        self.frame.grid(column=1, row=0, sticky="ns")
+    def __init__(self):
+        pass
+
+    def tk_init(self, master, *args, **kwargs):
+        super().__init__(master, column=1, row=0, sticky="ns")
 
         # Empty photo image to force the label to use pixel size
         self.photo_image = tk.PhotoImage()
@@ -18,19 +42,17 @@ class Metadata_Img:
         self.image_path = tk.StringVar()
 
         # Path to new image, entry
-        self.image_path_entry = ttk.Entry(
-            self.frame, textvariable=self.image_path
-        )
+        self.image_path_entry = ttk.Entry(self, textvariable=self.image_path)
         self.image_path_entry.grid(column=0, row=0, sticky="ew")
 
         self.reset_path_button = ttk.Button(
-            self.frame, width=2, text="X", command=self.resetPath
+            self, width=2, text="X", command=self.resetPath
         )
         self.reset_path_button.grid(column=1, row=0, sticky="w")
 
         # Image frame, Label
         self.img = tk.Label(
-            self.frame,
+            self,
             relief="sunken",
             background="gray10",
             image=self.photo_image,
@@ -40,7 +62,7 @@ class Metadata_Img:
         self.img.grid(column=0, row=1)
 
         # Image size, label
-        self.size_label = ttk.Label(self.frame, text="No Image")
+        self.size_label = ttk.Label(self, text="No Image")
         self.size_label.grid(column=0, row=2)
 
     def imageGet(self, *args, **kwargs):
@@ -60,10 +82,10 @@ class Metadata_Img:
         """
         # Error handling if theres no image
         try:
-            selection = fn_treeview.selectedItems()
+            selection = bpn.fn_treeview.selectedItems()
 
             # Load the first image, and well use it to compare against
-            self.picture = Meta_Picture(selection[0])
+            self.picture = utils.meta_picture(selection[0])
 
             # If the selected file isnt valid
             if self.picture == "not valid":
@@ -75,7 +97,7 @@ class Metadata_Img:
             # When it finds a diferent image breaks out of the loop and
             # executes the if
             elif not all(
-                Meta_Picture(file) == self.picture for file in selection
+                utils.meta_picture(file) == self.picture for file in selection
             ):
                 self.size_label.config(text="Different images")
                 self.picture = None

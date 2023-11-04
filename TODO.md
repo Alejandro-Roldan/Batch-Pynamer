@@ -38,3 +38,5 @@ AttributeError: 'NoneType' object has no attribute 'groups'
 * add logging
 
 * import basewidgets as bw (or just import the class needed which just should be 1 in each file)
+
+* filters hidden to set attribute in directory_navigator and the updater handles refresh

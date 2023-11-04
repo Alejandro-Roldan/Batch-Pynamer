@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnComboVar,
@@ -86,7 +85,7 @@ class AddFolderName(BaseNamingWidget, ttk.LabelFrame):  # (8)
         )
         self.levels_spin.grid(column=7, row=0)
 
-        self.bindEntries()
+        self.bindings()
 
 
 def add_folder_rename(name, path, fields_dict):

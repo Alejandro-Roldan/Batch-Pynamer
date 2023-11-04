@@ -2,11 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
-from batchpynamer import basewidgets, info_bar, menubar, commands
-from batchpynamer.trees import trees
+from batchpynamer import basewidgets, commands, info_bar, menubar
 from batchpynamer.notebook import notebook
 from batchpynamer.notebook.rename import rename
+from batchpynamer.trees import trees
 
 
 class WindowRoot(tk.Tk):
@@ -29,14 +28,7 @@ class WindowRoot(tk.Tk):
         bpn.info_bar.tk_init(mainframe)
 
         # Tree view & File view
-        # Frame Creation for the folder treeview, file view and the directory entry
-        f_t_view_frame = ttk.Frame(mainframe)
-        f_t_view_frame.grid(column=0, row=0, sticky="we")
-        f_t_view_frame.columnconfigure(1, weight=1)
-
-        bpn.fn_treeview.tk_init(f_t_view_frame)
-        bpn.folder_treeview.tk_init(f_t_view_frame, path=bpn.OG_PATH)
-        bpn.dir_entry_frame.tk_init(f_t_view_frame)
+        trees.TreesFrame(mainframe, column=0, row=0, sticky="we")
 
         # Notebook
         bpn.changes_notebook.tk_init(mainframe)

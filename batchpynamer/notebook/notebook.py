@@ -2,13 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
-from batchpynamer import basewidgets
-from batchpynamer.notebook.rename import rename
+from batchpynamer.basewidgets import BaseWidget
 from batchpynamer.notebook.metadata import metadata
+from batchpynamer.notebook.rename import rename
 
 
-class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
+class Changes_Notebook(BaseWidget, ttk.Notebook):
     """
     Draws the Notebook.
     It has the following pages:
@@ -50,7 +49,7 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
             bpn.info_bar.lastActionRefresh(metadata_import_error_msg)
 
         # Bindings
-        self.bindEntries()
+        self.bindings()
 
     def renameNbPage(self, master, *args, **kwargs):
         """Calls to draw the rename widgets"""
@@ -104,21 +103,19 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
         self.nb_metadata_frame.rowconfigure(0, weight=1)
 
         # Entries with the Metadata
-        # self.metadata_list_entries = Metadata_ListEntries(
-        #     self.nb_metadata_frame
-        # )
-        # # Attached Image
-        # self.metadata_img = Metadata_Img(self.nb_metadata_frame)
-        # # Apply buttons
-        # self.apply_changes = Apply_Changes(self.nb_metadata_frame)
+        bpn.metadata_list_entries.tk_init(self.nb_metadata_frame)
+        # Attached Image
+        bpn.metadata_img.tk_init(self.nb_metadata_frame)
+        # Apply buttons
+        bpn.metadata_apply_changes.tk_init(self.nb_metadata_frame)
 
     def nbTabGet(self, *args, **kwargs):
         return self.tab(self.select(), "text")
 
-    def bindEntries(self, *args, **kwargs):
+    def bindings(self, *args, **kwargs):
         self.bind("<<NotebookTabChanged>>", self.populate_fields)
 
-    def populate_fields(self, tab):
+    def populate_fields(self, *args, **kwargs):
         """
         What to show and what to have active when each notebook tab is active.
         """
@@ -132,7 +129,7 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
             # Enables the menu options for renaming
             bpn.menu_bar.renameEnable()
             # Disables the menu options for metadata
-            # bpn.menu_bar.metadataDisable()
+            bpn.menu_bar.metadataDisable()
 
         elif tab == "Metadata":
             # Stops showing new name
@@ -141,6 +138,6 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
             bpn.metadata_list_entries.metadataSelect()
             bpn.metadata_img.imageShow()
             # Enables the menu options for metadata
-            # bpn.menu_bar.metadataEnable()
+            bpn.menu_bar.metadataEnable()
             # Disables the menu options for renaming
             bpn.menu_bar.renameDisable()

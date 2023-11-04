@@ -3,9 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
-
 from batchpynamer import basewidgets, commands, info_bar
-from batchpynamer.trees import trees
 
 # Cant import files with numbers directly so use
 # Equivalent to "import ... as ..."
@@ -23,6 +21,8 @@ from batchpynamer.notebook.rename import (
     j_numbering,
     k_ext_replace,
 )
+from batchpynamer.notebook.rename.utils import new_naming
+from batchpynamer.trees import trees
 
 order = [
     "from_file",
@@ -197,7 +197,7 @@ def undo_rename(*args, **kwargs):
         print()
 
         # Update the folders treeviews
-        trees.Refresh_Treeviews()
+        trees.refresh_treeviews()
 
         info_bar.finish_show_working(inf_msg="Finished Undo Operation")
 
@@ -251,7 +251,7 @@ def final_rename(*args, **kwargs):
                 print('"{}" New name is the same as old name'.format(path))
         print()
 
-        trees.Refresh_Treeviews()
+        trees.refresh_treeviews()
 
         # Show that its finish
         info_bar.finish_show_working(inf_msg="Finished Rename")
@@ -332,51 +332,3 @@ def all_fields_get():
 
 def new_naming_visual(name, idx, path):
     return new_naming(name, idx, path, **all_fields_get())
-
-
-def new_naming(name, idx, path, **fields_dict):
-    """
-    Creates the new name going through all fields and making the changes
-    to the old_name string
-    """
-    # Separate name and extension
-    name, ext = de_ext(name)
-
-    name = a_from_file.rename_from_file_rename(name, idx, fields_dict)  # (0)
-    name = b_reg_exp.reg_exp_rename(name, fields_dict)  # (1)
-    name = c_name_basic.name_basic_rename(name, fields_dict)  # (2)
-    name = d_replace.replace_action(name, fields_dict)  # (3)
-    name = e_case.case_change(name, fields_dict)  # (4)
-    name = f_remove.remove_rename(name, fields_dict)  # (5)
-    name = g_move.move_copy_action(name, fields_dict)  # (6)
-    name = h_add_to_str.add_rename(name, fields_dict)  # (7)
-    name = i_add_folder_name.add_folder_rename(name, path, fields_dict)  # (8)
-    name = j_numbering.numbering_rename(name, idx, fields_dict)  # (9)
-
-    ext = k_ext_replace.ext_rename(ext, fields_dict)  # (10)
-
-    # Remove leading and trailing whitespaces and re-add the extension
-    name = name.strip() + ext
-
-    # Format any metadata fields that have been added to the name
-    # (only if the metadata modules were imported)
-    # if bpn.METADATA_IMPORT:
-    #     name = Meta_Format(name, path)
-
-    return name
-
-
-def de_ext(name):
-    """
-    Removes the extension from the selected path.
-    Returns the name of the field and the extension separate.
-    If theres no extension returns an empty extension.
-    """
-    file_name, dot, ext = name.rpartition(".")
-    if file_name != "":
-        ext = dot + ext
-        name = file_name
-    else:
-        ext = ""
-
-    return name, ext

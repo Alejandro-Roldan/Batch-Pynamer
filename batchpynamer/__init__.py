@@ -64,8 +64,6 @@ def init_tk_root():
     root = WindowRoot()
 
 
-# TODO: this can probably be moved outside and get rid of the hook by having
-# the rename classes init Fields vars inside tk_init
 def tk_init_post_hook():
     """Hook to call AFTER the tk root has been created
 
@@ -74,6 +72,9 @@ def tk_init_post_hook():
     """
 
     from batchpynamer.info_bar import Info_Bar
+    from batchpynamer.notebook.metadata.a_text import MetadataListEntries
+    from batchpynamer.notebook.metadata.b_image import MetadataImg
+    from batchpynamer.notebook.metadata.metadata import MetadataApplyChanges
     from batchpynamer.notebook.notebook import Changes_Notebook
     from batchpynamer.notebook.rename.a_from_file import RenameFromFile
     from batchpynamer.notebook.rename.b_reg_exp import RenameFromRegExp
@@ -87,12 +88,10 @@ def tk_init_post_hook():
     from batchpynamer.notebook.rename.j_numbering import Numbering
     from batchpynamer.notebook.rename.k_ext_replace import ExtReplace
     from batchpynamer.notebook.rename.rename import LastRename
+    from batchpynamer.trees.a_directory_navigator import DirectoryNavigator
+    from batchpynamer.trees.b_file_navigator import FileNavigator
+    from batchpynamer.trees.c_directory_entry import DirectoryEntryFrame
     from batchpynamer.trees.filtering import FiltersWidget
-    from batchpynamer.trees.trees import (
-        Directory_Entry_Frame,
-        Directory_Navigator,
-        File_Navigator,
-    )
 
     # Last Rename Object
     global last_rename
@@ -102,11 +101,11 @@ def tk_init_post_hook():
     global info_bar
     info_bar = Info_Bar()
     global fn_treeview
-    fn_treeview = File_Navigator()
+    fn_treeview = FileNavigator()
     global folder_treeview
-    folder_treeview = Directory_Navigator()
+    folder_treeview = DirectoryNavigator()
     global dir_entry_frame
-    dir_entry_frame = Directory_Entry_Frame()
+    dir_entry_frame = DirectoryEntryFrame()
     global changes_notebook
     changes_notebook = Changes_Notebook()
     global menu_bar
@@ -141,3 +140,9 @@ def tk_init_post_hook():
     ext_replace = ExtReplace()
 
     # Metadata Widgets
+    global metadata_list_entries
+    metadata_list_entries = MetadataListEntries()
+    global metadata_img
+    metadata_img = MetadataImg()
+    global metadata_apply_changes
+    metadata_apply_changes = MetadataApplyChanges()
