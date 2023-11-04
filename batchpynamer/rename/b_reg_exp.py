@@ -1,12 +1,10 @@
 import re  # regular expressions
-
 import tkinter as tk
-
 from tkinter import ttk
 
 import batchpynamer
-from .. import basewidgets
-from .. import mainwindow
+
+from .. import basewidgets, mainwindow
 
 
 class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
@@ -26,13 +24,16 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
     def __init__(self):
         pass
 
-    def tk_init(self, master, *args, **kwargs):
-        super().__init__(master, text="Regular Expressions (1)", **kwargs)
-        self.grid(column=1, row=0, sticky="nsew")
+    def tk_init(self, master):
+        super().__init__(
+            master,
+            column=1,
+            row=0,
+            text="Regular Expressions (1)",
+        )
+        super().tk_init()
 
         # Variable defs
-        # self.reg_exp_match_reg = tk.StringVar()
-        # self.reg_exp_replace_with = tk.StringVar()
         self.fields = self.Fields(
             reg_exp_match_reg=(tk.StringVar(), ""),
             reg_exp_replace_with=(tk.StringVar(), ""),
@@ -41,39 +42,35 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
         # Match, entry
         ttk.Label(self, text="Match").grid(column=0, row=0, sticky="w")
         self.match_reg_entry = ttk.Entry(
-            self, width=10, textvariable=self.fields.reg_exp_match_reg
+            self,
+            width=10,
+            textvariable=self.fields.reg_exp_match_reg,
         )
         self.match_reg_entry.grid(column=1, row=0, sticky="ew")
 
         # Replace with, entry
         ttk.Label(self, text="Replace").grid(column=0, row=1, sticky="w")
         self.replace_with_entry = ttk.Entry(
-            self, width=10, textvariable=self.fields.reg_exp_replace_with
+            self,
+            width=10,
+            textvariable=self.fields.reg_exp_replace_with,
         )
         self.replace_with_entry.grid(column=1, row=1, sticky="ew")
 
         # Extended, button
         extended_button = ttk.Button(
-            self, text="Extend", command=self.extendedRegExp
+            self,
+            text="Extend",
+            command=self.extendedRegExp,
         )
         extended_button.grid(column=1, row=2, sticky="w")
 
-        # Reset, button
-        self.reset_button = ttk.Button(
-            self, width=2, text="R", command=self.resetWidget
-        )
-        self.reset_button.grid(column=2, row=2, sticky="se", padx=2, pady=2)
-
         self.bindEntries()
 
-    # def matchRegGet(self, *args, **kwargs):
-    #     return self.reg_exp_match_reg.get()
-
-    # def replaceWithGet(self, *args, **kwargs):
-    #     return self.reg_exp_replace_with.get()
-
-    def bindEntries(self, *args, **kwargs):
+    def bindEntries(self):
         """Defines the binded actions"""
+        super().bindEntries()
+
         # Calls to update the new name column
         self.fields.reg_exp_match_reg.trace_add(
             "write", batchpynamer.fn_treeview.showNewName
@@ -99,7 +96,6 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
             self.ex_w_frame, bg="white", fg="black", relief="sunken"
         )
         self.ex_match_reg_text.grid(column=0, row=1, sticky="ew")
-        # self.ex_match_reg_text.insert("end", self.matchRegGet())
         self.ex_match_reg_text.insert(
             "end", self.fields.reg_exp_match_reg.get()
         )
@@ -112,7 +108,6 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
             self.ex_w_frame, bg="white", fg="black", relief="sunken"
         )
         self.ex_replace_with_text.grid(column=0, row=3, sticky="ew")
-        # self.ex_replace_with_text.insert("end", self.replaceWithGet())
         self.ex_replace_with_text.insert(
             "end", self.fields.reg_exp_replace_with.get()
         )
@@ -142,26 +137,8 @@ class RenameFromRegExp(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (1)
         # Kill window
         self.ex_w_frame.destroy()
 
-    # def resetWidget(self, *args, **kwargs):
-    #     """Resets each and all data variables inside the widget"""
-    #     self.reg_exp_match_reg.set("")
-    #     self.reg_exp_replace_with.set("")
 
-    # def setCommand(self, var_dict, *args, **kwargs):
-    #     """
-    #     Sets the variable fields according to the loaded
-    #     command dictionary
-    #     """
-    #     self.reg_exp_match_reg.set(var_dict["reg_exp_match_reg"])
-    #     self.reg_exp_replace_with.set(var_dict["reg_exp_replace_with"])
-
-    # @staticmethod
-    # def appendVarValToDict(dict_={}, *args, **kwargs):
-    #     dict_["reg_exp_match_reg"] = nb.reg_exp.matchRegGet()
-    #     dict_["reg_exp_replace_with"] = nb.reg_exp.replaceWithGet()
-
-
-def reg_exp_rename(name, **fields_dict):
+def reg_exp_rename(name, fields_dict):
     """
     Matches the regular expression specified in the match_reg entry
     and recreates the name with the words and number groups specified

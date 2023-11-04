@@ -3,11 +3,13 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
+from scandirrecursive.scandirrecursive import scandir_recursive_sorted
+
 import batchpynamer
 from batchpynamer import mainwindow
+
 from .. import basewidgets
 from ..rename import rename
-from scandirrecursive.scandirrecursive import scandir_recursive_sorted
 
 
 class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
@@ -106,8 +108,8 @@ class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
             self.tree_nav.delete(self.tree_nav.get_children(path))
 
             # Get if we need to show hidden folders
-            # hidden = nb.filters.hiddenGet()
-            hidden = False
+            hidden = batchpynamer.filters_widget.fields.hidden.get()
+            # hidden = False
             # Get folders and sort them
             scanned_dir = scandir_recursive_sorted(
                 path=path, folders=True, files=False, hidden=hidden, depth=0
@@ -116,11 +118,11 @@ class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
             for entry in scanned_dir:
                 self.insertNode(entry)
 
-    def refreshView(self):
+    def refreshView(self, *args):
         path = self.path
         # Get if hidden folders are active
-        # hidden = nb.filters.hiddenGet()
-        hidden = False
+        hidden = batchpynamer.filters_widget.fields.hidden.get()
+        # hidden = False
 
         # Delete all children and reset Treeview
         self.deleteChildren()
@@ -262,7 +264,7 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
             # Get the old name
             old_name = self.oldNameGet(path)
             # Transform the old name to the new name
-            new_name = rename.new_naming_x(old_name, idx, path)
+            new_name = rename.new_naming_visual(old_name, idx, path)
             # Changes the new name column
             self.setNewName(path, new_name, old_name)
 
@@ -321,70 +323,31 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
         # selected) don't try to load it
         if path:
             # Get the filters values
-            # mask = nb.filters.maskGet()
-            mask = ""
-            # ext = nb.filters.extGet()
-            ext = ""
-            # folders = nb.filters.foldersGet()
-            folders = True
-            # files = nb.filters.filesGet()
-            files = True
-            # hidden = nb.filters.hiddenGet()
-            hidden = False
-            # files_before_dirs = nb.filters.filesBeforeDirsGet()
-            files_before_dirs = False
-            # reverse = nb.filters.reverseGet()
-            reverse = False
-            # min_name_len = nb.filters.nameLenMinGet()
-            min_name_len = 0
-            # max_name_len = nb.filters.nameLenMaxGet()
-            max_name_len = 10000
-            # depth = nb.filters.depthGet()
-            depth = 0
-
-            # Compile the regular expressions mask
-            mask = re.compile(mask)
+            filters_dict = batchpynamer.filters_widget.fields.get_all()
 
             # Transform the list of extensions into a tuple and add a . before the
             # extension to make sure that its an extension and not just that the
             # filename ends in that
-            ext_list = ["." + i for i in re.split("; |;|, |,", ext)]
-            try:
-                ext_list.remove(".")
-            except ValueError:
-                pass
-            ext_tuple = tuple(ext_list)
+            exts = filters_dict.pop("ext")
+            filters_dict["ext_tuple"] = [
+                i for i in re.split(r";\s?|,\s?", exts)
+            ]
 
             # Delete the children, load the new ones and sort them
             self.deleteChildren()
 
-            scanned_dir = scandir_recursive_sorted(
-                path,
-                mask=mask,
-                ext_tuple=ext_tuple,
-                folders=folders,
-                files=files,
-                hidden=hidden,
-                min_name_len=min_name_len,
-                max_name_len=max_name_len,
-                depth=depth,
-                files_before_dirs=files_before_dirs,
-                reverse=reverse,
-            )
+            scanned_dir = scandir_recursive_sorted(path, **filters_dict)
 
             for entry in scanned_dir:
                 self.insertNode(entry)
 
             # Call info set actions
             self.active_path = path
-            # self.info_bar.numItemsRefresh(
             batchpynamer.info_bar.numItemsRefresh(
                 num_items=len(self.tree_folder.get_children()),
                 num_sel_items=len(self.selectedItems()),
             )
-            # self.directory_entry_frame.folderDirSet()
             batchpynamer.dir_entry_frame.folderDirSet()
-            # self.info_bar.lastActionRefresh("Refreshed File View")
             batchpynamer.info_bar.lastActionRefresh("Refreshed File View")
 
 
@@ -478,24 +441,11 @@ class Directory_Entry_Frame(basewidgets.BaseWidget, ttk.Frame):
             self.folderDirSet()
 
 
-def Tree_Sort(tree, depth=-1, files_before_dirs=False, reverse=False):
-    """Sort the tree list with a few options"""
-    # When depth wasn't 0 sort alphabetically and case-insensitively (casefold)
-    # the absolute paths, this will produce having a folder followed by
-    # its contents
-    if depth != 0:
-        tree.sort(key=lambda entry: entry.path.casefold(), reverse=reverse)
+def Refresh_Treeviews(*args, **kwargs):
+    """Refreshes Both Treeviews"""
+    # Update the file view
+    batchpynamer.fn_treeview.refreshView()
+    # Update the folder view
+    batchpynamer.folder_treeview.updateNode()
 
-    # When the depth is 0 order the list by directories first then files
-    # or viceversa depending on the files_before_dirs flag, and then by name
-    # case-insensitevely (casefold)
-    else:
-        tree.sort(
-            key=lambda entry: (
-                entry.is_dir() if files_before_dirs else entry.is_file(),
-                entry.name.casefold(),
-            ),
-            reverse=reverse,
-        )
-
-    return tree
+    batchpynamer.info_bar.lastActionRefresh("Refreshed Both Treeviews")

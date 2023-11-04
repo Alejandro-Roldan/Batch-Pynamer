@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+import batchpynamer
 from . import basewidgets
+from . import mainwindow
 
 
 class Info_Bar(basewidgets.BaseWidget, ttk.Frame):
@@ -48,7 +50,7 @@ class Info_Bar(basewidgets.BaseWidget, ttk.Frame):
         self.action_text_var.set(action)
 
 
-def Show_Working(inf_msg="Working..."):
+def show_working(inf_msg="Working..."):
     """
     Sets the cursor to "watch" and empties the info msg to show that
     you have to wait.
@@ -56,17 +58,17 @@ def Show_Working(inf_msg="Working..."):
     """
 
     # Set mouse pointer to watch
-    root.config(cursor="watch")
+    mainwindow.root.config(cursor="watch")
     # Delete the last action text from the info bar
-    info_bar.lastActionRefresh(inf_msg)
+    batchpynamer.info_bar.lastActionRefresh(inf_msg)
     # Needs the update call so the window can apply this changes
-    root.update()
+    mainwindow.root.update()
 
 
-def Finish_Show_Working(inf_msg="Done"):
+def finish_show_working(inf_msg="Done"):
     """Sets cursor to arrow and sets the info msg."""
 
     # Set mouse pointer back to arrow
-    root.config(cursor="arrow")
+    mainwindow.root.config(cursor="arrow")
     # Show that its finish by setting the info bar message.
-    info_bar.lastActionRefresh(inf_msg)
+    batchpynamer.info_bar.lastActionRefresh(inf_msg)

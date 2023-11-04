@@ -3,34 +3,33 @@ import webbrowser  # for the About menu
 from tkinter import ttk
 
 import batchpynamer
-from . import mainwindow
-from . import metadata
+
+from . import mainwindow, metadata, basewidgets, commands
 from .rename import rename
 
 
-class Top_Menu:
+class TopMenu(tk.Menu):
     def __init__(self):
         pass
 
-    def tk_init(self, master, brothers: dict = {}):
-        self.__dict__.update(brothers)
-        self.menubar = tk.Menu(master, bg="gray75", foreground="black")
+    def tk_init(self, master):
+        super().__init__(master, bg="gray75", foreground="black")
 
         # Create the menus and add them to the main bar
         self.fileMenu()
-        self.menubar.add_cascade(label="File", menu=self.file_menu)
+        self.add_cascade(label="File", menu=self.file_menu)
 
-        # self.selectionMenu()
-        # self.menubar.add_cascade(label="Selection", menu=self.selection_menu)
+        self.selectionMenu()
+        self.add_cascade(label="Selection", menu=self.selection_menu)
 
         # Only create the command menu if there is a configuration folder
-        # self.commandMenu()
-        # self.menubar.add_cascade(label="Commands", menu=self.command_menu)
-        # if not constants.CONFIG_FOLDER_PATH:
-        #     self.menubar.entryconfigure(index=3, state="disable")
+        self.commandMenu()
+        self.add_cascade(label="Commands", menu=self.command_menu)
+        if not batchpynamer.CONFIG_FOLDER_PATH:
+            self.entryconfigure(index=3, state="disable")
 
         self.aboutMenu()
-        self.menubar.add_cascade(label="About", menu=self.about_menu)
+        self.add_cascade(label="About", menu=self.about_menu)
 
         # self.changes_notebook.menu_bar = self
 
@@ -42,27 +41,27 @@ class Top_Menu:
 
         # Create the menu
         self.file_menu = tk.Menu(
-            self.menubar, tearoff=0, bg="gray75", foreground="black"
+            self, tearoff=0, bg="gray75", foreground="black"
         )
 
         # Rename
         self.file_menu.add_command(
             label="Rename",
-            command=rename.Rename.Final_Rename,
+            command=rename.final_rename,
             accelerator="Ctrl+R",
         )
 
         # Undo Rename
         self.file_menu.add_command(
             label="Undo Rename",
-            command=rename.Rename.Undo,
+            command=rename.undo_rename,
             accelerator="Ctrl+Z",
         )
 
         # Reset Entry Fields
         self.file_menu.add_command(
             label="Reset Entry Fields",
-            command=rename.Rename.Full_Reset,
+            command=rename.full_reset,
             accelerator="Ctrl+T",
         )
 
@@ -77,7 +76,7 @@ class Top_Menu:
 
         # Create the metadata menu options only if the metadata modification
         # is active (the dependencies have been exported)
-        # if constants.METADATA_IMPORT:
+        # if batchpynamer.METADATA_IMPORT:
         #     # Apply Metadata Changes
         #     self.file_menu.add_command(
         #         label="Apply Metadata Changes",
@@ -113,7 +112,6 @@ class Top_Menu:
         # Refresh Files
         self.file_menu.add_command(
             label="Refresh File View",
-            # command=self.fn_treeview.refreshView,
             command=batchpynamer.fn_treeview.refreshView,
             accelerator="F5",
         )
@@ -121,7 +119,6 @@ class Top_Menu:
         # Refresh Focused Node in Tree
         self.file_menu.add_command(
             label="Refresh Focused Node",
-            # command=self.dir_entry_frame.focusFolderRefresh,
             command=batchpynamer.dir_entry_frame.focusFolderRefresh,
             accelerator="Ctrl+F5",
         )
@@ -129,7 +126,6 @@ class Top_Menu:
         # Refresh Whole Tree
         self.file_menu.add_command(
             label="Refresh Full Directory Browser",
-            # command=self.dir_entry_frame.folderNavRefresh,
             command=batchpynamer.dir_entry_frame.folderNavRefresh,
             accelerator="Ctrl+Shift+F5",
         )
@@ -139,7 +135,6 @@ class Top_Menu:
 
         # Exit
         self.file_menu.add_command(
-            # label="Exit", command=self.root.quit, accelerator="Ctrl+Esc"
             label="Exit",
             command=mainwindow.root.quit,
             accelerator="Ctrl+Esc",
@@ -152,27 +147,27 @@ class Top_Menu:
         """Selection Menu Dropdown"""
         # Create the menu
         self.selection_menu = tk.Menu(
-            self.menubar, tearoff=0, bg="gray75", foreground="black"
+            self, tearoff=0, bg="gray75", foreground="black"
         )
 
         # Select All
         self.selection_menu.add_command(
             label="Select All",
-            command=fn_treeview.selectAll,
+            command=batchpynamer.fn_treeview.selectAll,
             accelerator="Ctrl+A",
         )
 
         # Deselect All
         self.selection_menu.add_command(
             label="Deselect All",
-            command=fn_treeview.deselectAll,
+            command=batchpynamer.fn_treeview.deselectAll,
             accelerator="Ctrl+D",
         )
 
         # Invert Selection
         self.selection_menu.add_command(
             label="Invert Selection",
-            command=fn_treeview.invertSelection,
+            command=batchpynamer.fn_treeview.invertSelection,
             accelerator="Ctrl+I",
         )
 
@@ -183,32 +178,32 @@ class Top_Menu:
 
         # Create the menu
         self.command_menu = tk.Menu(
-            self.menubar, tearoff=0, bg="gray75", foreground="black"
+            self, tearoff=0, bg="gray75", foreground="black"
         )
 
         # Save current variable values entries as command
         self.command_menu.add_command(
             label="Save Field States to Command",
-            command=Save_Command_Name_Window,
+            command=lambda: commands.SaveCommandNameWindow(mainwindow.root),
         )
 
         # Load selected command
         self.command_menu.add_command(
             label="Load Field States from Command",
-            command=Load_Command_Call,
+            command=commands.load_command_call,
             accelerator="Ctrl+E",
         )
 
         # Apply selected command
         self.command_menu.add_command(
             label="Apply Selected Command",
-            command=Rename.Apply_Command,
+            command=rename.apply_command,
             accelerator="Ctrl+Y",
         )
 
         # Delete selected command
         self.command_menu.add_command(
-            label="Delete Selected Command", command=Delete_Command
+            label="Delete Selected Command", command=commands.delete_command
         )
 
         self.command_select_menu = tk.Menu(
@@ -217,7 +212,7 @@ class Top_Menu:
 
         # Only try to load the commands if there is a path to the
         # commands configuration file
-        if constants.CONFIG_FOLDER_PATH:
+        if batchpynamer.CONFIG_FOLDER_PATH:
             self.updateCommandListMenu()
 
         # Separator
@@ -232,7 +227,7 @@ class Top_Menu:
         """Deletes the already existing items and updates the view"""
         self.command_select_menu.delete(0, "end")
         # Read the commands config and create a radio button for each command
-        for command_name in constants.COMMAND_CONF.sections():
+        for command_name in batchpynamer.COMMAND_CONF.sections():
             self.command_select_menu.add_radiobutton(
                 label=command_name,
                 variable=self.selected_command,
@@ -243,7 +238,7 @@ class Top_Menu:
         """About Menu Dropdown"""
         # Create the menu
         self.about_menu = tk.Menu(
-            self.menubar, tearoff=0, bg="gray75", foreground="black"
+            self, tearoff=0, bg="gray75", foreground="black"
         )
 
         # GitHub

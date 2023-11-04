@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer
-from . import basewidgets
-from . import metadata
+
+from . import basewidgets, metadata
 from .rename import rename
 
 
@@ -20,10 +20,9 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
     def __init__(self):
         pass
 
-    def tk_init(self, master, **kwargs):
+    def tk_init(self, master):
         # Create TTK Notebook with parent master
-        super().__init__(master, **kwargs)
-        self.grid(column=0, row=1)
+        super().__init__(master, column=0, row=1)
 
         self.nb_rename = ttk.Frame(self)
         self.nb_metadata = ttk.Frame(self, padding="5 5 5 5")
@@ -49,8 +48,6 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
             )
             inf_bar.lastActionRefresh(metadata_import_error_msg)
 
-        # self.__dict__.update(brothers)
-
         # Bindings
         self.bindEntries()
 
@@ -60,57 +57,38 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
         self.nb_rename_frame.grid(sticky="nsew")
 
         # Rename from File (0)
-        # self.rename_from_file = rename.Rename_From_File(
-        #     self.nb_rename_frame, brothers={"fn_treeview": self.fn_treeview}
-        # )
         batchpynamer.rename_from_file.tk_init(self.nb_rename_frame)
         # # Regular Expressions (1)
-        # self.reg_exp = rename.Reg_Exp(self.nb_rename_frame)
         batchpynamer.rename_from_reg_exp.tk_init(self.nb_rename_frame)
         # Name (2)
-        # self.name_basic = rename.c_name_basic.NameBasic(
-        # self.name_basic = batchpynamer.name_basic.tk_init(
-        batchpynamer.name_basic.tk_init(
-            # self.nb_rename_frame, brothers={"fn_treeview": self.fn_treeview}
-            self.nb_rename_frame
-        )
-        # # Replace (3)
-        # self.replace = rename.Replace(self.nb_rename_frame)
+        batchpynamer.name_basic.tk_init(self.nb_rename_frame)
+        # Replace (3)
         batchpynamer.replace.tk_init(self.nb_rename_frame)
-        # # Case (4)
-        # self.case = rename.Case(self.nb_rename_frame)
+        # Case (4)
         batchpynamer.case.tk_init(self.nb_rename_frame)
-        # # Remove (5)
-        # self.remove = rename.Remove(self.nb_rename_frame)
+        # Remove (5)
         batchpynamer.remove.tk_init(self.nb_rename_frame)
-        # # Move Parts (6)
-        # self.Move_Parts = rename.Move_Parts(self.nb_rename_frame)
+        # Move Parts (6)
         batchpynamer.move_parts.tk_init(self.nb_rename_frame)
-        # # Add (7)
-        # self.add_to_string = rename.Add_To_String(self.nb_rename_frame)
+        # Add (7)
         batchpynamer.add_to_str.tk_init(self.nb_rename_frame)
-        # # Append Folder Name (8)
-        # self.append_folder_name = rename.Append_Folder_Name(
-        #     self.nb_rename_frame
-        # )
+        # Append Folder Name (8)
         batchpynamer.add_folder_name.tk_init(self.nb_rename_frame)
-        # # Numbering (9)
-        # self.numbering = rename.Numbering(self.nb_rename_frame)
+        # Numbering (9)
         batchpynamer.numbering.tk_init(self.nb_rename_frame)
-        # # Extension (10)
-        # self.extension_rep = rename.Extension_Rep(self.nb_rename_frame)
+        # Extension (10)
         batchpynamer.ext_replace.tk_init(self.nb_rename_frame)
 
-        # # Bottom Frame for Filters and Rename buttons
-        # self.nb_bottom_frame = ttk.Frame(self.nb_rename_frame)
-        # self.nb_bottom_frame.grid(
-        #     column=0, row=3, columnspan=6, sticky="w" + "e"
-        # )
-        # self.nb_bottom_frame.columnconfigure(0, weight=1)
-        # # Filters
-        # self.filters = Filters_Widget(self.nb_bottom_frame)
-        # # Rename
-        # self.rename = rename.Rename(self.nb_bottom_frame)
+        # Bottom Frame for Filters and Rename buttons
+        self.nb_bottom_frame = ttk.Frame(self.nb_rename_frame)
+        self.nb_bottom_frame.grid(
+            column=0, row=3, columnspan=6, sticky="w" + "e"
+        )
+        self.nb_bottom_frame.columnconfigure(0, weight=1)
+        # Filters
+        batchpynamer.filters_widget.tk_init(self.nb_bottom_frame)
+        # Rename
+        self.rename = rename.Rename(self.nb_bottom_frame)
 
         # Add a little bit of padding between each widget
         for child in self.nb_rename_frame.winfo_children():
@@ -153,7 +131,7 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
             # Enables the menu options for renaming
             batchpynamer.menu_bar.renameEnable()
             # Disables the menu options for metadata
-            batchpynamer.menu_bar.metadataDisable()
+            # batchpynamer.menu_bar.metadataDisable()
 
         elif tab == "Metadata":
             # Stops showing new name
@@ -162,6 +140,6 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
             batchpynamer.metadata_list_entries.metadataSelect()
             batchpynamer.metadata_img.imageShow()
             # Enables the menu options for metadata
-            batchpynamer.menu_bar.metadataEnable()
+            # batchpynamer.menu_bar.metadataEnable()
             # Disables the menu options for renaming
             batchpynamer.menu_bar.renameDisable()

@@ -5,7 +5,6 @@ import PIL
 import PIL.ImageTk
 from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
-
 # Change import name for code clarity
 from mutagen.flac import FLAC
 from mutagen.flac import Picture as FlacPicture

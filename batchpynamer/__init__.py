@@ -1,15 +1,12 @@
 import os
 import sys
+import configparser
 
 import batchpynamer
-from .notebook import Changes_Notebook
-from .info import Info_Bar
-from .trees.trees import (
-    File_Navigator,
-    Directory_Navigator,
-    Directory_Entry_Frame,
-)
 
+from .info_bar import Info_Bar
+from .notebook import Changes_Notebook
+from .rename.rename import LastRename
 from .rename.a_from_file import RenameFromFile
 from .rename.b_reg_exp import RenameFromRegExp
 from .rename.c_name_basic import NameBasic
@@ -21,7 +18,12 @@ from .rename.h_add_to_str import AddToStr
 from .rename.i_add_folder_name import AddFolderName
 from .rename.j_numbering import Numbering
 from .rename.k_ext_replace import ExtReplace
-
+from .trees.trees import (
+    Directory_Entry_Frame,
+    Directory_Navigator,
+    File_Navigator,
+)
+from .trees.filtering import FiltersWidget
 
 # Information
 __license__ = "GPL3"
@@ -56,6 +58,8 @@ else:
 # Configparser object for loading the commands
 if CONFIG_FOLDER_PATH is not None:
     COMMAND_CONF_FILE = CONFIG_FOLDER_PATH + "commands.conf"
+    COMMAND_CONF = configparser.ConfigParser()
+    COMMAND_CONF.read(COMMAND_CONF_FILE)
 
 # Metadata availabe flag
 try:
@@ -83,6 +87,10 @@ def tk_init_hook():
     other widgets without caring for widget creation order
     """
 
+    # Last Rename Object
+    global last_rename
+    last_rename = LastRename()
+
     # Main Window Widgets
     global info_bar
     info_bar = Info_Bar()
@@ -95,7 +103,11 @@ def tk_init_hook():
     global changes_notebook
     changes_notebook = Changes_Notebook()
     global menu_bar
-    menu_bar = menubar.Top_Menu()
+    menu_bar = menubar.TopMenu()
+
+    # Search Filters
+    global filters_widget
+    filters_widget = FiltersWidget()
 
     # Rename Widgets
     global rename_from_file

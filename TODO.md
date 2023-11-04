@@ -17,3 +17,20 @@
 * revise tkInts vars set(0) when creating them for default value
 
 * move numbering_create inside numbering_rename func
+
+* revise if we can remove extra frames from notebook
+
+* save command window and error window can be derived from a parent class PopUpWindow()
+
+* regex handle no matching errors
+```python
+  File "/home/Venus/Programs/Python/Batch-Pynamer/batchpynamer/rename/rename.py", line 360, in new_naming
+    name = b_reg_exp.reg_exp_rename(name, fields_dict)  # (1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/Venus/Programs/Python/Batch-Pynamer/batchpynamer/rename/b_reg_exp.py", line 170, in reg_exp_rename
+    for i in range(0, len(reg_grouping.groups()) + 1):
+                          ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'groups'
+```
+
+* Check if we can defocus the spinboxes when removing focus lol

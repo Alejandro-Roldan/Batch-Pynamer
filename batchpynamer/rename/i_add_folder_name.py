@@ -1,8 +1,8 @@
 import tkinter as tk
-
 from tkinter import ttk
 
 import batchpynamer
+
 from .. import basewidgets
 
 
@@ -19,15 +19,17 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
     def __init__(self):
         pass
 
-    def tk_init(self, master, *args, **kwargs):
-        self.lf = ttk.Labelframe(master, text="Append Folder Name (8)")
-        self.lf.grid(column=3, row=2, columnspan=2, sticky="nsew")
+    def tk_init(self, master):
+        super().__init__(
+            master,
+            column=3,
+            row=2,
+            columnspan=2,
+            text="Add Folder Name (8)",
+        )
+        super().tk_init(reset_column_row=(8, 1))
 
         # Variable defs
-        # self.add_folder_name_name_pos = tk.StringVar()
-        # self.add_folder_name_pos = tk.IntVar()
-        # self.add_folder_name_sep = tk.StringVar()
-        # self.add_folder_name_levels = tk.IntVar()
         self.fields = self.Fields(
             add_folder_name_name_pos=(
                 tk.StringVar(),
@@ -39,12 +41,11 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
         )
 
         # Name, combobox
-        ttk.Label(self.lf, text="Name").grid(column=0, row=0, sticky="ew")
+        ttk.Label(self, text="Name").grid(column=0, row=0, sticky="ew")
         self.name_pos_combo = ttk.Combobox(
-            self.lf,
+            self,
             width=5,
             state="readonly",
-            # values=("Prefix", "Suffix", "Position"),
             values=self.fields.add_folder_name_name_pos.default,
             textvariable=self.fields.add_folder_name_name_pos,
         )
@@ -52,9 +53,9 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
         self.name_pos_combo.current(0)
 
         # Folders add_folder_name_levels, spinbox
-        ttk.Label(self.lf, text="Pos.").grid(column=2, row=0, sticky="ew")
+        ttk.Label(self, text="Pos.").grid(column=2, row=0, sticky="ew")
         self.levels_spin = ttk.Spinbox(
-            self.lf,
+            self,
             width=3,
             from_=-batchpynamer.MAX_NAME_LEN,
             to=batchpynamer.MAX_NAME_LEN,
@@ -63,16 +64,18 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
         self.levels_spin.grid(column=3, row=0)
 
         # Separator, entry
-        ttk.Label(self.lf, text="Sep.").grid(column=4, row=0, sticky="ew")
+        ttk.Label(self, text="Sep.").grid(column=4, row=0, sticky="ew")
         self.sep_entry = ttk.Entry(
-            self.lf, width=5, textvariable=self.fields.add_folder_name_sep
+            self,
+            width=5,
+            textvariable=self.fields.add_folder_name_sep,
         )
         self.sep_entry.grid(column=5, row=0, sticky="ew")
 
         # Folders add_folder_name_levels, spinbox
-        ttk.Label(self.lf, text="Levels").grid(column=6, row=0, sticky="ew")
+        ttk.Label(self, text="Levels").grid(column=6, row=0, sticky="ew")
         self.levels_spin = ttk.Spinbox(
-            self.lf,
+            self,
             width=3,
             from_=0,
             to=500,
@@ -80,30 +83,11 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
         )
         self.levels_spin.grid(column=7, row=0)
 
-        # Reset, button
-        self.reset_button = ttk.Button(
-            self.lf, width=2, text="R", command=self.resetWidget
-        )
-        self.reset_button.grid(column=20, row=20, sticky="w", padx=2, pady=2)
-
         self.bindEntries()
 
-    # def namePosGet(self, *args, **kwargs):
-    #     return self.add_folder_name_name_pos.get()
-
-    # def posGet(self, *args, **kwargs):
-    #     return self.add_folder_name_pos.get()
-
-    # def sepGet(self, *args, **kwargs):
-    #     return self.add_folder_name_sep.get()
-
-    # def levelsGet(self, *args, **kwargs):
-    #     return self.add_folder_name_levels.get()
-
-    def bindEntries(self, *args, **kwargs):
+    def bindEntries(self):
         """What to execute when the bindings happen."""
-        # Defocus the hightlight when changing combobox
-        self.name_pos_combo.bind("<<ComboboxSelected>>", self.defocus)
+        super().bindEntries()
 
         # Calls to update the new name column
         self.fields.add_folder_name_name_pos.trace_add(
@@ -119,41 +103,8 @@ class AddFolderName(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (8)
             "write", batchpynamer.fn_treeview.showNewName
         )
 
-    def defocus(self, *args, **kwargs):
-        """
-        Clears the highlightning of the comboboxes inside this frame
-        whenever any of them changes value.
-        """
-        self.name_pos_combo.selection_clear()
 
-    # def resetWidget(self, *args, **kwargs):
-    #     """Resets each and all data variables inside the widget."""
-    #     self.add_folder_name_name_pos.set("Prefix")
-    #     self.add_folder_name_pos.set(0)
-    #     self.add_folder_name_sep.set("")
-    #     self.add_folder_name_levels.set(0)
-
-    # def setCommand(self, var_dict, *args, **kwargs):
-    #     """
-    #     Sets the variable fields according to the loaded
-    #     command dictionary
-    #     """
-    #     self.add_folder_name_name_pos.set(var_dict["append_folder_name_name_pos"])
-    #     self.add_folder_name_sep.set(var_dict["append_folder_name_pos"])
-    #     self.add_folder_name_sep.set(var_dict["append_folder_name_sep"])
-    #     self.add_folder_name_levels.set(var_dict["append_folder_name_levels"])
-
-    # @staticmethod
-    # def appendVarValToDict(dict_={}, *args, **kwargs):
-    #     dict_[
-    #         "append_folder_name_name_pos"
-    #     ] = nb.append_folder_name.namePosGet()
-    #     dict_["append_folder_name_pos"] = nb.append_folder_name.posGet()
-    #     dict_["append_folder_name_sep"] = nb.append_folder_name.sepGet()
-    #     dict_["append_folder_name_levels"] = nb.append_folder_name.levelsGet()
-
-
-def add_folder_rename(name, path, **fields_dict):
+def add_folder_rename(name, path, fields_dict):
     add_folder_name_name_pos = fields_dict.get("add_folder_name_name_pos")
     add_folder_name_sep = fields_dict.get("add_folder_name_sep")
     add_folder_name_levels = fields_dict.get("add_folder_name_levels")

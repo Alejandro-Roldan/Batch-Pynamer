@@ -1,8 +1,8 @@
 import tkinter as tk
-
 from tkinter import ttk
 
 import batchpynamer
+
 from .. import basewidgets
 
 
@@ -18,9 +18,14 @@ class Case(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (4)
     def __init__(self):
         pass
 
-    def tk_init(self, master, *args, **kwargs):
-        self.lf = ttk.Labelframe(master, text="Case (4)")
-        self.lf.grid(column=0, row=1, sticky="nsew")
+    def tk_init(self, master):
+        super().__init__(
+            master,
+            column=0,
+            row=1,
+            text="Case (4)",
+        )
+        super().tk_init()
 
         # Variable defs
         # self.case_case_want = tk.StringVar()
@@ -32,62 +37,30 @@ class Case(basewidgets.BaseNamingWidget, ttk.LabelFrame):  # (4)
         )
 
         # Chose case, combobox
-        ttk.Label(self.lf, text="Case").grid(column=0, row=0, sticky="w")
+        ttk.Label(self, text="Case").grid(column=0, row=0, sticky="w")
         self.case_combo = ttk.Combobox(
-            self.lf,
+            self,
             width=10,
             state="readonly",
-            # values=("Same", "Upper Case", "Lower Case", "Title", "Sentence"),
             values=self.fields.case_case_want.default,
             textvariable=self.fields.case_case_want,
         )
         self.case_combo.grid(column=1, row=0, sticky="ew")
         self.case_combo.current(0)
 
-        # Reset, button
-        self.reset_button = ttk.Button(
-            self.lf, width=2, text="R", command=self.resetWidget
-        )
-        self.reset_button.grid(column=2, row=1, sticky="e", padx=2, pady=2)
-
         self.bindEntries()
 
-    # def caseWantGet(self, *args, **kwargs):
-    #     return self.case_case_want.get()
-
-    def bindEntries(self, *args, **kwargs):
+    def bindEntries(self):
         """Defines the binded actions"""
-        self.case_combo.bind("<<ComboboxSelected>>", self.defocus)
+        super().bindEntries()
 
         # Calls to update the new name column
         self.fields.case_case_want.trace_add(
             "write", batchpynamer.fn_treeview.showNewName
         )
 
-    def defocus(self, *args, **kwargs):
-        """
-        Clears the highlightning of the comboboxes inside this frame
-        whenever any of them changes value.
-        """
-        self.case_combo.selection_clear()
 
-    # def resetWidget(self, *args, **kwargs):
-    #     """Resets each and all data variables inside the widget"""
-    #     self.case_case_want.set("Same")
-
-    # def setCommand(self, var_dict, *args, **kwargs):
-    #     """
-    #     Sets the variable fields according to the loaded
-    #     command dictionary
-    #     """
-    #     self.case_case_want.set(var_dict["case_case_want"])
-
-    @staticmethod
-    def appendVarValToDict(dict_={}, *args, **kwargs):
-        dict_["case_case_want"] = nb.case.caseWantGet()
-
-
-def case_change(name, **fields_dict):
+def case_change(name, fields_dict):
     """Does the case change for the new name"""
     case_case_want = fields_dict.get("case_case_want")
 
