@@ -3,7 +3,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import BaseNamingWidget, BpnComboVar
+from batchpynamer.basewidgets import BaseNamingWidget, BpnComboVar
 
 
 class Case(BaseNamingWidget, ttk.LabelFrame):  # (4)

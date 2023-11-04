@@ -58,10 +58,10 @@ def __init__():
 
 
 def init_tk_root():
-    from tkinter import Tk
+    from batchpynamer.mainwindow import WindowRoot
 
     global root
-    root = Tk()
+    root = WindowRoot()
 
 
 # TODO: this can probably be moved outside and get rid of the hook by having
@@ -73,22 +73,22 @@ def tk_init_post_hook():
     other widgets without caring for widget creation order
     """
 
-    from .info_bar import Info_Bar
-    from .notebook import Changes_Notebook
-    from .rename.a_from_file import RenameFromFile
-    from .rename.b_reg_exp import RenameFromRegExp
-    from .rename.c_name_basic import NameBasic
-    from .rename.d_replace import Replace
-    from .rename.e_case import Case
-    from .rename.f_remove import Remove
-    from .rename.g_move import MoveParts
-    from .rename.h_add_to_str import AddToStr
-    from .rename.i_add_folder_name import AddFolderName
-    from .rename.j_numbering import Numbering
-    from .rename.k_ext_replace import ExtReplace
-    from .rename.rename import LastRename
-    from .trees.filtering import FiltersWidget
-    from .trees.trees import (
+    from batchpynamer.info_bar import Info_Bar
+    from batchpynamer.notebook.notebook import Changes_Notebook
+    from batchpynamer.notebook.rename.a_from_file import RenameFromFile
+    from batchpynamer.notebook.rename.b_reg_exp import RenameFromRegExp
+    from batchpynamer.notebook.rename.c_name_basic import NameBasic
+    from batchpynamer.notebook.rename.d_replace import Replace
+    from batchpynamer.notebook.rename.e_case import Case
+    from batchpynamer.notebook.rename.f_remove import Remove
+    from batchpynamer.notebook.rename.g_move import MoveParts
+    from batchpynamer.notebook.rename.h_add_to_str import AddToStr
+    from batchpynamer.notebook.rename.i_add_folder_name import AddFolderName
+    from batchpynamer.notebook.rename.j_numbering import Numbering
+    from batchpynamer.notebook.rename.k_ext_replace import ExtReplace
+    from batchpynamer.notebook.rename.rename import LastRename
+    from batchpynamer.trees.filtering import FiltersWidget
+    from batchpynamer.trees.trees import (
         Directory_Entry_Frame,
         Directory_Navigator,
         File_Navigator,
@@ -139,3 +139,5 @@ def tk_init_post_hook():
     numbering = Numbering()
     global ext_replace
     ext_replace = ExtReplace()
+
+    # Metadata Widgets

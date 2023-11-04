@@ -4,7 +4,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
+from batchpynamer.basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
 class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)

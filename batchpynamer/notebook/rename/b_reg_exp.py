@@ -4,7 +4,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import BaseNamingWidget, BpnStrVar
+from batchpynamer.basewidgets import BaseNamingWidget, BpnStrVar
 
 
 class RenameFromRegExp(BaseNamingWidget, ttk.LabelFrame):  # (1)

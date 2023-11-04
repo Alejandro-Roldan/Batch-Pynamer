@@ -6,7 +6,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import (
+from batchpynamer.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
     BpnComboVar,

@@ -4,7 +4,12 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnIntVar, BpnStrVar
+from batchpynamer.basewidgets import (
+    BaseNamingWidget,
+    BpnComboVar,
+    BpnIntVar,
+    BpnStrVar,
+)
 
 
 class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)

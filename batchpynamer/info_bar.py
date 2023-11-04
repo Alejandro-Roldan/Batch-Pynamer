@@ -3,7 +3,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from . import basewidgets
+from batchpynamer import basewidgets
 
 
 class Info_Bar(basewidgets.BaseWidget, ttk.Frame):

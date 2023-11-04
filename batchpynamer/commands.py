@@ -3,11 +3,11 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from . import basewidgets, menubar
-from .rename import rename
+from batchpynamer import basewidgets as bw, menubar
+from batchpynamer.notebook.rename import rename
 
 
-class SaveCommandNameWindow(basewidgets.PopUpWindow):
+class SaveCommandNameWindow(bw.PopUpWindow, bw.BaseFieldsWidget):
     """
     Opens a window to save a command.
     It has:
@@ -15,36 +15,41 @@ class SaveCommandNameWindow(basewidgets.PopUpWindow):
         - A Previous command dropdown. Lists all the already saved commads
     """
 
-    def __init__(self, master):
-        super().__init__(master, title="Choose Name for Command")
+    def __init__(self):
+        super().__init__(title="Choose Name for Command")
 
+        # Get the command list
+        steps_list = bpn.COMMAND_CONF.sections()
+        # Insert an empty one at the top
+        steps_list.insert(0, "")
         # Variable defs
-        self.command_name = tk.StringVar()
-        self.prev_step = tk.StringVar()
+        self.fields = self.Fields(
+            command_name=bw.BpnStrVar(""),
+            prev_step=bw.BpnComboVar(steps_list),
+        )
 
         # Extended Replace, entry
         txt = "Choose a Name for The New Command"
         ttk.Label(self, text=txt).grid(
             column=0, row=0, columnspan=2, sticky="w"
         )
-        self.name_entry = ttk.Entry(self, textvariable=self.command_name)
+        self.name_entry = ttk.Entry(
+            self, textvariable=self.fields.command_name
+        )
         self.name_entry.grid(column=0, row=1, columnspan=2, sticky="ew")
         self.name_entry.focus()
 
         # Previous Step, combobox
-        steps_list = bpn.COMMAND_CONF.sections()
-        steps_list.insert(0, "")
         txt = "Select Previous Step"
         ttk.Label(self, text=txt).grid(column=0, row=2, sticky="w")
         self.steps_combo = ttk.Combobox(
             self,
             width=10,
             state="readonly",
-            values=steps_list,
-            textvariable=self.prev_step,
+            values=self.fields.prev_step.options,
+            textvariable=self.fields.prev_step,
         )
         self.steps_combo.grid(column=1, row=2, sticky="ew")
-        self.steps_combo.current(0)
 
         # Cancel, button
         self.cancel_button = ttk.Button(
@@ -61,30 +66,19 @@ class SaveCommandNameWindow(basewidgets.PopUpWindow):
 
         self.bindEntries()
 
-    def bindEntries(self, *args, **kwargs):
-        """Defines the binded actions"""
-        self.steps_combo.bind("<<ComboboxSelected>>", self.defocus)
-
-    def defocus(self, *args, **kwargs):
-        """
-        Clears the highlightning of the comboboxes inside this frame
-        whenever any of them changes value.
-        """
-        self.steps_combo.selection_clear()
-
     def saveExit(self, *args, **kwargs):
         """
         Saves the command to the configuration file and exits the window
         """
-        command_name = self.command_name.get()
-        prev_step = self.prev_step.get()
+        command_name = self.fields.command_name.get()
+        prev_step = self.fields.prev_step.get()
 
         # Check the command name is valid (alphanumeric)
         if not command_name.isalnum():
-            basewidgets.ErrorFrame("Invalid Name")
+            bw.ErrorFrame(f'Invalid Name: "{command_name}"')
         # Check its not already in use
         elif command_name in bpn.COMMAND_CONF:
-            basewidgets.ErrorFrame("Name Already in Use")
+            bw.ErrorFrame("Name Already in Use")
         # Save command and edit the previous step
         else:
             save_to_command_file(command_name, prev_step)

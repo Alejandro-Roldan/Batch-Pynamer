@@ -4,13 +4,13 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from .. import basewidgets, commands, info_bar
-from ..trees import trees
+from batchpynamer import basewidgets, commands, info_bar
+from batchpynamer.trees import trees
 
 # Cant import files with numbers directly so use
 # Equivalent to "import ... as ..."
 # name_basic = __import__("", ["02_name_basic"])
-from . import (
+from batchpynamer.notebook.rename import (
     a_from_file,
     b_reg_exp,
     c_name_basic,
@@ -163,7 +163,7 @@ def apply_command(event=None, command_name=None, *args, **kwargs):
 
     # If the selected command was the default show msg
     else:
-        inf_bar.lastActionRefresh("No Command Selected")
+        bpn.info_bar.lastActionRefresh("No Command Selected")
 
     # Set the variable fields back to what you had prior to the command
     commands.set_command_call(var_val_dict_in_use)
@@ -272,23 +272,26 @@ def system_rename(file, new_path, *args, **kwargs):
 
         # Catch exceptions for invalid filenames
         except OSError:
-            msg = "Couldn't rename file {}.\nInvalid characters".format(file)
-            basewidgets.ErrorFrame(bpn.root, error_desc=msg)
+            msg = f"Couldn't rename file {file}.\nInvalid characters"
+            basewidgets.ErrorFrame(error_desc=msg)
             bpn.info_bar.lastActionRefresh(
                 "Couldn't Rename file. Invalid characters"
             )
 
         except FileNotFoundError:
-            msg = "Couldn't rename file {}.\nFile not found".format(file)
-            basewidgets.ErrorFrame(bpn.root, error_desc=msg)
+            msg = f"Couldn't rename file {file}.\nFile not found"
+            basewidgets.ErrorFrame(error_desc=msg)
             bpn.info_bar.lastActionRefresh(
                 "Couldn't Rename file. File not found"
             )
 
     # If path already exists don't write over it and skip it
     else:
-        msg = "Couldn't rename file {}.\nPath already exists".format(file)
-        basewidgets.ErrorFrame(bpn.root, error_desc=msg)
+        msg = (
+            f'Couldn\'t rename file "{file}" to "{new_path}".\nPath already ex'
+            "ists"
+        )
+        basewidgets.ErrorFrame(error_desc=msg)
         bpn.info_bar.lastActionRefresh(
             "Couldn't Rename file. Path already exists"
         )

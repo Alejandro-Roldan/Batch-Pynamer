@@ -4,8 +4,9 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from . import basewidgets, commands, metadata
-from .rename import rename
+from batchpynamer import basewidgets, commands
+from batchpynamer.notebook.rename import rename
+from batchpynamer.notebook.metadata import metadata
 
 
 class TopMenu(tk.Menu):
@@ -184,7 +185,7 @@ class TopMenu(tk.Menu):
         # Save current variable values entries as command
         self.command_menu.add_command(
             label="Save Field States to Command",
-            command=lambda: commands.SaveCommandNameWindow(bpn.root),
+            command=commands.SaveCommandNameWindow,
         )
 
         # Load selected command

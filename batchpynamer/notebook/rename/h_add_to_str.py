@@ -3,7 +3,12 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import BaseNamingWidget, BpnBoolVar, BpnIntVar, BpnStrVar
+from batchpynamer.basewidgets import (
+    BaseNamingWidget,
+    BpnBoolVar,
+    BpnIntVar,
+    BpnStrVar,
+)
 
 
 class AddToStr(BaseNamingWidget, ttk.LabelFrame):  # (7)

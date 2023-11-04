@@ -3,8 +3,9 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from . import basewidgets, metadata
-from .rename import rename
+from batchpynamer import basewidgets
+from batchpynamer.notebook.rename import rename
+from batchpynamer.notebook.metadata import metadata
 
 
 class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
@@ -46,7 +47,7 @@ class Changes_Notebook(basewidgets.BaseWidget, ttk.Notebook):
                 "program is able to edit metadata tags if you install the mutagen "
                 "and Pillow libraries"
             )
-            inf_bar.lastActionRefresh(metadata_import_error_msg)
+            bpn.info_bar.lastActionRefresh(metadata_import_error_msg)
 
         # Bindings
         self.bindEntries()

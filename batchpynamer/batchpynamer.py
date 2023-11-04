@@ -25,7 +25,7 @@ import sys
 
 import batchpynamer as bpn
 
-from . import mainwindow
+from batchpynamer import mainwindow
 
 
 def start_Path_Handling(sys_args):
@@ -107,13 +107,13 @@ def _run():
     if bpn.CONFIG_FOLDER_PATH:
         create_Config_Folder(bpn.CONFIG_FOLDER_PATH)
 
-    # Initialize last rename
-    # last_rename = Last_Rename()
-
     """
     WINDOW INITIALIZATION
     """
-    mainwindow.windowInitialization()
+    # Create the Tkinter root window
+    bpn.init_tk_root()
+    # Initialize
+    bpn.root.tk_init()
 
 
 ###################################

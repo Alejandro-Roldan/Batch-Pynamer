@@ -7,10 +7,8 @@ from scandirrecursive.scandirrecursive import scandir_recursive_sorted
 
 import batchpynamer as bpn
 
-from .. import basewidgets
-from ..rename import rename
-
-# from batchpynamer import mainwindow
+from batchpynamer import basewidgets
+from batchpynamer.notebook.rename import rename
 
 
 class Directory_Navigator(basewidgets.BaseWidget, ttk.Frame):
@@ -293,7 +291,7 @@ class File_Navigator(basewidgets.BaseWidget, ttk.Frame):
         name = os.path.basename(path)
 
         # Set info msg
-        inf_bar.lastActionRefresh('Copied "{}" Path to Clipboard'.format(name))
+        bpn.info_bar.lastActionRefresh(f'Copied "{name}" Path to Clipboard')
 
     def insertNode(self, entry, tag="", *args, **kwargs):
         """Create nodes"""

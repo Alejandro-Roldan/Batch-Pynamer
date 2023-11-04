@@ -3,7 +3,12 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 
-from ..basewidgets import BaseNamingWidget, BpnComboVar, BpnIntVar, BpnStrVar
+from batchpynamer.basewidgets import (
+    BaseNamingWidget,
+    BpnComboVar,
+    BpnIntVar,
+    BpnStrVar,
+)
 
 
 class AddFolderName(BaseNamingWidget, ttk.LabelFrame):  # (8)

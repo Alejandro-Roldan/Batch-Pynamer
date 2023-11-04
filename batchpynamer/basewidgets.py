@@ -7,8 +7,9 @@ import batchpynamer as bpn
 
 
 class PopUpWindow(tk.Toplevel):
-    def __init__(self, master, title=""):
-        super().__init__(master, bg="gray85")
+    def __init__(self, title=""):
+        # Pop Up windows always are children of root
+        super().__init__(bpn.root, bg="gray85")
         self.title(title)
         self.attributes("-type", "dialog")
 
@@ -16,12 +17,12 @@ class PopUpWindow(tk.Toplevel):
 class ErrorFrame(PopUpWindow):
     """Error frame with an error message and an "Okay" button"""
 
-    def __init__(self, master, title="", error_desc="ERROR"):
+    def __init__(self, error_desc="Non-descript"):
         # Create a new window
-        super().__init__(master, title=title)
+        super().__init__(title="ERROR")
 
         # Label with error description
-        ttk.Label(self, text="Error: {}".format(error_desc)).grid(
+        ttk.Label(self, text=f"ERROR: {error_desc}").grid(
             column=0, row=0, padx=5, pady=5
         )
 
@@ -56,12 +57,10 @@ class BaseWidget:
     def tk_init(self):
         raise NotImplementedError
 
-    def bindEntries(self):
-        """Default function for binded actions"""
-        raise NotImplementedError
 
+class BaseFieldsWidget(BaseWidget):
+    fields = None
 
-class BaseNamingWidget(BaseWidget):
     class Fields:
         def __init__(self, **fields):
             self.__dict__.update(fields)
@@ -75,6 +74,24 @@ class BaseNamingWidget(BaseWidget):
             for field in self.__dict__:
                 self.__dict__[field].reset()
 
+    def bindEntries(self):
+        """Defines the binded actions"""
+        # Call defocus when combo boxes have items selected
+        for var in self.__dict__:
+            if isinstance(self.__dict__[var], ttk.Combobox):
+                self.__dict__[var].bind("<<ComboboxSelected>>", self.defocus)
+
+    def defocus(self, event=None):
+        """
+        Clears the highlightning of the comboboxes inside the instance
+        whenever any of them changes value.
+        """
+        for var in self.__dict__:
+            if isinstance(self.__dict__[var], ttk.Combobox):
+                self.__dict__[var].selection_clear()
+
+
+class BaseNamingWidget(BaseFieldsWidget):
     def tk_init(self, reset_column_row: tuple = (2, 2)):
         """Creates the reset button"""
         self.reset_button = ttk.Button(
@@ -92,11 +109,7 @@ class BaseNamingWidget(BaseWidget):
         )
 
     def bindEntries(self):
-        """Defines the binded actions"""
-        # Call defocus when combo boxes have items selected
-        for var in self.__dict__:
-            if isinstance(self.__dict__[var], ttk.Combobox):
-                self.__dict__[var].bind("<<ComboboxSelected>>", self.defocus)
+        super().bindEntries()
 
         # Call update new name when each fields are written on
         for field in self.fields.__dict__:
@@ -104,16 +117,6 @@ class BaseNamingWidget(BaseWidget):
                 "write", bpn.fn_treeview.showNewName
             )
 
-    def defocus(self, event=None):
-        """
-        Clears the highlightning of the comboboxes inside the instance
-        whenever any of them changes value.
-        """
-        for var in self.__dict__:
-            if isinstance(self.__dict__[var], ttk.Combobox):
-                self.__dict__[var].selection_clear()
-
-    # TODO: This can be handled to a Fields method
     def resetWidget(self):
         """Resets fields to defined default value"""
         self.fields.reset_all()
@@ -124,10 +127,6 @@ class BaseNamingWidget(BaseWidget):
             self.fields.__dict__[field].set(var_dict[field])
 
     def appendVarValToDict(dict_={}, *args, **kwargs):
-        raise NotImplementedError
-
-    @staticmethod
-    def appendVarValToDict(dict_: dict = {}):
         raise NotImplementedError
 
 
