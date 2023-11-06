@@ -24,10 +24,10 @@ import pathlib
 import sys
 
 import batchpynamer as bpn
-from batchpynamer import mainwindow
+import batchpynamer.gui as bpn_gui
 
 
-def start_Path_Handling(sys_args):
+def start_path_handling(sys_args):
     """Get the path from the arguments in the program call or use a default path
     if no argument was passed"""
 
@@ -57,62 +57,54 @@ def start_Path_Handling(sys_args):
     except AttributeError:
         sys.exit(
             "ERROR:\n\t- Too many arguments. Program expected 1 (a valid "
-            "path), got {} instead.".format(len(sys_args) - 1)
+            f"path), got {len(sys_args) - 1} instead."
         )
     # When finding a FileNotFoundError exit the program with an error message
     except FileNotFoundError:
-        sys.exit(
-            'ERROR:\n\t- The given path "{}" doesn\'t exists.'.format(path)
-        )
+        sys.exit(f'ERROR:\n\t- The given path "{path}" doesn\'t exists.')
     # When finding a NotADirectoryError exit the program with an error message
     except NotADirectoryError:
-        sys.exit(
-            'ERROR:\n\t- The given path "{}" isn\'t a directory.'.format(path)
-        )
+        sys.exit(f'ERROR:\n\t- The given path "{path}" isn\'t a directory.')
     # When finding a PermissionError exit the program with an error message
     except PermissionError:
         sys.exit(
             "ERROR:\n\t- You don't have permission to access the given path"
-            ' "{}".'.format(path)
+            f' "{path}".'
         )
     # When there was no path given from the terminal default to the user path
     except IndexError:
-        path = "/home/Jupiter/Music"
-        pass
+        path = "."
 
     return path
 
 
-def get_Max_Name_Len(path):
+def max_name_len_get(path):
     """Get the maximum filename lenght in the active drive"""
     max_name_len = os.statvfs(path).f_namemax
 
 
-def create_Config_Folder(path):
+def create_config_folder(path):
     """Creates the config folder if it doesn't exist already"""
-    try:
-        pathlib.Path(path).mkdir(parents=True, exist_ok=False)
-    except FileExistsError:
-        pass
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 
-def _run():
+def _gui_run():
     """
     PROGRAM INITIALIZATION
     """
-    bpn.OG_PATH = start_Path_Handling(sys.argv)
+    bpn.OG_PATH = start_path_handling(sys.argv)
 
     # Try to create the configuration folder
     if bpn.CONFIG_FOLDER_PATH:
-        create_Config_Folder(bpn.CONFIG_FOLDER_PATH)
+        create_config_folder(bpn.CONFIG_FOLDER_PATH)
 
     """
     WINDOW INITIALIZATION
     """
     # Create the Tkinter root window
-    bpn.init_tk_root()
+    bpn_gui.init_tk_root()
     # Initialize
-    bpn.root.tk_init()
+    bpn_gui.root.tk_init()
 
 
 ###################################
@@ -121,6 +113,4 @@ PROGRAM
 """
 ###################################
 if __name__ == "__main__":
-    _run()
-
-    print("end")
+    _gui_run()

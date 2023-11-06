@@ -17,13 +17,15 @@ setup(
     ),
     long_description=readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/Alejandro-Roldan/Batch-Pynamer/tree/master",
+    url=__url__,
     author=batchpynamer.__author__,
     author_email=batchpynamer.__email__,
     license=batchpynamer.__license__,
     packages=["batchpynamer"],
     entry_points={
-        "console_scripts": ["batchpynamer = batchpynamer.batchpynamer:_run"]
+        "console_scripts": [
+            "batchpynamer = batchpynamer.batchpynamer:_gui_run"
+        ]
     },
     package_data={},
     zip_safe=False,
