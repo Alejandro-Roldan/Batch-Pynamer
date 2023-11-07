@@ -7,6 +7,7 @@ from batchpynamer.gui import commands
 from batchpynamer.gui.notebook.metadata import metadata
 from batchpynamer.gui.notebook.rename import rename
 from batchpynamer.gui.trees import trees
+from batchpynamer.plugins import plugins_base
 
 
 class TopMenu(tk.Menu):
@@ -29,10 +30,11 @@ class TopMenu(tk.Menu):
         if not bpn.CONFIG_FOLDER_PATH:
             self.entryconfigure(index=3, state="disable")
 
+        self.plugins_menu_init()
+        self.add_cascade(label="Plugins", menu=self.plugins_menu)
+
         self.about_menu_init()
         self.add_cascade(label="About", menu=self.about_menu)
-
-        # self.changes_notebook.menu_bar = self
 
         self.menu_opts_metadata_disable()
 
@@ -231,7 +233,7 @@ class TopMenu(tk.Menu):
         # Separator
         self.command_menu.add_separator()
 
-        # Apply selected command
+        # Select command
         self.command_menu.add_cascade(
             label="Select Command", menu=self.command_select_menu
         )
@@ -247,7 +249,45 @@ class TopMenu(tk.Menu):
                 value=command_name,
             )
 
-    def about_menu_init(self, *args, **kwargs):
+    def plugins_menu_init(self):
+        def generate_plugin_menu(parent, plugins_dict):
+            def _traverse(parent, nested_dict):
+                """Returns name for reference and run method"""
+                for key in nested_dict:
+                    if isinstance(
+                        nested_dict[key],
+                        plugins_base.PluginsDictStruct.PluginImport,
+                    ):
+                        for class_ in nested_dict[key].module_classes:
+                            item = nested_dict[key].module_classes[class_]
+                            # Select command
+                            parent.add_command(
+                                label=class_,
+                                command=item()._run,
+                            )
+                        parent.add_separator()
+                    else:
+                        menu = tk.Menu(
+                            parent, tearoff=0, bg="gray75", foreground="black"
+                        )
+                        parent.add_cascade(label=key, menu=menu)
+                        _traverse(menu, nested_dict[key])
+
+                # TODO
+                # breakpoint()
+                # parent.entryconfigure(index=-1, state="disable")
+                # if last item separator:
+                #     remove
+
+            return _traverse(parent, plugins_dict.nested_dict)
+
+        self.plugins_menu = tk.Menu(
+            self, tearoff=0, bg="gray75", foreground="black"
+        )
+        plugins_dict = plugins_base._extract_plugins()
+        generate_plugin_menu(self.plugins_menu, plugins_dict)
+
+    def about_menu_init(self):
         """About Menu Dropdown"""
         # Create the menu
         self.about_menu = tk.Menu(

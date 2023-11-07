@@ -2,7 +2,7 @@ from tkinter import ttk
 
 import batchpynamer.gui as bpn_gui
 from batchpynamer.data import metadata_data_tools
-from batchpynamer.gui import info_bar
+from batchpynamer.gui import infobar
 from batchpynamer.gui.basewidgets import BaseWidget
 from batchpynamer.gui.notebook import notebook
 
@@ -77,7 +77,7 @@ def _meta_gui_changes_action(
 ):
     """Action for the GUI to apply metadata changes"""
     # Show that its in the process
-    info_bar.show_working()
+    infobar.show_working()
     selection = bpn_gui.fn_treeview.selection_get()
 
     if meta_change:
@@ -97,4 +97,4 @@ def _meta_gui_changes_action(
     # Reload after the changes
     notebook.populate_fields()
     # Show that its finish
-    info_bar.finish_show_working(inf_msg=inf_msg)
+    infobar.finish_show_working(inf_msg=inf_msg)

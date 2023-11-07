@@ -15,7 +15,7 @@ def tk_init_post_hook():
     other widgets without caring for widget creation order
     """
 
-    from batchpynamer.gui.info_bar import Info_Bar
+    from batchpynamer.gui.infobar import Info_Bar
     from batchpynamer.gui.menubar import TopMenu
     from batchpynamer.gui.notebook.metadata.a_text import MetadataListEntries
     from batchpynamer.gui.notebook.metadata.b_image import MetadataImg
@@ -49,10 +49,10 @@ def tk_init_post_hook():
     # Main Window Widgets
     global info_bar
     info_bar = Info_Bar()
-    global fn_treeview
-    fn_treeview = FileNavigator()
     global folder_treeview
     folder_treeview = DirectoryNavigator()
+    global fn_treeview
+    fn_treeview = FileNavigator()
     global dir_entry_frame
     dir_entry_frame = DirectoryEntryFrame()
     global changes_notebook

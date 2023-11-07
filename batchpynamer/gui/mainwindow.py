@@ -3,7 +3,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 import batchpynamer.gui as bpn_gui
-from batchpynamer.gui import commands, info_bar
+from batchpynamer.gui import commands
 from batchpynamer.gui.notebook.rename import rename
 from batchpynamer.gui.trees import trees
 

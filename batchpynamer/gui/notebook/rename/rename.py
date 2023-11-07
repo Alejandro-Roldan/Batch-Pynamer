@@ -10,7 +10,7 @@ from batchpynamer.data.rename_data_tools import (
     rename_create_new_name_action,
     rename_system_rename,
 )
-from batchpynamer.gui import basewidgets, commands, info_bar
+from batchpynamer.gui import basewidgets, commands, infobar
 from batchpynamer.gui.trees import trees
 
 
@@ -121,7 +121,7 @@ def rename_gui_undo_rename_call(event=None):
     # Try to undo the changes only if there are changes to undo
     if last_rename_list:
         # Show that it's in the process
-        info_bar.show_working()
+        infobar.show_working()
 
         logging.info("Undo:")
         for name_pair in last_rename_list:
@@ -137,7 +137,7 @@ def rename_gui_undo_rename_call(event=None):
         # Update the folders treeviews
         trees.refresh_treeviews()
 
-        info_bar.finish_show_working(inf_msg="Finished Undo Operation")
+        infobar.finish_show_working(inf_msg="Finished Undo Operation")
 
         # Clear the last rename list pairs
         bpn_gui.last_rename.clear()
@@ -174,13 +174,12 @@ def rename_gui_apply_rename_call(event=None):
     # Try to apply the changes only if there is a selection
     if selection:
         # Show that its in the process
-        info_bar.show_working()
+        infobar.show_working()
 
         logging.info("Rename:")
         for old_path in selection:
             directory, slash, old_name = old_path.rpartition("/")
             name = bpn_gui.fn_treeview.tree_folder.set(old_path, "#1")
-            # Only rename if the old name is different from the new name
             new_path = directory + slash + name
 
             # Rename and handle output
@@ -194,7 +193,7 @@ def rename_gui_apply_rename_call(event=None):
         trees.refresh_treeviews()
 
         # Show that its finish
-        info_bar.finish_show_working(inf_msg="Finished Rename")
+        infobar.finish_show_working(inf_msg="Finished Rename")
 
     # Else show a msg that there is no selection
     else:

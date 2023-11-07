@@ -13,6 +13,7 @@ def rename_apply_new_name_action(name, idx, path, fields_dict):
 
 
 def rename_system_rename(old_path, new_path):
+    # Only rename if the old name is different from the new name
     if old_path == new_path:
         logging.info(f'"{old_path}" New name is the same as old name')
         return None
