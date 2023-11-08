@@ -1,5 +1,6 @@
 # Batch-Pynamer
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A purely python batch file renamer specially made to work on linux.
 
 It can also change and use metadata for flac, mp3 and mp4 files. If you don't have the metadata dependencies needed you can still use the rest of the program, which uses exclusively base python libraries.
@@ -41,6 +42,8 @@ cd into it and run
 ```
 pip install . --break-system-packages
 ```
+--break-system-packages seems to be needed even though this package is not managed by any system...
+this pip change deletes my will to live
 
 
 Batch-Pynamer-Plugins
