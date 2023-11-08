@@ -1,11 +1,7 @@
 import logging
-import os
-import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer as bpn
 import batchpynamer.config as bpn_config
-import batchpynamer.data as bpn_data
 import batchpynamer.gui as bpn_gui
 from batchpynamer.data.rename_data_tools import (
     rename_create_new_name_action,

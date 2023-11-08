@@ -1,6 +1,5 @@
 from tkinter import ttk
 
-import batchpynamer as bpn
 import batchpynamer.gui as bpn_gui
 from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (

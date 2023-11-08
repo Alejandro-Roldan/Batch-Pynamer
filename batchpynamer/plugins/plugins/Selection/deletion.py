@@ -1,8 +1,7 @@
-from batchpynamer.plugins.plugins_base import BasePlugin
-
-import time
 import pathlib
 import shutil
+
+from batchpynamer.plugins.plugins_base import BasePlugin
 
 
 class DeleteSelection(BasePlugin):

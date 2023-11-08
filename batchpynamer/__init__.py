@@ -8,9 +8,6 @@ __author__ = __maintainer__ = "Alejandro Roldán"
 __email__ = "alej.roldan.trabajos@gmail.com"
 __url__ = "https://github.com/Alejandro-Roldan/Batch-Pynamer"
 
-import os
-
-import batchpynamer
 import logging
 
 TITLE = f"{__name__}-V{__version__}"

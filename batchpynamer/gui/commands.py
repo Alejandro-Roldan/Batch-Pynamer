@@ -1,12 +1,14 @@
+import logging
 from tkinter import ttk
 
-import batchpynamer as bpn
 import batchpynamer.config as bpn_config
 import batchpynamer.gui as bpn_gui
+from batchpynamer.gui import infobar
 from batchpynamer.gui.basewidgets import (
     BaseFieldsWidget,
     BpnComboVar,
     BpnStrVar,
+    ErrorFrame,
     PopUpWindow,
 )
 from batchpynamer.gui.notebook.rename import rename
@@ -83,12 +85,12 @@ class SaveCommandWindow(PopUpWindow, BaseFieldsWidget):
         # Check the command name is valid (alphanumeric)
         if not command_name.isalnum():
             inf_msg = f'Invalid Name: "{command_name}"'
-            bw.ErrorFrame(inf_msg)
+            ErrorFrame(inf_msg)
             logging.error("GUI- command- " + inf_msg)
         # Check its not already in use
         elif command_name in bpn_config.command_conf:
             inf_msg = "Name Already in Use"
-            bw.ErrorFrame(inf_msg)
+            ErrorFrame(inf_msg)
             logging.error("GUI- command- " + inf_msg)
         # Save command and edit the previous step
         else:
@@ -159,7 +161,7 @@ def command_gui_apply_action(event=None, command_name=None):
     # Apply only if the selected command isn't the default (no changes)
     if command_name != "DEFAULT":
         # Show that it's in the process
-        info_bar.show_working()
+        infobar.show_working()
 
         # Get the variables values dict from the config command file under
         # the selected command name
@@ -180,12 +182,12 @@ def command_gui_apply_action(event=None, command_name=None):
             bpn_gui.fn_treeview.selection_set(
                 bpn_gui.last_rename.new_name_list_get()
             )
-            # Call Apply_Command with next_step
-            apply_command(event=None, command_name=next_step)
+            # Call command_gui_apply_action with next_step
+            command_gui_apply_action(event=None, command_name=next_step)
 
         # Show that it finished
         inf_msg = 'Applied "{}" Command'.format(command_name)
-        info_bar.finish_show_working(inf_msg=inf_msg)
+        infobar.finish_show_working(inf_msg=inf_msg)
         logging.info("GUI- command- " + inf_msg)
 
     # If the selected command was the default show msg

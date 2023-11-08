@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+import os
+import sys
+
+import batchpynamer.config as bpn_config
+import batchpynamer.gui as bpn_gui
+from batchpynamer.config import config
+
 """ Copyright 2019-2023 Alejandro Roldán """
 
 """
@@ -19,19 +26,10 @@
     along with Batch Pynamer.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import os
-import pathlib
-import sys
-
-import batchpynamer as bpn
-import batchpynamer.config as bpn_config
-import batchpynamer.gui as bpn_gui
-from batchpynamer.config import config
-
 
 def _start_path_handling(sys_args):
-    """Get the path from the arguments in the program call or use a default path
-    if no argument was passed"""
+    """Get the path from the arguments in the program call or use a default
+    path if no argument was passed"""
 
     try:
         # Make sure the path doesn't have a trailing backslash to avoid errors

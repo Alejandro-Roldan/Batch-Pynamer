@@ -1,7 +1,5 @@
-import tkinter as tk
 from tkinter import ttk
 
-import batchpynamer as bpn
 from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,

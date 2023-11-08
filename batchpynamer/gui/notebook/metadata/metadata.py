@@ -16,10 +16,10 @@ class MetadataApplyChanges(BaseWidget, ttk.Frame):
         - Button to apply both
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, master):
+        #     pass
 
-    def tk_init(self, master):
+        # def tk_init(self, master):
         super().__init__(master, column=2, row=0, sticky="se")
 
         self.apply_meta_button = ttk.Button(

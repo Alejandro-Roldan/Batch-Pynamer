@@ -3,11 +3,9 @@
 * max name len por directorio elegido
 
 * plugins:
-full metadata from path
 check weird chars
 plugin where the selection applies recursevily and if no selection get the folder view selection
-plugin that removes extra metadata
-plugin for metadata from musicbrainzz
+plugin for metadata from musicbrainz
 
 * dont add separator at the end of plugin menu
 

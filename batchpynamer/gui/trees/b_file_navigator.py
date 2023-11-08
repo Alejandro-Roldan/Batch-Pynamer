@@ -207,5 +207,5 @@ class FileNavigator(BaseWidget, ttk.Frame):
         name = os.path.basename(path)
         # Set info msg
         msg = f'Copied "{name}" Path to Clipboard'
-        bpn_gui.info_bar.last_action_set()
+        bpn_gui.info_bar.last_action_set(msg)
         logging.debug("GUI- " + msg)

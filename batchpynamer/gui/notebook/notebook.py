@@ -94,7 +94,7 @@ class ChangesNotebook(BaseWidget, ttk.Notebook):
         # Attached Image
         bpn_gui.metadata_img.tk_init(master)
         # Apply buttons
-        bpn_gui.metadata_apply_changes.tk_init(master)
+        metadata.MetadataApplyChanges(master)
 
     def nb_active_tab_get(self):
         return self.tab(self.select(), "text")

@@ -37,8 +37,8 @@ def rename_system_rename(old_path, new_path):
     # If path already exists don't write over it and skip it
     else:
         error_msg = (
-            f'Couldn\'t rename file "{old_path}" to "{new_path}".\nPath already ex'
-            "ists"
+            f'Couldn\'t rename file "{old_path}" to "{new_path}".\nPath alread'
+            "y exists"
         )
 
     logging.error(error_msg)
@@ -118,7 +118,8 @@ def rename_from_file_action(name, idx, fields_dict):
                     pass
         except IsADirectoryError:
             logging.warning(
-                f'rename_from_file_file: "{rename_from_file_file}" is a directory'
+                f'rename_from_file_file: "{rename_from_file_file}" is a direct'
+                "ory"
             )
 
     return name
@@ -261,9 +262,9 @@ def rename_remove_action(name, fields_dict):
         remove_rm_words = fields_dict.get("remove_rm_words")
         remove_rm_chars = fields_dict.get("remove_rm_chars")
 
-        # Only try this if theres somethin in remove_rm_words, otherwise it would
-        # have to transform the string into lists and loop through the whole
-        # name of each selected item everytime
+        # Only try this if theres somethin in remove_rm_words, otherwise it
+        # would have to transform the string into lists and loop through the
+        # whole name of each selected item everytime
         if remove_rm_words:
             # Create list of words to remove, splitted spaces
             remove_rm_words = remove_rm_words.split()
@@ -289,7 +290,7 @@ def rename_remove_action(name, fields_dict):
         Crops before or after the specified char(s).
         It can also crop inbetween 2 char(s), ex:
         a*b (for cropping between the first ocurrence of a and b)
-        \[*\] (for cropping between [ and ])
+        \\[*\\] (for cropping between [ and ])
         """
         remove_crop_pos = fields_dict.get("remove_crop_pos")
         remove_crop_this = fields_dict.get("remove_crop_this")

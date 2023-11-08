@@ -23,9 +23,6 @@ def tk_init_post_hook():
     from batchpynamer.gui.menubar import TopMenu
     from batchpynamer.gui.notebook.metadata.a_text import MetadataListEntries
     from batchpynamer.gui.notebook.metadata.b_image import MetadataImg
-    from batchpynamer.gui.notebook.metadata.metadata import (
-        MetadataApplyChanges,
-    )
     from batchpynamer.gui.notebook.notebook import ChangesNotebook
     from batchpynamer.gui.notebook.rename.a_from_file import RenameFromFile
     from batchpynamer.gui.notebook.rename.b_reg_exp import RenameFromRegExp
@@ -62,7 +59,7 @@ def tk_init_post_hook():
     global changes_notebook
     changes_notebook = ChangesNotebook()
     global menu_bar
-    menu_bar = menubar.TopMenu()
+    menu_bar = TopMenu()
 
     # Search Filters
     global filters_widget
@@ -97,7 +94,5 @@ def tk_init_post_hook():
     metadata_list_entries = MetadataListEntries()
     global metadata_img
     metadata_img = MetadataImg()
-    global metadata_apply_changes
-    metadata_apply_changes = MetadataApplyChanges()
 
     logging.debug("Initialized window sub fields with global")
