@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
+import batchpynamer.config as bpn_config
 import batchpynamer.data as bpn_data
 import batchpynamer.gui as bpn_gui
 from batchpynamer.data.rename_data_tools import (
@@ -80,7 +81,7 @@ class Rename(basewidgets.BaseWidget, ttk.Frame):
         )
         # Disable the button if no path to where commands are stored
         # TODO add also disable if no command selected
-        if not bpn.CONFIG_FOLDER_PATH:
+        if not bpn_config.config_folder_path:
             self.load_command_button.config(state="disable")
 
         self.reset_button = ttk.Button(
@@ -214,6 +215,7 @@ def rename_gui_all_fields_reset(event=None):
     bpn_gui.numbering.resetWidget()
     bpn_gui.ext_replace.resetWidget()
 
+    logging.debug("GUI- Full Reset")
     bpn_gui.info_bar.last_action_set("Full Reset")
 
 

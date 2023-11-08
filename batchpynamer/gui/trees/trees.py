@@ -6,12 +6,12 @@ from batchpynamer.gui.basewidgets import BaseWidget
 
 
 class TreesFrame(BaseWidget, ttk.Frame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, og_path, **kwargs):
         super().__init__(master, **kwargs)
         self.columnconfigure(1, weight=1)
 
         bpn_gui.fn_treeview.tk_init(self)
-        bpn_gui.folder_treeview.tk_init(self, path=bpn.OG_PATH)
+        bpn_gui.folder_treeview.tk_init(self, path=og_path)
         bpn_gui.dir_entry_frame.tk_init(self)
 
 

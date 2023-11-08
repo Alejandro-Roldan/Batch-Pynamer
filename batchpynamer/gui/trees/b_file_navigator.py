@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from tkinter import ttk
@@ -69,14 +70,17 @@ class FileNavigator(BaseWidget, ttk.Frame):
     def selection_set(self, items):
         """Sets the selection of the tree_folder to the list of items"""
         self.tree_folder.selection_set(items)
+        logging.debug("GUI- file navigator selection set")
 
     def select_all(self, event=None):
         """Select all children items"""
         self.tree_folder.selection_set(self.tree_folder.get_children())
+        logging.debug("GUI- file navigator select all")
 
     def deselect_all(self, event=None):
         """Deselect all selected items"""
         self.tree_folder.selection_set()
+        logging.debug("GUI- file navigator deselect all")
 
     def invert_selection(self, event=None):
         """Inverts the selection"""
@@ -90,6 +94,7 @@ class FileNavigator(BaseWidget, ttk.Frame):
 
         # Set inverted as the new selection
         self.selection_set(inverted)
+        logging.debug("GUI- file navigator inverse selection")
 
     def show_new_name(self, var=None, index=None, mode=None):
         """
@@ -108,6 +113,7 @@ class FileNavigator(BaseWidget, ttk.Frame):
             )
             # Changes the new name column
             self.new_name_set(path, new_name, old_name)
+        logging.debug("GUI- file navigator show new name")
 
     def reset_new_name(self):
         """
@@ -172,6 +178,7 @@ class FileNavigator(BaseWidget, ttk.Frame):
             )
             # bpn_gui.dir_entry_frame.folderDirSet()
             bpn_gui.info_bar.last_action_set("Refreshed File View")
+            logging.debug("GUI- file navigator refreshed view")
 
     def num_items_info_bar_call(self, event=None):
         """Refresh the number of items in the info bar"""
@@ -196,4 +203,6 @@ class FileNavigator(BaseWidget, ttk.Frame):
         # Get the file/directory name to use in info msg
         name = os.path.basename(path)
         # Set info msg
-        bpn_gui.info_bar.last_action_set(f'Copied "{name}" Path to Clipboard')
+        msg = f'Copied "{name}" Path to Clipboard'
+        bpn_gui.info_bar.last_action_set()
+        logging.debug("GUI- " + msg)

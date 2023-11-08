@@ -2,6 +2,7 @@ from tkinter import ttk
 
 import batchpynamer as bpn
 import batchpynamer.gui as bpn_gui
+from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -35,7 +36,7 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
             files_before_dirs=BpnBoolVar(False),
             reverse=BpnBoolVar(False),
             min_name_len=BpnIntVar(0),
-            max_name_len=BpnIntVar(bpn.MAX_NAME_LEN),
+            max_name_len=BpnIntVar(bpn_gui_utils.drive_max_name_len()),
             depth=BpnIntVar(0),
         )
 
@@ -113,7 +114,7 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
             self,
             width=3,
             from_=-1,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.depth,
         )
         self.depth_spin.grid(column=5, row=0)
@@ -126,7 +127,7 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
         self.name_len_min_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.min_name_len,
         )
         self.name_len_min_spin.grid(column=7, row=1, sticky="w")
@@ -136,7 +137,7 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
         self.name_len_max_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.max_name_len,
         )
         self.name_len_max_spin.grid(column=9, row=1, sticky="w")

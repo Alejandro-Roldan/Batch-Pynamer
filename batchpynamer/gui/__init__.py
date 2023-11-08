@@ -1,11 +1,15 @@
 """Graphic User Interface related code"""
 
+import logging
+
 
 def init_tk_root():
     from batchpynamer.gui.mainwindow import WindowRoot
 
     global root
     root = WindowRoot()
+
+    logging.debug("Initialized window root with global")
 
 
 def tk_init_post_hook():
@@ -95,3 +99,5 @@ def tk_init_post_hook():
     metadata_img = MetadataImg()
     global metadata_apply_changes
     metadata_apply_changes = MetadataApplyChanges()
+
+    logging.debug("Initialized window sub fields with global")

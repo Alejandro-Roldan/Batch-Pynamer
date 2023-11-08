@@ -2,6 +2,7 @@ import tkinter as tk
 import webbrowser  # for the About menu
 
 import batchpynamer as bpn
+import batchpynamer.config as bpn_config
 import batchpynamer.gui as bpn_gui
 from batchpynamer.gui import commands
 from batchpynamer.gui.notebook.metadata import metadata
@@ -27,7 +28,7 @@ class TopMenu(tk.Menu):
         # Only create the command menu if there is a configuration folder
         self.command_menu_init()
         self.add_cascade(label="Commands", menu=self.command_menu)
-        if not bpn.CONFIG_FOLDER_PATH:
+        if not bpn_config.config_folder_path:
             self.entryconfigure(index=3, state="disable")
 
         self.plugins_menu_init()
@@ -227,7 +228,7 @@ class TopMenu(tk.Menu):
 
         # Only try to load the commands if there is a path to the
         # commands configuration file
-        if bpn.CONFIG_FOLDER_PATH:
+        if bpn_config.config_folder_path:
             self.update_command_list_menu()
 
         # Separator
@@ -242,7 +243,7 @@ class TopMenu(tk.Menu):
         """Deletes the already existing items and updates the view"""
         self.command_select_menu.delete(0, "end")
         # Read the commands config and create a radio button for each command
-        for command_name in bpn.COMMAND_CONF.sections():
+        for command_name in bpn_config.command_conf.sections():
             self.command_select_menu.add_radiobutton(
                 label=command_name,
                 variable=self.selected_command,

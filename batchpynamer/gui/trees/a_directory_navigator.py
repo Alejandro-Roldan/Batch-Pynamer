@@ -1,3 +1,4 @@
+import logging
 import os
 from tkinter import TclError, ttk
 
@@ -97,6 +98,7 @@ class DirectoryNavigator(BaseWidget, ttk.Frame):
         self.delete_node_children(node)
         self.empty_nodes[node] = node
         self.fill_node(node=node)
+        logging.info(f"GUI- Refreshed directory view node: {node}")
 
     def delete_node_children(self, node):
         """Delete all existing nodes in the folder view"""

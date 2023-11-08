@@ -24,10 +24,12 @@ import pathlib
 import sys
 
 import batchpynamer as bpn
+import batchpynamer.config as bpn_config
 import batchpynamer.gui as bpn_gui
+from batchpynamer.config import config
 
 
-def start_path_handling(sys_args):
+def _start_path_handling(sys_args):
     """Get the path from the arguments in the program call or use a default path
     if no argument was passed"""
 
@@ -78,25 +80,16 @@ def start_path_handling(sys_args):
     return path
 
 
-def max_name_len_get(path):
-    """Get the maximum filename lenght in the active drive"""
-    max_name_len = os.statvfs(path).f_namemax
-
-
-def create_config_folder(path):
-    """Creates the config folder if it doesn't exist already"""
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
-
 def _gui_run():
     """
     PROGRAM INITIALIZATION
     """
-    bpn.OG_PATH = start_path_handling(sys.argv)
+    og_path = _start_path_handling(sys.argv)
 
     # Try to create the configuration folder
-    if bpn.CONFIG_FOLDER_PATH:
-        create_config_folder(bpn.CONFIG_FOLDER_PATH)
+    if bpn_config.config_folder_path:
+        config.create_config_folder(bpn_config.config_folder_path)
+        config.create_config_folder(bpn_config.plugins_folder_path)
 
     """
     WINDOW INITIALIZATION
@@ -104,7 +97,7 @@ def _gui_run():
     # Create the Tkinter root window
     bpn_gui.init_tk_root()
     # Initialize
-    bpn_gui.root.tk_init()
+    bpn_gui.root.tk_init(og_path)
 
 
 ###################################

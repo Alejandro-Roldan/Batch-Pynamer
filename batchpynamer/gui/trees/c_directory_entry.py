@@ -1,3 +1,4 @@
+import logging
 import os
 from tkinter import ttk
 
@@ -55,7 +56,6 @@ class DirectoryEntryFrame(BaseFieldsWidget, ttk.Frame):
         self, var=None, index=None, mode=None, event=None, new_active_path=None
     ):
         """Sets the active path and refreshes the file view"""
-        # breakpoint()
         if new_active_path is not None:
             self.fields.active_path.set(new_active_path)
 
@@ -65,3 +65,4 @@ class DirectoryEntryFrame(BaseFieldsWidget, ttk.Frame):
             bpn_gui.fn_treeview.refresh_view_call(active_path)
         else:
             bpn_gui.info_bar.last_action_set("Not a Valid Directory")
+            logging.warning(f'GUI- "{active_path}" not a valid directory')

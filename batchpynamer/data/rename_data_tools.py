@@ -15,7 +15,9 @@ def rename_apply_new_name_action(name, idx, path, fields_dict):
 def rename_system_rename(old_path, new_path):
     # Only rename if the old name is different from the new name
     if old_path == new_path:
-        logging.info(f'"{old_path}" New name is the same as old name')
+        logging.debug(
+            f'"{old_path}" New name is the same as old name. Skipped'
+        )
         return None
 
     if not os.path.exists(new_path):
@@ -27,6 +29,7 @@ def rename_system_rename(old_path, new_path):
 
         except FileNotFoundError:
             error_msg = f"Couldn't rename file {old_path}.\nFile not found"
+        # No errors
         else:
             logging.info(f"{old_path} -> {new_path}")
             return None
@@ -100,6 +103,7 @@ def rename_from_file_action(name, idx, fields_dict):
     rename_from_file_file = fields_dict.get("rename_from_file_file")
     rename_from_file_wrap = fields_dict.get("rename_from_file_wrap")
 
+    # Handling of
     if os.path.exists(rename_from_file_file):
         try:
             with open(rename_from_file_file, "r") as f:
@@ -113,7 +117,9 @@ def rename_from_file_action(name, idx, fields_dict):
                 except IndexError:
                     pass
         except IsADirectoryError:
-            pass
+            logging.warning(
+                f'rename_from_file_file: "{rename_from_file_file}" is a directory'
+            )
 
     return name
 
@@ -133,21 +139,27 @@ def rename_reg_exp_action(name, fields_dict):
     reg_exp_match_reg = fields_dict.get("reg_exp_match_reg")
     reg_exp_replace_with = fields_dict.get("reg_exp_replace_with")
 
-    reg_exp_match_reg = re.compile(reg_exp_match_reg)
-    reg_grouping = reg_exp_match_reg.match(name)
-    if reg_exp_match_reg != "" and reg_exp_replace_with != "":
-        for i in range(0, len(reg_grouping.groups()) + 1):
-            n = str(i)
+    try:
+        reg_exp_match_reg = re.compile(reg_exp_match_reg)
+    # Handle unterminated patterns while writing
+    except re.error:
+        pass
+    else:
+        # breakpoint()
+        reg_grouping = reg_exp_match_reg.match(name)
+        if reg_exp_match_reg and reg_exp_replace_with:
+            for i in range(0, len(reg_grouping.groups()) + 1):
+                n = str(i)
 
-            # Prevent IndexError blocking
-            try:
-                reg_exp_replace_with = reg_exp_replace_with.replace(
-                    "/" + n, reg_grouping.group(i)
-                )
-            except IndexError:
-                pass
+                # Prevent IndexError blocking
+                try:
+                    reg_exp_replace_with = reg_exp_replace_with.replace(
+                        "/" + n, reg_grouping.group(i)
+                    )
+                except IndexError:
+                    pass
 
-        name = reg_exp_replace_with
+            name = reg_exp_replace_with
 
     return name
 
@@ -177,7 +189,7 @@ def rename_replace_action(name, fields_dict):
         name = name.replace(replace_replace_this, replace_replace_with)
     # But when replacing without minding the case...
     # (If replace_replace_this is empty it breaks)
-    elif replace_replace_this != "":
+    elif replace_replace_this:
         # Start searching from the start of the string
         idx = 0
         # Find at what position what we want to replace is (all lowercase)
@@ -287,6 +299,7 @@ def rename_remove_action(name, fields_dict):
             # If the combobox is not in 'Special' do the regular crops
             if remove_crop_pos != "Special":
                 name_tuple = name.partition(remove_crop_this)
+                # Dont crop if it would be the only thing left
                 if remove_crop_pos == "Before" and name_tuple[2]:
                     name = name_tuple[2]
                 elif remove_crop_pos == "After" and name_tuple[0]:
@@ -332,7 +345,7 @@ def rename_remove_action(name, fields_dict):
     def _lead_dots(name):
         """Removes either '.' or '..' right at the begining"""
         remove_lead_dots = fields_dict.get("remove_lead_dots")
-        if remove_lead_dots != "None":
+        if remove_lead_dots != "None" and name.startswith(remove_lead_dots):
             name = name.replace(remove_lead_dots, "", 1)
 
         return name
@@ -432,13 +445,15 @@ def rename_add_action(name, fields_dict):
     # Add suffix
     name = name + add_to_str_suffix
 
-    if add_to_str_word_space:  # add a space before each capital letter
+    if add_to_str_word_space:
+        # Add a space before each capital letter
         name = "".join([" " + ch if ch.isupper() else ch for ch in name])
 
     return name
 
 
 def rename_add_folder_rename_action(name, path, fields_dict):
+    """Adds parent directories at position: start, end, position"""
     add_folder_name_name_pos = fields_dict.get("add_folder_name_name_pos")
     add_folder_name_sep = fields_dict.get("add_folder_name_sep")
     add_folder_name_levels = fields_dict.get("add_folder_name_levels")
@@ -594,6 +609,7 @@ def rename_numbering_action(name, idx, fields_dict):
 
 
 def rename_ext_action(ext, fields_dict):
+    """Extension renaming"""
     ext_replace_change_ext = fields_dict.get("ext_replace_change_ext")
     ext_replace_fixed_ext = fields_dict.get("ext_replace_fixed_ext")
 

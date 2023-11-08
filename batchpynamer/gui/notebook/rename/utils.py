@@ -1,3 +1,5 @@
+import logging
+
 from batchpynamer.gui.basewidgets import BpnIntVar
 
 

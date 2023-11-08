@@ -42,12 +42,7 @@ class ChangesNotebook(BaseWidget, ttk.Notebook):
             self.initialize_metadata_nb_page(self.nb_metadata)
         else:
             self.tab(1, state="disable")
-            metadata_import_error_msg = (
-                "No metadata modules available. This "
-                "program is able to edit metadata tags if you install the mutagen "
-                "and Pillow libraries"
-            )
-            bpn_gui.info_bar.last_action_set(metadata_import_error_msg)
+            bpn_gui.info_bar.last_action_set(bpn.metadata_import_error_msg)
 
         # Bindings
         self.bindings()

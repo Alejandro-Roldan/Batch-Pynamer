@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk
 from tkinter import ttk
 
@@ -11,7 +12,7 @@ from batchpynamer.gui.trees import trees
 class WindowRoot(tk.Tk):
     """Tkinter Root Window is created by __init__"""
 
-    def tk_init(self):
+    def tk_init(self, og_path):
         # Set title
         self.title(bpn.TITLE)
         # Set window type to dialog to make it floating
@@ -28,7 +29,7 @@ class WindowRoot(tk.Tk):
         bpn_gui.info_bar.tk_init(mainframe)
 
         # Tree view & File view
-        trees.TreesFrame(mainframe, column=0, row=0, sticky="we")
+        trees.TreesFrame(mainframe, og_path, column=0, row=0, sticky="ew")
 
         # Notebook
         bpn_gui.changes_notebook.tk_init(mainframe)
@@ -73,6 +74,7 @@ class WindowRoot(tk.Tk):
 
         # Exit
         self.bind("<Control-Escape>", lambda event: self.quit())
+        logging.debug("GUI- root binds")
 
     def rename_binds(self):
         # Entries Reset

@@ -1,3 +1,4 @@
+import logging
 import os
 
 from mutagen.easyid3 import EasyID3, EasyID3KeyError
@@ -21,6 +22,7 @@ def meta_audio_get(file):
     else:
         meta_audio = None
 
+    logging.debug(f'Loaded metadata from file "{file}":\n{meta_audio}')
     return meta_audio
 
 
@@ -44,21 +46,27 @@ def meta_img_get(file):
     else:
         meta_picture = "not valid"
 
+    logging.debug(f'Loaded metadata image from file "{file}"')
     return meta_picture
 
 
 def meta_audio_save(meta_audio, new_metadata_dict: dict):
+    """Updates metadata dict"""
     for key, value in new_metadata_dict.items():
         if ";" not in value:
             if value:
                 try:
                     meta_audio[key] = value
+                # ID3 tags, unlike flac, have specific accepted keys
+                # Handle trying to add an unsupported key
                 except (EasyID3KeyError, EasyMP4KeyError):
                     msg = f'Undefined Tag name "{key}" for ID3/MP4. Skipped'
+                    logging.error(msg)
             else:
                 del meta_audio[key]
 
     meta_audio.save()
+    logging.debug(f"Metadata dict:\n{meta_audio}")
 
 
 def meta_img_create(img_path):
@@ -111,6 +119,7 @@ def meta_img_save(item, img=None, apic=None):
     elif item.endswith(".mp3"):
         meta_audio = ID3(item)
         meta_img_mp3_save(meta_audio, apic)
+    logging.info(f'Added metadata image to "{item}"')
 
 
 def meta_img_flac_save(meta_audio, img=None):

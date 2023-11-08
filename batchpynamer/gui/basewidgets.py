@@ -115,6 +115,13 @@ class BpnIntVar(BpnVar, tk.IntVar):
     def __init__(self, default_val: int):
         super().__init__(default_val)
 
+    def get(self):
+        try:
+            return super().get()
+        # Handle spinboxes error when writing something thats not int
+        except tk.TclError:
+            return self.default
+
 
 class BpnStrVar(BpnVar, tk.StringVar):
     def __init__(self, default_val: str):

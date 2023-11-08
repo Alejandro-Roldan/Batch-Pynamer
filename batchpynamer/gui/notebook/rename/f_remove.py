@@ -1,11 +1,8 @@
-# import re  # regular expressions
-# import string
 import tkinter as tk
-
-# import unicodedata
 from tkinter import ttk
 
 import batchpynamer as bpn
+from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -70,7 +67,7 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.first_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.remove_first_n,
         )
         self.first_n_spin.grid(column=1, row=0)
@@ -80,7 +77,7 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.last_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.remove_last_n,
         )
         self.last_n_spin.grid(column=3, row=0)
@@ -90,7 +87,7 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.from_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.remove_from_n,
         )
         self.from_n_spin.grid(column=1, row=1)
@@ -100,7 +97,7 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
         self.to_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.remove_to_n,
         )
         self.to_n_spin.grid(column=3, row=1)

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
+from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -65,8 +66,8 @@ class AddToStr(BaseNamingWidget, ttk.LabelFrame):  # (7)
         self.at_pos_spin = ttk.Spinbox(
             self,
             width=3,
-            from_=-bpn.MAX_NAME_LEN,
-            to=bpn.MAX_NAME_LEN,
+            from_=-bpn_gui_utils.drive_max_name_len(),
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.add_to_str_at_pos,
         )
         self.at_pos_spin.grid(column=1, row=2)

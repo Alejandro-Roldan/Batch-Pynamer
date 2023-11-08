@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
+from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnComboVar,
@@ -59,7 +60,7 @@ class MoveParts(BaseNamingWidget, ttk.LabelFrame):  # (6)
         self.ori_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.move_parts_ori_n,
         )
         self.ori_n_spin.grid(column=3, row=0)
@@ -80,7 +81,7 @@ class MoveParts(BaseNamingWidget, ttk.LabelFrame):  # (6)
         self.end_n_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.move_parts_end_n,
         )
         self.end_n_spin.grid(column=7, row=0)

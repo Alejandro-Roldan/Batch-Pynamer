@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
+from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnComboVar,
@@ -56,8 +57,8 @@ class AddFolderName(BaseNamingWidget, ttk.LabelFrame):  # (8)
         self.levels_spin = ttk.Spinbox(
             self,
             width=3,
-            from_=-bpn.MAX_NAME_LEN,
-            to=bpn.MAX_NAME_LEN,
+            from_=-bpn_gui_utils.drive_max_name_len(),
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.add_folder_name_pos,
         )
         self.levels_spin.grid(column=3, row=0)

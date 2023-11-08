@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk
 from io import BytesIO
 from tkinter import ttk
@@ -9,7 +10,7 @@ import batchpynamer.gui as bpn_gui
 from batchpynamer.data import metadata_data_tools
 from batchpynamer.gui.basewidgets import BaseFieldsWidget, BpnStrVar
 
-IMG_DISPLAY_SIZE = 295  # Max size before it makes the window bigger
+IMG_DISPLAY_SIZE = 310  # Max size before it makes the window bigger
 
 
 class MetadataImg(BaseFieldsWidget, ttk.Frame):
@@ -38,7 +39,7 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
         )
 
     def tk_init(self, master):
-        super().__init__(master, column=1, row=0, sticky="ns")
+        super().__init__(master, column=1, row=0, sticky="nsew")
 
         # Path to new image, entry
         self.image_path_entry = ttk.Entry(
@@ -127,3 +128,4 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
         self.img.config(image=self.picture)
         # And update label text
         self.size_label.config(text=text)
+        logging.debug("GUI- image- " + text)

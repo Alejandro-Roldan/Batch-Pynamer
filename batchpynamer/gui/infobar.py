@@ -1,3 +1,4 @@
+import logging
 from tkinter import ttk
 
 import batchpynamer.gui as bpn_gui
@@ -46,6 +47,7 @@ class Info_Bar(BaseFieldsWidget, ttk.Frame):
         """Display a message, passed in the action variable"""
         # Set the text variable with the message
         self.fields.last_action.set(action)
+        logging.debug("GUI- " + action)
 
 
 def show_working(inf_msg="Working..."):

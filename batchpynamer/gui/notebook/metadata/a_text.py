@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk
 from tkinter import ttk
 
@@ -91,6 +92,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
 
         else:
             msg = "No name for the new tag. Please type a name"
+            logging.error("GUI- " + msg)
             bpn_gui.info_bar.last_action_set(msg)
 
     def metadata_gui_show(self):

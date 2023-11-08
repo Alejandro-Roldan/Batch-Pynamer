@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer as bpn
+from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnComboVar,
@@ -79,8 +80,8 @@ class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
         self.at_n_spin = ttk.Spinbox(
             self,
             width=3,
-            from_=-bpn.MAX_NAME_LEN,
-            to=bpn.MAX_NAME_LEN,
+            from_=-bpn_gui_utils.drive_max_name_len(),
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.numbering_at_n,
         )
         self.at_n_spin.grid(column=3, row=0)
@@ -90,7 +91,7 @@ class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
         self.start_num_spin = ttk.Spinbox(
             self,
             width=3,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.numbering_start_num,
         )
         self.start_num_spin.grid(column=1, row=1)
@@ -101,7 +102,7 @@ class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
             self,
             width=3,
             from_=1,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.numbering_incr_num,
         )
         self.incr_num_spin.grid(column=3, row=1)
@@ -112,7 +113,7 @@ class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
             self,
             width=3,
             from_=1,
-            to=bpn.MAX_NAME_LEN,
+            to=bpn_gui_utils.drive_max_name_len(),
             textvariable=self.fields.numbering_pad,
         )
         self.pad_spin.grid(column=1, row=2)
