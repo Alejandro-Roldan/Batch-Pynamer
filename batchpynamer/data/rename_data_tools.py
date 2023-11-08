@@ -107,7 +107,7 @@ def rename_from_file_action(name, idx, fields_dict):
     if os.path.exists(rename_from_file_file):
         try:
             with open(rename_from_file_file, "r") as f:
-                lines = f.readlines()
+                lines = f.read().splitlines()
                 lines_count = len(lines)
                 try:
                     if rename_from_file_wrap:
