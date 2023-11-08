@@ -53,17 +53,26 @@ def meta_img_get(file):
 def meta_audio_save(meta_audio, new_metadata_dict: dict):
     """Updates metadata dict"""
     for key, value in new_metadata_dict.items():
-        if ";" not in value:
-            if value:
-                try:
-                    meta_audio[key] = value
-                # ID3 tags, unlike flac, have specific accepted keys
-                # Handle trying to add an unsupported key
-                except (EasyID3KeyError, EasyMP4KeyError):
-                    msg = f'Undefined Tag name "{key}" for ID3/MP4. Skipped'
-                    logging.error(msg)
+        if ";" in value:
+            # When scaping the ";" char with a "\" we want to convert the
+            # string into a list of values separated at the ";", and save all
+            # those values to the dict[key]
+            if "\\;" in value:
+                value = value.split("\\; ")
+            # Else we ignore this field
             else:
-                del meta_audio[key]
+                continue
+
+        if value:
+            try:
+                meta_audio[key] = value
+            # ID3 tags, unlike flac, have specific accepted keys
+            # Handle trying to add an unsupported key
+            except (EasyID3KeyError, EasyMP4KeyError):
+                msg = f'Undefined Tag name "{key}" for ID3/MP4. Skipped'
+                logging.error(msg)
+        else:
+            del meta_audio[key]
 
     meta_audio.save()
     logging.debug(f"Metadata dict:\n{meta_audio}")
