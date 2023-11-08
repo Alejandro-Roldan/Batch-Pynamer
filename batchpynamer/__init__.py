@@ -11,6 +11,7 @@ __url__ = "https://github.com/Alejandro-Roldan/Batch-Pynamer"
 import os
 
 import batchpynamer
+import logging
 
 TITLE = f"{__name__}-V{__version__}"
 

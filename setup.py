@@ -17,7 +17,7 @@ setup(
     ),
     long_description=readme(),
     long_description_content_type="text/markdown",
-    url=__url__,
+    url=batchpynamer.__url__,
     author=batchpynamer.__author__,
     author_email=batchpynamer.__email__,
     license=batchpynamer.__license__,
