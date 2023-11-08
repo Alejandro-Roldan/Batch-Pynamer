@@ -160,6 +160,7 @@ class TopMenu(tk.Menu):
 
     def selection_menu_init(self):
         """Selection Menu Dropdown"""
+
         # Create the menu
         self.selection_menu = tk.Menu(
             self, tearoff=0, bg="gray75", foreground="black"
@@ -188,6 +189,7 @@ class TopMenu(tk.Menu):
 
     def command_menu_init(self):
         """Command Menu Dropdown"""
+
         # Variable defs
         self.selected_command = tk.StringVar(value="DEFAULT")
 
@@ -251,62 +253,69 @@ class TopMenu(tk.Menu):
             )
 
     def plugins_menu_init(self):
+        """Plugin Menu Dropdown"""
+
         def generate_plugin_menu(parent, plugins_dict):
             def _traverse(parent, nested_dict):
                 """Returns name for reference and run method"""
+
+                # Loop through the nested dict recursively
                 for key in nested_dict:
+                    # For the Plugins imports
                     if isinstance(
                         nested_dict[key],
                         plugins_base.PluginsDictStruct.PluginImport,
                     ):
-                        for class_ in nested_dict[key].module_classes:
-                            item = nested_dict[key].module_classes[class_]
-                            # Select command
+                        # Add the plugin classes in each file
+                        for name in nested_dict[key].module_classes:
+                            instance_ = nested_dict[key].module_classes[name]
                             parent.add_command(
-                                label=class_,
-                                command=item()._run,
+                                label=name,
+                                # Link the _run command
+                                command=instance_._run,
                             )
+
+                        # Add a separaton after ending file
                         parent.add_separator()
+
+                    # For directories
                     else:
+                        # Add a cascade menu
                         menu = tk.Menu(
                             parent, tearoff=0, bg="gray75", foreground="black"
                         )
                         parent.add_cascade(label=key, menu=menu)
+                        # And keep traversing
                         _traverse(menu, nested_dict[key])
-
-                # TODO
-                # breakpoint()
-                # parent.entryconfigure(index=-1, state="disable")
-                # if last item separator:
-                #     remove
 
             return _traverse(parent, plugins_dict.nested_dict)
 
+        # Cretae the plugin abse menu
         self.plugins_menu = tk.Menu(
             self, tearoff=0, bg="gray75", foreground="black"
         )
+        # And fill it dinamically
         plugins_dict = plugins_base._extract_plugins()
         generate_plugin_menu(self.plugins_menu, plugins_dict)
 
     def about_menu_init(self):
         """About Menu Dropdown"""
+
+        def _open_project_url():
+            """Open the Project Url"""
+            webbrowser.open(bpn.PROJECT_URL)
+
+        def _open_wiki_url():
+            """Open the Wiki Url"""
+            webbrowser.open(bpn.WIKI_URL)
+
         # Create the menu
         self.about_menu = tk.Menu(
             self, tearoff=0, bg="gray75", foreground="black"
         )
 
         # GitHub
-        self.about_menu.add_command(
-            label="Project", command=self.open_project_url
-        )
+        self.about_menu.add_command(label="Project", command=_open_project_url)
 
         # Wiki
-        self.about_menu.add_command(label="Help", command=self.open_wiki_url)
-
-    def open_project_url(self):
-        """Open the Project Url"""
-        webbrowser.open(bpn.PROJECT_URL)
-
-    def open_wiki_url(self):
-        """Open the Wiki Url"""
-        webbrowser.open(bpn.WIKI_URL)
+        self.about_menu.add_command(label="Help", command=_open_wiki_url)

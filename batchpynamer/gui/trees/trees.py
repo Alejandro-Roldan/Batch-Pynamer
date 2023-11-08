@@ -10,8 +10,8 @@ class TreesFrame(BaseWidget, ttk.Frame):
         super().__init__(master, **kwargs)
         self.columnconfigure(1, weight=1)
 
-        bpn_gui.fn_treeview.tk_init(self)
         bpn_gui.folder_treeview.tk_init(self, path=og_path)
+        bpn_gui.fn_treeview.tk_init(self)
         bpn_gui.dir_entry_frame.tk_init(self)
 
 

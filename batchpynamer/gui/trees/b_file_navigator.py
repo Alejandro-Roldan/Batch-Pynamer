@@ -157,15 +157,8 @@ class FileNavigator(BaseWidget, ttk.Frame):
         # selected) don't try to load it
         if path:
             # Get the filters values
-            filters_dict = bpn_gui.filters_widget.fields.get_all()
+            filters_dict = self.filters_widget_get()
 
-            # Transform the list of extensions into a tuple
-            exts = filters_dict.pop("ext")
-            filters_dict["ext_tuple"] = [
-                i for i in re.split(r";\s?|,\s?", exts)
-            ]
-
-            # breakpoint()
             scanned_dir = scandir_recursive_sorted(path, **filters_dict)
             for entry in scanned_dir:
                 _insert_node(entry)
@@ -179,6 +172,16 @@ class FileNavigator(BaseWidget, ttk.Frame):
             # bpn_gui.dir_entry_frame.folderDirSet()
             bpn_gui.info_bar.last_action_set("Refreshed File View")
             logging.debug("GUI- file navigator refreshed view")
+
+    def filters_widget_get(self):
+        """Get the filters values"""
+        filters_dict = bpn_gui.filters_widget.fields.get_all()
+
+        # Transform the list of extensions into a tuple
+        exts = filters_dict.pop("ext")
+        filters_dict["ext_tuple"] = [i for i in re.split(r";\s?|,\s?", exts)]
+
+        return filters_dict
 
     def num_items_info_bar_call(self, event=None):
         """Refresh the number of items in the info bar"""

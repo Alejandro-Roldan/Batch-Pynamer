@@ -1,8 +1,7 @@
 import os
 
 import batchpynamer.gui as bpn_gui
-from batchpynamer.data.metadata_data_tools import meta_audio_get, meta_img_get
-from batchpynamer.data.rename_data_tools import rename_ext_split_action
+from batchpynamer.data.metadata_data_tools import meta_audio_get
 from batchpynamer.gui.infobar import finish_show_working
 from batchpynamer.gui.notebook import notebook
 from batchpynamer.plugins.plugins_base import BasePlugin
@@ -27,35 +26,10 @@ class _MetadataPluginBaseClass(BasePlugin):
             finish_show_working(inf_msg=self.finish_msg)
 
 
-class TitleAndTrackFromFilename(_MetadataPluginBaseClass):
-    """
-    Sets the title and tracknumber metadata getting its values from the
-    filename. It splits the filename at the first apparition of "-" and
-    sets the left part to be the tracknumber and the right part to be
-    the title.
-    """
-
-    finish_msg = 'Changed "title" and "tracknumber" according to filename'
-
-    def meta_changes(self, meta_audio, item):
-        # Get the filename
-        name = os.path.basename(item)
-
-        # Split filename
-        n, title = name.split("-", 1)
-        # Remove the extension from the title
-        title, ext = rename_ext_split_action(title)
-
-        # Set the new metadata values
-        meta_audio["title"] = title.strip()
-        meta_audio["tracknumber"] = n.strip()
-
-        return meta_audio
-
-
 class FormatTrackNum(_MetadataPluginBaseClass):
     """Format metadata's tracknumber to be a single 2 digits number"""
 
+    short_desc = 'Format "tracknumber"'
     finish_msg = 'Changed "tracknumber" format'
 
     def meta_changes(self, meta_audio, _):
@@ -76,6 +50,7 @@ class FormatTrackNum(_MetadataPluginBaseClass):
 class FormatYearDate(_MetadataPluginBaseClass):
     """Format metadata date to just be the year"""
 
+    short_desc = 'Format "date" as year'
     finish_msg = 'Changed "date" format'
 
     def meta_changes(self, meta_audio, _):
@@ -93,6 +68,7 @@ class FormatYearDate(_MetadataPluginBaseClass):
 class FormatFullDate(_MetadataPluginBaseClass):
     """Format metadata date to have dashes between year-month-day"""
 
+    short_desc = 'Format full "date"'
     finish_msg = 'Changed "date" format'
 
     def meta_changes(self, meta_audio, _):
