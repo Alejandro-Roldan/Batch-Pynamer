@@ -1,8 +1,9 @@
-V. 08.00:
+V. 08.0.3:
 	- Refactored code into a more professional project
 	- Double Space removal deafults to true
 	- Extension splitting now checks that selection is file (prevents from treating whats after last . in directories as the extension and not being able to affect it with the name change)
 	- Added plugins support
+	- Added values list support for metadata separating the values with "\;" (rather than just ";" wich ignores changing those keys)
 
 
 V. 07.00:
