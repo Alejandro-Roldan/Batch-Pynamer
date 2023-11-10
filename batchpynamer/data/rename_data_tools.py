@@ -8,11 +8,12 @@ import batchpynamer as bpn
 from batchpynamer.data.metadata_data_tools import meta_audio_get
 
 
-def rename_apply_new_name_action(name, idx, path, fields_dict):
-    rename_create_new_name_action(name, idx, path, **fields_dict)
-
-
 def rename_system_rename(old_path, new_path):
+    """Rename files
+
+    Returns None when successful. Otherwise returns and error message
+    """
+
     # Only rename if the old name is different from the new name
     if old_path == new_path:
         logging.debug(
@@ -45,7 +46,22 @@ def rename_system_rename(old_path, new_path):
     return error_msg
 
 
-def rename_create_new_name_action(name, idx, path, **fields_dict):
+def rename_generate_new_name(old_path, idx, fields_dict):
+    """
+    Iterates over each selected item and recreates each new name
+    following the renaming rules given inside the rename page of
+    the notebook.
+    """
+    # Get the old name
+    old_name = os.path.basename(old_path)
+    # Transform the old name to the new name
+    return (
+        rename_create_new_name_action(old_name, idx, old_path, fields_dict),
+        old_path,
+    )
+
+
+def rename_create_new_name_action(name, idx, path, fields_dict):
     """
     Creates the new name going through all fields and making the changes
     to the old_name string
@@ -68,7 +84,7 @@ def rename_create_new_name_action(name, idx, path, **fields_dict):
 
     ext = rename_ext_action(ext, fields_dict)
     # Re-add extension
-    name = name + ext
+    name = name.strip() + ext.strip()
 
     # Format any metadata fields that have been added to the name
     # (only if the metadata modules were imported)
@@ -76,7 +92,7 @@ def rename_create_new_name_action(name, idx, path, **fields_dict):
         name = rename_metadata_format_action(name, path)
 
     # Remove leading and trailing whitespaces
-    return name.strip()
+    return name
 
 
 def rename_ext_split_action(name):
@@ -93,6 +109,11 @@ def rename_ext_split_action(name):
         ext = ""
 
     return name, ext
+
+
+"""
+RENAME FIELD APPLY
+"""
 
 
 def rename_from_file_action(name, idx, fields_dict):
@@ -140,15 +161,15 @@ def rename_reg_exp_action(name, fields_dict):
     reg_exp_match_reg = fields_dict.get("reg_exp_match_reg")
     reg_exp_replace_with = fields_dict.get("reg_exp_replace_with")
 
-    try:
-        reg_exp_match_reg = re.compile(reg_exp_match_reg)
-    # Handle unterminated patterns while writing
-    except re.error:
-        pass
-    else:
-        # breakpoint()
-        reg_grouping = reg_exp_match_reg.match(name)
-        if reg_exp_match_reg and reg_exp_replace_with:
+    if reg_exp_match_reg and reg_exp_replace_with:
+        try:
+            reg_exp_match_reg = re.compile(reg_exp_match_reg)
+        # Handle unterminated patterns while writing
+        except re.error:
+            pass
+        else:
+            # breakpoint()
+            reg_grouping = reg_exp_match_reg.match(name)
             for i in range(0, len(reg_grouping.groups()) + 1):
                 n = str(i)
 
@@ -196,8 +217,8 @@ def rename_replace_action(name, fields_dict):
         # Find at what position what we want to replace is (all lowercase)
         # If find returns a -1 it means it didn't find it and we can break
         while (
-            idx := name.lower().find(replace_replace_this.lower(), idx) != -1
-        ):
+            idx := name.lower().find(replace_replace_this.lower(), idx)
+        ) != -1:
             # Create the new name
             name = (
                 name[:idx]

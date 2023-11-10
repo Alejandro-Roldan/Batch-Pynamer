@@ -1,3 +1,12 @@
+V. 08.0.5:
+	- Fixed bug for rename from file where it would rename also with the "\n"
+	- Fixed bug for replace where it would just hang
+	- Fixed commands not being applied
+	- Fixed reset bug expecting extra argument that shouldnt be expected
+	- Now command chains are applied to each name in one go instead of to every item by steps
+	- Fixed bug where rename wouldn't remove beggining and trailing spaces
+	- Added error handling for metadata image not being present
+
 V. 08.0.3:
 	- Refactored code into a more professional project
 	- Double Space removal deafults to true

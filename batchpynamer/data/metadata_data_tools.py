@@ -43,6 +43,8 @@ def meta_img_get(file):
             if "APIC" in tag:
                 meta_picture = meta_audio.get(tag).data
                 break
+        else:
+            raise AttributeError
     else:
         meta_picture = "not valid"
 

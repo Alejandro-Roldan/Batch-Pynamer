@@ -141,9 +141,18 @@ class DirectoryNavigator(BaseWidget, ttk.Frame):
             # Get if we need to show hidden folders
             hidden = bpn_gui.filters_widget.fields.hidden.get()
             # Get folders and sort them
-            scanned_dir = scandir_recursive_sorted(
-                path=node, folders=True, files=False, hidden=hidden, depth=0
-            )
-            # Insert the entries
-            for entry in scanned_dir:
-                _insert_node(entry)
+            try:
+                scanned_dir = scandir_recursive_sorted(
+                    path=node,
+                    folders=True,
+                    files=False,
+                    hidden=hidden,
+                    depth=0,
+                )
+            # When file not found refresh parent node
+            except FileNotFoundError:
+                self.refresh_node(self.tree_nav.parent(node))
+            else:
+                # Insert the entries
+                for entry in scanned_dir:
+                    _insert_node(entry)

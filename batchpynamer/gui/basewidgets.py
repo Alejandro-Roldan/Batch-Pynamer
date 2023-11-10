@@ -70,7 +70,7 @@ class BaseNamingWidget(BaseFieldsWidget):
             self,
             width=2,
             text="R",
-            command=self.resetWidget,
+            command=self.reset_widget,
         )
         self.reset_button.grid(
             column=reset_column_row[0],
@@ -89,17 +89,14 @@ class BaseNamingWidget(BaseFieldsWidget):
                 "write", bpn_gui.fn_treeview.show_new_name
             )
 
-    def resetWidget(self):
+    def reset_widget(self):
         """Resets fields to defined default value"""
         self.fields.reset_all()
 
-    def setCommand(self, var_dict):
+    def set_fields_from_command(self, var_dict):
         """Sets the proper rename class child fields from the whole dict"""
         for field in self.fields.__dict__:
             self.fields.__dict__[field].set(var_dict[field])
-
-    def appendVarValToDict(dict_={}, *args, **kwargs):
-        raise NotImplementedError
 
 
 class BpnVar:

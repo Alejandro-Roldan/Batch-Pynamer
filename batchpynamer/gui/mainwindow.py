@@ -69,8 +69,8 @@ class WindowRoot(tk.Tk):
         # Command
         self.bind("<Control-e>", commands.command_gui_load_command_call)
         self.bind("<Control-E>", commands.command_gui_load_command_call)
-        self.bind("<Control-y>", commands.command_gui_apply_action)
-        self.bind("<Control-Y>", commands.command_gui_apply_action)
+        self.bind("<Control-y>", commands.command_gui_apply_command_call)
+        self.bind("<Control-Y>", commands.command_gui_apply_command_call)
 
         # Exit
         self.bind("<Control-Escape>", lambda event: self.quit())
