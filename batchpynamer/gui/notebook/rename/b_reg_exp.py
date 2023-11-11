@@ -26,13 +26,12 @@ class RenameFromRegExp(BaseNamingWidget, ttk.LabelFrame):  # (1)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=1,
             row=0,
             text="Regular Expressions (1)",
         )
-        super().tk_init()
 
         # Match, entry
         ttk.Label(self, text="Match").grid(column=0, row=0, sticky="w")

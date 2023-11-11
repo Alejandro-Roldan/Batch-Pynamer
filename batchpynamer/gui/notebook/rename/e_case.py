@@ -20,13 +20,12 @@ class Case(BaseNamingWidget, ttk.LabelFrame):  # (4)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=0,
             row=1,
             text="Case (4)",
         )
-        super().tk_init()
 
         # Chose case, combobox
         ttk.Label(self, text="Case").grid(column=0, row=0, sticky="w")

@@ -30,14 +30,14 @@ class AddFolderName(BaseNamingWidget, ttk.LabelFrame):  # (8)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=3,
             row=2,
             columnspan=2,
             text="Add Folder Name (8)",
+            reset_column_row=(8, 1),
         )
-        super().tk_init(reset_column_row=(8, 1))
 
         # Name, combobox
         ttk.Label(self, text="Name").grid(column=0, row=0, sticky="ew")

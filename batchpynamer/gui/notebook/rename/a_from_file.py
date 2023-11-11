@@ -24,13 +24,12 @@ class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=0,
             row=0,
             text="Rename From File (0)",
         )
-        super().tk_init()
 
         # Filename, entry
         ttk.Label(self, text="Filename").grid(column=0, row=0, sticky="w")

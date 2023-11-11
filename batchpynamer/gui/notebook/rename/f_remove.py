@@ -51,14 +51,14 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=3,
             row=0,
             rowspan=2,
             text="Remove (5)",
+            reset_column_row=(4, 7),
         )
-        super().tk_init(reset_column_row=(4, 7))
 
         # Remove first n characters, spinbox
         ttk.Label(self, text="First n").grid(column=0, row=0, sticky="ew")

@@ -40,14 +40,14 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=0,
             row=0,
             sticky="w",
             text="Filter File View",
+            reset_column_row=(10, 1),
         )
-        super().tk_init(reset_column_row=(10, 1))
 
         # Regular expression mask, entry
         ttk.Label(self, text="Mask").grid(column=0, row=0, sticky="e")

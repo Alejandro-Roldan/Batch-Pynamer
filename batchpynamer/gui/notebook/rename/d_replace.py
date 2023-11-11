@@ -24,14 +24,13 @@ class Replace(BaseNamingWidget, ttk.LabelFrame):  # (3)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=1,
             row=1,
             columnspan=2,
             text="Replace (3)",
         )
-        super().tk_init()
 
         # Replace this, entry
         ttk.Label(self, text="Replace").grid(column=0, row=0, sticky="w")

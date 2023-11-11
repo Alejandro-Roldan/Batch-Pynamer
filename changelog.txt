@@ -6,6 +6,7 @@ V. 08.0.5:
 	- Now command chains are applied to each name in one go instead of to every item by steps
 	- Fixed bug where rename wouldn't remove beggining and trailing spaces
 	- Added error handling for metadata image not being present
+	- Fixed filter view bug call
 
 V. 08.0.3:
 	- Refactored code into a more professional project

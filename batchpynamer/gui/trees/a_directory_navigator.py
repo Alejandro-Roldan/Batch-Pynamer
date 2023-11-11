@@ -77,7 +77,9 @@ class DirectoryNavigator(BaseWidget, ttk.Frame):
         # the index instead of doing a for loop
         return self.tree_nav.focus()
 
-    def refresh_full_tree_call(self, event=None):
+    def refresh_full_tree_call(
+        self, event=None, var=None, index=None, mode=None
+    ):
         self.refresh_node(self.path)
 
     def update_active_node_call(self, event=None):

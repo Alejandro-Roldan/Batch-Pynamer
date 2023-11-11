@@ -64,8 +64,24 @@ class BaseFieldsWidget(BaseWidget):
 
 
 class BaseNamingWidget(BaseFieldsWidget):
-    def tk_init(self, reset_column_row: tuple = (2, 2)):
+    def tk_init(
+        self,
+        master,
+        column,
+        row,
+        text,
+        reset_column_row: tuple = (2, 2),
+        **kwargs,
+    ):
         """Creates the reset button"""
+        super().__init__(
+            master,
+            column=column,
+            row=row,
+            text=text,
+            **kwargs,
+        )
+
         self.reset_button = ttk.Button(
             self,
             width=2,

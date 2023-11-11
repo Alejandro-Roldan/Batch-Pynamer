@@ -32,14 +32,14 @@ class AddToStr(BaseNamingWidget, ttk.LabelFrame):  # (7)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=4,
             row=0,
             rowspan=2,
             text="Add (7)",
+            reset_column_row=(2, 5),
         )
-        super().tk_init(reset_column_row=(2, 5))
 
         # Prefix, entry
         ttk.Label(self, text="Prefix").grid(column=0, row=0, sticky="ew")

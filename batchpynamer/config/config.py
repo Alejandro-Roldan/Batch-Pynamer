@@ -15,6 +15,10 @@ class CommandsConfig(configparser.ConfigParser):
             logging.info("Loaded command configuration")
             logging.debug(f'from "{command_conf_file}"')
 
+    def gettuple(self, value):
+        """Extract tuples from str"""
+        return tuple(k.strip() for k in value[1:-1].split(","))
+
     def command_conf_fields_get(self, command_name):
         """Fields get that handles types"""
         command_dict = data.ALL_RENAME_FIELDS.copy()

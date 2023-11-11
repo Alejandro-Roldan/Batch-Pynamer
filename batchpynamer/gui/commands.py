@@ -184,7 +184,7 @@ def command_gui_generate_name_action(
     fields_dict = bpn_config.command_conf.command_conf_fields_get(command_name)
 
     new_name = rename_create_new_name_action(
-        old_name, idx, old_path, **fields_dict
+        old_name, idx, old_path, fields_dict
     )
 
     # Get the next_step value from the command config, if there is one
