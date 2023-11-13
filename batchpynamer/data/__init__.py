@@ -87,3 +87,12 @@ ALL_RENAME_FIELDS = {
 
 IMG_EXTS = (".jpg", ".jpeg", ".png")
 AUDIO_EXTS = (".mp3", ".flac", ".ape")
+
+DEFAULT_METADATA_FIELDS = [
+    "title",
+    "tracknumber",
+    "artist",
+    "album",
+    "date",
+    "genre",
+]

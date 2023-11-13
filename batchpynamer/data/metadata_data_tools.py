@@ -74,7 +74,11 @@ def meta_audio_save(meta_audio, new_metadata_dict: dict):
                 msg = f'Undefined Tag name "{key}" for ID3/MP4. Skipped'
                 logging.error(msg)
         else:
-            del meta_audio[key]
+            try:
+                del meta_audio[key]
+            # Handle keys that donst exists in this particular file
+            except KeyError:
+                pass
 
     meta_audio.save()
     logging.debug(f"Metadata dict:\n{meta_audio}")

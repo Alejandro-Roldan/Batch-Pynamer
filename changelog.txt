@@ -7,6 +7,7 @@ V. 08.0.5:
 	- Fixed bug where rename wouldn't remove beggining and trailing spaces
 	- Added error handling for metadata image not being present
 	- Fixed filter view bug call
+	- Fixed error raising when metadata key doesnt exist for particular file
 
 V. 08.0.3:
 	- Refactored code into a more professional project
