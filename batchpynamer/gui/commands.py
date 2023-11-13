@@ -187,15 +187,9 @@ def command_gui_generate_name_action(
         old_name, idx, old_path, fields_dict
     )
 
-    # Get the next_step value from the command config, if there is one
-    # call func recursevely with command_name=next_step
+    # Get the next_step call recursevely
     next_step = fields_dict["next_step"]
     if next_step:
-        # Select the items that were previously selected based on the
-        # last_rename list to get what are the new names
-        bpn_gui.fn_treeview.selection_set(
-            bpn_gui.last_rename.new_name_list_get()
-        )
         # Call command_gui_apply_action with next_step
         new_name = command_gui_generate_name_action(
             command_name=next_step,

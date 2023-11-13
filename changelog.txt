@@ -8,6 +8,7 @@ V. 08.0.5:
 	- Added error handling for metadata image not being present
 	- Fixed filter view bug call
 	- Fixed error raising when metadata key doesnt exist for particular file
+	- Fixed command chains bug with selection
 
 V. 08.0.3:
 	- Refactored code into a more professional project
