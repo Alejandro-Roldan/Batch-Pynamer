@@ -32,9 +32,9 @@ def meta_img_get(file):
     returns None.
     """
     meta_picture = None
-    if file.endswith("flac"):
+    if file.endswith(".flac"):
         meta_picture = FLAC(file).pictures[0].data
-    elif file.endswith("mp3"):
+    elif file.endswith(".mp3"):
         meta_audio = ID3(file)
         # Because the attached picture in mp3 files can have many names
         # and the only common factor is having APIC in the key, check all keys

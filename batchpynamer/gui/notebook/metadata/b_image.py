@@ -77,26 +77,29 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
 
         def _compare_img(selection):
             """
-            Loads the first image binded to the selected files and checks if
-            they are all the same. If not then it loads no image.
+            Checks all images are the same. If not then it loads no image.
             Also does nothing if the file doesnt have an image attached.
             """
             try:
-                # Load first image, and we'll use it to compare against
-                picture1 = metadata_data_tools.meta_img_get(selection[0])
-            # IndexError = no selection
-            # AttributeError = no img in file
+                if not selection:
+                    raise IndexError
+                # Load images into a set (they cant have duplicate items) to
+                # check all images are the same
+                pic_set = set()
+                for file in selection:
+                    # IndexError raises if no image for flac
+                    # or AttributeError raises if no image in mp3
+                    pic_set.add(metadata_data_tools.meta_img_get(file))
+                    # As soon as there are more, exit
+                    if len(pic_set) > 1:
+                        return None, "Different images"
             except (IndexError, AttributeError):
                 return None, "No image"
             else:
+                picture1 = pic_set.pop()
                 if picture1 == "not valid":
                     return None, "Not a valid file"
-                # Check against every image
-                elif all(
-                    metadata_data_tools.meta_img_get(file) == picture1
-                    for file in selection
-                ):
-                    # When they are all the same
+                else:
                     # PIL to get image size and resize
                     picture1 = PIL.Image.open(BytesIO(picture1))
                     im_width, im_height = map(str, picture1.size)
@@ -108,20 +111,17 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
 
                     return picture1, f"{im_width} x {im_height}"
 
-                else:
-                    return None, "Different images"
-
         selection = bpn_gui.fn_treeview.selection_get()
 
         # Get the display img and text
         self.picture, text = _compare_img(selection)
-        if self.picture is not None:
-            # This step so it doesnt get garbage collected and dissapears
-            self.img.image = self.picture
 
+        if self.picture is not None:
+            # Set this so it doesnt get garbage collected and dissapears
+            self.img.image = self.picture
         else:
-            # But here nwe dont add that so it does get garbage collected
-            # just update for an empty img
+            # But here we dont add that so it does get garbage collected
+            # And we set the picture to the empty image
             self.picture = self.fields.photo_image
 
         # Display the image
