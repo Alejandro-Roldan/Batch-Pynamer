@@ -181,11 +181,10 @@ def rename_reg_exp_action(name, fields_dict):
 
         # Replace the numbered groups with the group match
         for i in range(0, len(reg_grouping.groups()) + 1):
-            n = str(i)
             # Prevent IndexError blocking
             try:
-                # "/n" gets replace for the nth match group
-                name = name.replace(f"/{n}", reg_grouping.group(i))
+                # "/i" gets replace for the ith match group
+                name = name.replace(f"/{i}", reg_grouping.group(i))
             except IndexError:
                 pass
 
