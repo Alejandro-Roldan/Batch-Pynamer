@@ -161,27 +161,32 @@ def rename_reg_exp_action(name, fields_dict):
     reg_exp_match_reg = fields_dict.get("reg_exp_match_reg")
     reg_exp_replace_with = fields_dict.get("reg_exp_replace_with")
 
-    if reg_exp_match_reg and reg_exp_replace_with:
-        try:
-            reg_exp_match_reg = re.compile(reg_exp_match_reg)
-        # Handle unterminated patterns while writing
-        except re.error:
-            pass
-        else:
-            # breakpoint()
-            reg_grouping = reg_exp_match_reg.match(name)
-            for i in range(0, len(reg_grouping.groups()) + 1):
-                n = str(i)
+    if not (reg_exp_match_reg and reg_exp_replace_with):
+        # Exit soon when no regexes
+        return name
 
-                # Prevent IndexError blocking
-                try:
-                    reg_exp_replace_with = reg_exp_replace_with.replace(
-                        "/" + n, reg_grouping.group(i)
-                    )
-                except IndexError:
-                    pass
+    try:
+        reg_exp_match_reg = re.compile(reg_exp_match_reg)
+    # Handle unterminated patterns while writing
+    except re.error:
+        pass
+    else:
+        name = reg_exp_replace_with
+        reg_grouping = reg_exp_match_reg.match(name)
 
-            name = reg_exp_replace_with
+        # Prevent "AttributeError"
+        if reg_grouping is None:
+            return name
+
+        # Replace the numbered groups with the group match
+        for i in range(0, len(reg_grouping.groups()) + 1):
+            n = str(i)
+            # Prevent IndexError blocking
+            try:
+                # "/n" gets replace for the nth match group
+                name = name.replace(f"/{n}", reg_grouping.group(i))
+            except IndexError:
+                pass
 
     return name
 
