@@ -171,8 +171,9 @@ def rename_reg_exp_action(name, fields_dict):
     except re.error:
         pass
     else:
-        name = reg_exp_replace_with
         reg_grouping = reg_exp_match_reg.match(name)
+        # Reassign name after we have done the regex matching first
+        name = reg_exp_replace_with
 
         # Prevent "AttributeError"
         if reg_grouping is None:
