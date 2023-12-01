@@ -32,9 +32,9 @@ def meta_img_get(file):
     returns None.
     """
     meta_picture = None
-    if file.endswith("flac"):
+    if file.endswith(".flac"):
         meta_picture = FLAC(file).pictures[0].data
-    elif file.endswith("mp3"):
+    elif file.endswith(".mp3"):
         meta_audio = ID3(file)
         # Because the attached picture in mp3 files can have many names
         # and the only common factor is having APIC in the key, check all keys
@@ -43,6 +43,8 @@ def meta_img_get(file):
             if "APIC" in tag:
                 meta_picture = meta_audio.get(tag).data
                 break
+        else:
+            raise AttributeError
     else:
         meta_picture = "not valid"
 
@@ -72,7 +74,11 @@ def meta_audio_save(meta_audio, new_metadata_dict: dict):
                 msg = f'Undefined Tag name "{key}" for ID3/MP4. Skipped'
                 logging.error(msg)
         else:
-            del meta_audio[key]
+            try:
+                del meta_audio[key]
+            # Handle keys that donst exists in this particular file
+            except KeyError:
+                pass
 
     meta_audio.save()
     logging.debug(f"Metadata dict:\n{meta_audio}")

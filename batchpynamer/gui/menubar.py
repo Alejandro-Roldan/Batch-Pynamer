@@ -214,14 +214,14 @@ class TopMenu(tk.Menu):
         # Apply selected command
         self.command_menu.add_command(
             label="Apply Selected Command",
-            command=commands.command_gui_apply_action,
+            command=commands.command_gui_apply_command_call,
             accelerator="Ctrl+Y",
         )
 
         # Delete selected command
         self.command_menu.add_command(
             label="Delete Selected Command",
-            command=commands.command_gui_delete_command,
+            command=commands.command_gui_delete_command_action,
         )
 
         self.command_select_menu = tk.Menu(

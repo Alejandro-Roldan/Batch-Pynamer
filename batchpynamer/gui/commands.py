@@ -3,6 +3,7 @@ from tkinter import ttk
 
 import batchpynamer.config as bpn_config
 import batchpynamer.gui as bpn_gui
+from batchpynamer.data.rename_data_tools import rename_create_new_name_action
 from batchpynamer.gui import infobar
 from batchpynamer.gui.basewidgets import (
     BaseFieldsWidget,
@@ -128,10 +129,12 @@ def command_gui_load_command_call(event=None):
     # If the selected command isn't the default loads the dictionary from the
     # configuration file
     if command_name != "DEFAULT":
-        var_val_dict = dict(bpn_config.command_conf.items(command_name))
+        fields_dict = bpn_config.command_conf.command_conf_fields_get(
+            command_name
+        )
 
         # Call to set the dictionary
-        set_command_action(var_val_dict)
+        set_command_action(fields_dict)
 
         # Show info msg
         inf_msg = f'Loaded "{command_name}" Fields Configuration'
@@ -145,45 +148,13 @@ def command_gui_load_command_call(event=None):
         logging.info("GUI- command- " + inf_msg)
 
 
-def command_gui_apply_action(event=None, command_name=None):
-    """
-    Directly applies a command or a chain of commands.
-    """
-    # Clear the last_rename list
-    bpn_gui.last_rename.clear()
-    # Save what the variable fields are right now
-    var_val_dict_in_use = rename.all_fields_get()
-
-    # Gets the selected command if a command_name wasn't provided
-    if command_name is None:
-        command_name = bpn_gui.menu_bar.selected_command.get()
+def command_gui_apply_command_call(event=None):
+    # Gets the selected command
+    command_name = bpn_gui.menu_bar.selected_command.get()
 
     # Apply only if the selected command isn't the default (no changes)
     if command_name != "DEFAULT":
-        # Show that it's in the process
-        infobar.show_working()
-
-        # Get the variables values dict from the config command file under
-        # the selected command name
-        var_val_dict = dict(bpn_gui.command_conf.items(command_name))
-
-        # Set that variable values dict in the fields
-        set_command_action(var_val_dict)
-        # Call for a basic Rename
-        rename.final_rename()
-
-        # Get the next_step value from the command config, if there is one
-        # call Apply_Command (this same function) but with command_name =
-        # next_step
-        next_step = var_val_dict["next_step"]
-        if next_step:
-            # Select the items that were previously selected based on the
-            # last_rename list to get what are the new names
-            bpn_gui.fn_treeview.selection_set(
-                bpn_gui.last_rename.new_name_list_get()
-            )
-            # Call command_gui_apply_action with next_step
-            command_gui_apply_action(event=None, command_name=next_step)
+        rename.rename_gui_apply_rename_action(command_rename=command_name)
 
         # Show that it finished
         inf_msg = 'Applied "{}" Command'.format(command_name)
@@ -196,11 +167,41 @@ def command_gui_apply_action(event=None, command_name=None):
         bpn_gui.info_bar.last_action_set(inf_msg)
         logging.info("GUI- command- " + inf_msg)
 
-    # Set the variable fields back to what you had prior to the command
-    set_command_action(var_val_dict_in_use)
+
+def command_gui_generate_name_action(
+    command_name=None, old_name="", old_path="", idx=0
+):
+    """
+    Directly applies a command or a chain of commands.
+    """
+
+    # Gets the selected command if a command_name wasn't provided
+    if command_name is None or command_name == "DEFAULT":
+        return ""
+
+    # Get the variables values dict from the config command file under
+    # the selected command name
+    fields_dict = bpn_config.command_conf.command_conf_fields_get(command_name)
+
+    new_name = rename_create_new_name_action(
+        old_name, idx, old_path, fields_dict
+    )
+
+    # Get the next_step call recursevely
+    next_step = fields_dict["next_step"]
+    if next_step:
+        # Call command_gui_apply_action with next_step
+        new_name = command_gui_generate_name_action(
+            command_name=next_step,
+            old_name=new_name,
+            old_path=old_path,
+            idx=idx,
+        )
+
+    return new_name
 
 
-def command_gui_delete_command():
+def command_gui_delete_command_action():
     """Deletes selected command from the command configuration file"""
     # Get selected command
     command_name = bpn_gui.menu_bar.selected_command.get()
@@ -220,14 +221,14 @@ def command_gui_delete_command():
 
 def set_command_action(fields_dict):
     """Call each widget to set the entries values from the given dict"""
-    bpn_gui.rename_from_file.setCommand(fields_dict)
-    bpn_gui.rename_from_reg_exp.setCommand(fields_dict)
-    bpn_gui.name_basic.setCommand(fields_dict)
-    bpn_gui.replace.setCommand(fields_dict)
-    bpn_gui.case.setCommand(fields_dict)
-    bpn_gui.remove.setCommand(fields_dict)
-    bpn_gui.move_parts.setCommand(fields_dict)
-    bpn_gui.add_to_str.setCommand(fields_dict)
-    bpn_gui.add_folder_name.setCommand(fields_dict)
-    bpn_gui.numbering.setCommand(fields_dict)
-    bpn_gui.ext_replace.setCommand(fields_dict)
+    bpn_gui.rename_from_file.set_fields_from_command(fields_dict)
+    bpn_gui.rename_from_reg_exp.set_fields_from_command(fields_dict)
+    bpn_gui.name_basic.set_fields_from_command(fields_dict)
+    bpn_gui.replace.set_fields_from_command(fields_dict)
+    bpn_gui.case.set_fields_from_command(fields_dict)
+    bpn_gui.remove.set_fields_from_command(fields_dict)
+    bpn_gui.move_parts.set_fields_from_command(fields_dict)
+    bpn_gui.add_to_str.set_fields_from_command(fields_dict)
+    bpn_gui.add_folder_name.set_fields_from_command(fields_dict)
+    bpn_gui.numbering.set_fields_from_command(fields_dict)
+    bpn_gui.ext_replace.set_fields_from_command(fields_dict)

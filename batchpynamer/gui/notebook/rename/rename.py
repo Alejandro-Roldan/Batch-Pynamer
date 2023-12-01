@@ -1,12 +1,10 @@
 import logging
+import os
 from tkinter import ttk
 
 import batchpynamer.config as bpn_config
 import batchpynamer.gui as bpn_gui
-from batchpynamer.data.rename_data_tools import (
-    rename_create_new_name_action,
-    rename_system_rename,
-)
+from batchpynamer.data.rename_data_tools import rename_system_rename
 from batchpynamer.gui import basewidgets, commands, infobar
 from batchpynamer.gui.trees import trees
 
@@ -70,7 +68,7 @@ class Rename(basewidgets.BaseWidget, ttk.Frame):
         self.load_command_button = ttk.Button(
             self,
             text="Command",
-            command=commands.command_gui_apply_action,
+            command=commands.command_gui_apply_command_call,
         )
         self.load_command_button.grid(
             column=0, row=1, padx=1, pady=1, sticky="e"
@@ -145,39 +143,44 @@ def rename_gui_undo_rename_call(event=None):
 
 
 def rename_gui_apply_rename_call(event=None):
-    """GUI rename selected items"""
-    # Clear the last_rename action list
-    bpn_gui.last_rename.clear()
+    rename_gui_apply_rename_action(command_rename=False)
+
+
+def rename_gui_apply_rename_action(command_rename=None):
+    """GUI rename selected items
+
+    In this proccess we don't calculate the new name before rename because we
+    have alreay had to calculate them for showing. So we just extract from the
+    new name column in the file view
+    """
+
     # Get selected items
     selection = list(bpn_gui.fn_treeview.selection_get())
-
-    # When to reverse the naming items list so as to skip naming problems
-    # like with recursiveness naming a folder before the files in it so
-    # then the files can't be renamed because the path pointer doesn't
-    # exists. Optimized the boolean function
-    # A=menu_bar.rename_order_bottom_to_top.get()
-    # B=nb.filters.depthGet()
-    # C=nb.filters.reverseGet()
-    # F(A,B,C)=~BA+B~C
-    if (
-        not bpn_gui.filters_widget.fields.depth.get()
-        and bpn_gui.menu_bar.rename_order_bottom_to_top.get()
-    ) or (
-        bpn_gui.filters_widget.fields.depth.get()
-        and not bpn_gui.filters_widget.fields.reverse.get()
-    ):
-        selection = reversed(selection)
+    selection = rename_gui_reverse_selection(selection)
 
     # Try to apply the changes only if there is a selection
     if selection:
+        # Clear the last_rename action list
+        bpn_gui.last_rename.clear()
         # Show that its in the process
         infobar.show_working()
 
         logging.info("Rename:")
-        for old_path in selection:
-            directory, slash, old_name = old_path.rpartition("/")
-            name = bpn_gui.fn_treeview.tree_folder.set(old_path, "#1")
-            new_path = directory + slash + name
+        for idx, old_path in enumerate(selection):
+            directory = os.path.dirname(old_path)
+            old_name = os.path.basename(old_path)
+            if command_rename:
+                new_name = commands.command_gui_generate_name_action(
+                    command_name=command_rename,
+                    old_name=old_name,
+                    old_path=old_path,
+                    idx=idx,
+                )
+            else:
+                # Get new name from file view
+                new_name = bpn_gui.fn_treeview.new_name_get(old_path)
+            # Create new path
+            new_path = os.path.join(directory, new_name)
 
             # Rename and handle output
             result = rename_system_rename(old_path, new_path)
@@ -197,19 +200,40 @@ def rename_gui_apply_rename_call(event=None):
         bpn_gui.info_bar.last_action_set("No Selected Items")
 
 
+def rename_gui_reverse_selection(selection=[]):
+    # When to reverse the naming items list so as to skip naming problems
+    # like with recursiveness naming a folder before the files in it so
+    # then the files can't be renamed because the path pointer doesn't
+    # exists. Optimized the boolean function
+    # A=menu_bar.rename_order_bottom_to_top.get()
+    # B=nb.filters.depthGet()
+    # C=nb.filters.reverseGet()
+    # F(A,B,C)=~BA+B~C
+    if (
+        not bpn_gui.filters_widget.fields.depth.get()
+        and bpn_gui.menu_bar.rename_order_bottom_to_top.get()
+    ) or (
+        bpn_gui.filters_widget.fields.depth.get()
+        and not bpn_gui.filters_widget.fields.reverse.get()
+    ):
+        return reversed(selection)
+
+    return selection
+
+
 def rename_gui_all_fields_reset(event=None):
-    """Calls all resetWidget Methods"""
-    bpn_gui.rename_from_file.resetWidget()
-    bpn_gui.rename_from_reg_exp.resetWidget()
-    bpn_gui.name_basic.resetWidget()
-    bpn_gui.replace.resetWidget()
-    bpn_gui.case.resetWidget()
-    bpn_gui.remove.resetWidget()
-    bpn_gui.move_parts.resetWidget()
-    bpn_gui.add_to_str.resetWidget()
-    bpn_gui.add_folder_name.resetWidget()
-    bpn_gui.numbering.resetWidget()
-    bpn_gui.ext_replace.resetWidget()
+    """Calls all reset_widget Methods"""
+    bpn_gui.rename_from_file.reset_widget()
+    bpn_gui.rename_from_reg_exp.reset_widget()
+    bpn_gui.name_basic.reset_widget()
+    bpn_gui.replace.reset_widget()
+    bpn_gui.case.reset_widget()
+    bpn_gui.remove.reset_widget()
+    bpn_gui.move_parts.reset_widget()
+    bpn_gui.add_to_str.reset_widget()
+    bpn_gui.add_folder_name.reset_widget()
+    bpn_gui.numbering.reset_widget()
+    bpn_gui.ext_replace.reset_widget()
 
     logging.debug("GUI- Full Reset")
     bpn_gui.info_bar.last_action_set("Full Reset")
@@ -230,9 +254,3 @@ def rename_gui_all_fields_get():
         **bpn_gui.numbering.fields.get_all(),
         **bpn_gui.ext_replace.fields.get_all(),
     }
-
-
-def rename_gui_create_new_name_action(name, idx, path):
-    return rename_create_new_name_action(
-        name, idx, path, **rename_gui_all_fields_get()
-    )

@@ -29,13 +29,12 @@ class NameBasic(BaseNamingWidget, ttk.LabelFrame):  # (2)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=2,
             row=0,
             text="Name (2)",
         )
-        super().tk_init()
 
         # Chose case, combobox
         ttk.Label(self, text="Name").grid(column=0, row=0, sticky="w")

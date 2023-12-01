@@ -15,4 +15,4 @@ command_conf_file = (
     if config_folder_path
     else None
 )
-command_conf = config.user_config_commands_get(command_conf_file)
+command_conf = config.CommandsConfig(command_conf_file)

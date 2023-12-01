@@ -61,8 +61,13 @@ class DirectoryEntryFrame(BaseFieldsWidget, ttk.Frame):
 
         active_path = self.fields.active_path.get()
 
-        if os.path.isdir(active_path):
+        # When active_path == "" clear the view
+        if not active_path:
+            bpn_gui.fn_treeview.delete_children()
+        # Else show the active path
+        elif os.path.isdir(active_path):
             bpn_gui.fn_treeview.refresh_view_call(active_path)
+        # Unless its a file or it doesnt exist
         else:
             bpn_gui.info_bar.last_action_set("Not a Valid Directory")
             logging.warning(f'GUI- "{active_path}" not a valid directory')

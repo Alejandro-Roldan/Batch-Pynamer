@@ -41,13 +41,12 @@ class ExtReplace(BaseNamingWidget, ttk.LabelFrame):  # (10)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=5,
             row=2,
             text="Extension (10)",
         )
-        super().tk_init()
 
         # Change Extension, combobox
         self.change_ext_combo = ttk.Combobox(

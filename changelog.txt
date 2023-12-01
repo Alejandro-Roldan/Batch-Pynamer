@@ -1,6 +1,20 @@
+V. 08.0.5:
+	- Fixed bug for rename from file where it would rename also with the "\n"
+	- Fixed bug for replace where it would just hang
+	- Fixed commands not being applied
+	- Fixed reset bug expecting extra argument that shouldnt be expected
+	- Now command chains are applied to each name in one go instead of to every item by steps
+	- Fixed bug where rename wouldn't remove beggining and trailing spaces
+	- Added error handling for metadata image not being present
+	- Fixed filter view bug call
+	- Fixed error raising when metadata key doesnt exist for particular file
+	- Fixed command chains bug with selection
+	- Fixed unhandled errors when music files didnt have metdata images
+	- Refresh when focusing out or pressing enter when writing to the rename from file file entry (instead of with every key stroke)
+
 V. 08.0.3:
 	- Refactored code into a more professional project
-	- Double Space removal deafults to true
+	- Double Space removal defaults to true
 	- Extension splitting now checks that selection is file (prevents from treating whats after last . in directories as the extension and not being able to affect it with the name change)
 	- Added plugins support
 	- Added values list support for metadata separating the values with "\;" (rather than just ";" wich ignores changing those keys)

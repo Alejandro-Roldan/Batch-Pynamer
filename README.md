@@ -42,6 +42,8 @@ cd into it and run
 ```
 pip install . --break-system-packages
 ```
+--break-system-packages seems to be needed even though this package is not managed by any system...
+this pip change deletes my will to live
 
 
 Batch-Pynamer-Plugins

@@ -52,14 +52,14 @@ class Numbering(BaseNamingWidget, ttk.LabelFrame):  # (9)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=5,
             row=0,
             rowspan=2,
             text="Numbering (9)",
+            reset_column_row=(4, 5),
         )
-        super().tk_init(reset_column_row=(4, 5))
 
         # Mode, combobox
         ttk.Label(self, text="Mode").grid(column=0, row=0, sticky="ew")

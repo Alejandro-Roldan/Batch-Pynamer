@@ -33,14 +33,14 @@ class MoveParts(BaseNamingWidget, ttk.LabelFrame):  # (6)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=0,
             row=2,
             columnspan=3,
             text="Move Parts (6)",
+            reset_column_row=(10, 1),
         )
-        super().tk_init(reset_column_row=(10, 1))
 
         # Copy from, combobox
         ttk.Label(self, text="Copy").grid(column=0, row=0)

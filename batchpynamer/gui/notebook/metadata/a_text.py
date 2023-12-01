@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import batchpynamer.gui as bpn_gui
+from batchpynamer import data as bpn_data
 from batchpynamer.data import metadata_data_tools
 from batchpynamer.gui.basewidgets import (
     BaseFieldsWidget,
@@ -61,12 +62,10 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
             pass
 
         self.fields = self.Fields(
-            title=BpnStrVar(""),
-            tracknumber=BpnStrVar(""),
-            artist=BpnStrVar(""),
-            album=BpnStrVar(""),
-            date=BpnStrVar(""),
-            genre=BpnStrVar(""),
+            **{
+                field: BpnStrVar("")
+                for field in bpn_data.DEFAULT_METADATA_FIELDS
+            }
         )
 
     def add_new_tag_to_entries(self):
@@ -126,14 +125,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
             """Transforms a list into a string separating values with ";" """
             return "; ".join(list_)
 
-        self.meta_dict = {
-            "title": [],
-            "tracknumber": [],
-            "artist": [],
-            "album": [],
-            "date": [],
-            "genre": [],
-        }
+        meta_dict = {field: [] for field in bpn_data.DEFAULT_METADATA_FIELDS}
         self.metadata_fields_reset()
         try:
             for file in selection:
@@ -143,15 +135,15 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
                     meta_value = meta_audio.get(meta_item)
 
                     # Adds to each key the value for this selected item
-                    self.meta_dict[meta_item] = (
-                        self.meta_dict.get(meta_item, list()) + meta_value
+                    meta_dict[meta_item] = (
+                        meta_dict.get(meta_item, list()) + meta_value
                     )
 
-            for key in self.meta_dict:
+            for key in meta_dict:
                 # Remove duplicates
-                self.meta_dict[key] = no_duplicate_list(self.meta_dict[key])
+                meta_dict[key] = no_duplicate_list(meta_dict[key])
                 # List to string
-                str_value = meta_values_list_to_str(self.meta_dict[key])
+                str_value = meta_values_list_to_str(meta_dict[key])
 
                 # Add new fields to self.fields
                 self.fields.__dict__[key] = BpnStrVar(str_value)

@@ -1,5 +1,6 @@
 from tkinter import ttk
 
+import batchpynamer.gui as bpn_gui
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
     BpnBoolVar,
@@ -24,13 +25,12 @@ class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
         )
 
     def tk_init(self, master):
-        super().__init__(
+        super().tk_init(
             master,
             column=0,
             row=0,
             text="Rename From File (0)",
         )
-        super().tk_init()
 
         # Filename, entry
         ttk.Label(self, text="Filename").grid(column=0, row=0, sticky="w")
@@ -50,3 +50,14 @@ class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)
         self.wrap_check.grid(column=0, row=1)
 
         self.bindings()
+
+    def bindings(self):
+        """
+        Redefine bindings to not refresh with every key stroke when writing to
+        rename_from_file_file
+        """
+        self.file_entry.bind("<FocusOut>", bpn_gui.fn_treeview.show_new_name)
+        self.file_entry.bind("<Return>", bpn_gui.fn_treeview.show_new_name)
+        self.fields.rename_from_file_wrap.trace_add(
+            "write", bpn_gui.fn_treeview.show_new_name
+        )

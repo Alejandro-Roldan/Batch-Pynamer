@@ -6,6 +6,7 @@ from tkinter import ttk
 from scandirrecursive.scandirrecursive import scandir_recursive_sorted
 
 import batchpynamer.gui as bpn_gui
+from batchpynamer.data.rename_data_tools import rename_generate_new_name
 from batchpynamer.gui.basewidgets import BaseWidget
 from batchpynamer.gui.notebook import notebook
 from batchpynamer.gui.notebook.rename import rename
@@ -61,7 +62,10 @@ class FileNavigator(BaseWidget, ttk.Frame):
     def old_name_get(self, item):
         return self.tree_folder.item(item)["text"]
 
-    def new_name_set(self, path, new_name, old_name):
+    def new_name_get(self, path):
+        return self.tree_folder.set(path, "#1")
+
+    def new_name_set(self, path, new_name):
         return self.tree_folder.set(path, "#1", new_name)
 
     def selection_get(self):
@@ -101,18 +105,14 @@ class FileNavigator(BaseWidget, ttk.Frame):
         Iterates over each selected item and recreates each new name
         following the renaming rules given inside the rename page of
         the notebook.
+
+        var=None, index=None, mode=None for the events calls
         """
-        # Get list of selected items iids
-        selection = self.selection_get()
-        for idx, path in enumerate(selection):
-            # Get the old name
-            old_name = self.old_name_get(path)
-            # Transform the old name to the new name
-            new_name = rename.rename_gui_create_new_name_action(
-                old_name, idx, path
-            )
+        fields_dict = rename.rename_gui_all_fields_get()
+        for idx, path in enumerate(self.selection_get()):
+            new_name, _ = rename_generate_new_name(path, idx, fields_dict)
             # Changes the new name column
-            self.new_name_set(path, new_name, old_name)
+            self.new_name_set(path, new_name)
         logging.debug("GUI- file navigator show new name")
 
     def reset_new_name(self):
@@ -123,7 +123,12 @@ class FileNavigator(BaseWidget, ttk.Frame):
         all_nodes = self.tree_folder.get_children()
         for item in all_nodes:
             old_name = self.old_name_get(item)
-            self.new_name_set(item, old_name, old_name)
+            self.new_name_set(item, old_name)
+
+    def delete_children(self):
+        """Delete already existing nodes in the folder view"""
+        for item in self.tree_folder.get_children():
+            self.tree_folder.delete(item)
 
     def refresh_view_call(self, path=None):
         """Get the folder path and update the treeview"""
@@ -141,13 +146,8 @@ class FileNavigator(BaseWidget, ttk.Frame):
                 open=False,
             )
 
-        def _delete_children():
-            """Delete already existing nodes in the folder view"""
-            for item in self.tree_folder.get_children():
-                self.tree_folder.delete(item)
-
         # Delete the children, load the new ones and sort them
-        _delete_children()
+        self.delete_children()
 
         # When the path is still not set use the active_path
         if path is None:

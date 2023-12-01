@@ -2,7 +2,7 @@
 
 
 __license__ = "GPL3"
-__version__ = "8.0.3"
+__version__ = "8.0.5"
 __release__ = True
 __author__ = __maintainer__ = "Alejandro Roldán"
 __email__ = "alej.roldan.trabajos@gmail.com"
