@@ -54,7 +54,7 @@ class WindowRoot(tk.Tk):
         """
 
         # Refresh
-        self.bind("<F5>", bpn_gui.dir_entry_frame.active_path_set)
+        self.bind("<F5>", trees.refresh_file_navigator_view)
         self.bind("<Control-F5>", trees.refresh_folderview_focus_node)
         self.bind("<Control-Shift-F5>", trees.refresh_folderview_full_tree)
 

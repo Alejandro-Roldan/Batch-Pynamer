@@ -6,6 +6,7 @@ from scandirrecursive.scandirrecursive import scandir_recursive_sorted
 
 import batchpynamer.gui as bpn_gui
 from batchpynamer.gui.basewidgets import BaseWidget
+from batchpynamer.gui.trees import trees
 
 
 class DirectoryNavigator(BaseWidget, ttk.Frame):
@@ -67,7 +68,7 @@ class DirectoryNavigator(BaseWidget, ttk.Frame):
         self.tree_nav.bind("<<TreeviewOpen>>", self.open_node_call)
         self.tree_nav.bind(
             "<<TreeviewSelect>>",
-            lambda x: bpn_gui.dir_entry_frame.active_path_set(
+            lambda x: trees.refresh_file_navigator_view(
                 new_active_path=self.selected_item()
             ),
         )

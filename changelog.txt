@@ -11,6 +11,8 @@ V. 08.0.5:
 	- Fixed command chains bug with selection
 	- Fixed unhandled errors when music files didnt have metdata images
 	- Refresh when focusing out or pressing enter when writing to the rename from file file entry (instead of with every key stroke)
+	- Added leading and trailing spaces removal for metadata values
+	- Fixed command saving fail
 
 V. 08.0.3:
 	- Refactored code into a more professional project

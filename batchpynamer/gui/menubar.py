@@ -104,7 +104,7 @@ class TopMenu(tk.Menu):
         # Refresh Files
         self.file_menu.add_command(
             label="Refresh File View",
-            command=bpn_gui.dir_entry_frame.active_path_set,
+            command=trees.refresh_file_navigator_view,
             accelerator="F5",
         )
 

@@ -60,10 +60,14 @@ def meta_audio_save(meta_audio, new_metadata_dict: dict):
             # string into a list of values separated at the ";", and save all
             # those values to the dict[key]
             if "\\;" in value:
-                value = value.split("\\; ")
+                # Also we remove leading and trailing spaces
+                value = [val.strip() for val in value.split("\\;")]
             # Else we ignore this field
             else:
                 continue
+        else:
+            # Remove leading and trailing spaces
+            value = value.strip()
 
         if value:
             try:
@@ -76,7 +80,7 @@ def meta_audio_save(meta_audio, new_metadata_dict: dict):
         else:
             try:
                 del meta_audio[key]
-            # Handle keys that donst exists in this particular file
+            # Handle keys that dont exists in this particular file
             except KeyError:
                 pass
 

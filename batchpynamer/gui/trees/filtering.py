@@ -1,6 +1,5 @@
 from tkinter import ttk
 
-import batchpynamer.gui as bpn_gui
 from batchpynamer.gui import utils as bpn_gui_utils
 from batchpynamer.gui.basewidgets import (
     BaseNamingWidget,
@@ -8,6 +7,7 @@ from batchpynamer.gui.basewidgets import (
     BpnIntVar,
     BpnStrVar,
 )
+from batchpynamer.gui.trees import trees
 
 
 class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
@@ -147,28 +147,18 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
         """Redefined"""
         # Refresh files view when updating fields
         for field in self.fields.__dict__:
-            # Except "mask" and "ext" fields
-            if field != "mask" and field != "ext":
+            # Except "mask", "ext" and "hidden" fields
+            if field != "mask" and field != "ext" and field != "hidden":
                 self.fields.__dict__[field].trace_add(
-                    "write", bpn_gui.dir_entry_frame.active_path_set
+                    "write", trees.refresh_file_navigator_view
                 )
 
         # Those are updated when we finish changing them
         # (instead of with each keystroke)
-        self.mask_entry.bind(
-            "<FocusOut>", bpn_gui.dir_entry_frame.active_path_set
-        )
-        self.mask_entry.bind(
-            "<Return>", bpn_gui.dir_entry_frame.active_path_set
-        )
-        self.ext_entry.bind(
-            "<FocusOut>", bpn_gui.dir_entry_frame.active_path_set
-        )
-        self.ext_entry.bind(
-            "<Return>", bpn_gui.dir_entry_frame.active_path_set
-        )
+        self.mask_entry.bind("<FocusOut>", trees.refresh_file_navigator_view)
+        self.mask_entry.bind("<Return>", trees.refresh_file_navigator_view)
+        self.ext_entry.bind("<FocusOut>", trees.refresh_file_navigator_view)
+        self.ext_entry.bind("<Return>", trees.refresh_file_navigator_view)
 
-        # Refresh folders view
-        self.fields.hidden.trace_add(
-            "write", bpn_gui.folder_treeview.refresh_full_tree_call
-        )
+        # Refresh both views
+        self.fields.hidden.trace_add("write", trees.refresh_treeviews)

@@ -102,7 +102,7 @@ class SaveCommandWindow(PopUpWindow, BaseFieldsWidget):
 def command_gui_save_command_action(command_name, prev_step=""):
     """Saves the current entries variables configuration as a command"""
     # Get the current variable config
-    command_dict = rename.all_fields_get()
+    command_dict = rename.rename_gui_all_fields_get()
 
     # Added to the configparser object
     bpn_config.command_conf[command_name] = command_dict
