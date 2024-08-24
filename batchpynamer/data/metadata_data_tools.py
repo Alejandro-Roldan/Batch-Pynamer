@@ -11,6 +11,21 @@ from mutagen.mp3 import MP3
 import batchpynamer.data as bpn_data
 
 
+def meta_img_actual_image_get(file):
+    """Returns the metadata from an image file"""
+    if file.endswith(".jpg"):
+        metadata_dict = JPG(file)
+
+
+def JPG(file):
+    with open(file, "rb") as input_file:
+        img = ExifImage(img_file)
+
+        for tag in EXIF_TAGS:
+            value = img.get(tag)
+            print("{}: {}".format(tag, value))
+
+
 def meta_audio_get(file):
     """Returns the metadata from the audio file"""
     if file.endswith(".flac"):

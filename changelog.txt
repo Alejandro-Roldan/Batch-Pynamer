@@ -1,3 +1,6 @@
+V. 08.1.0:
+	- Added image  metadata handling
+
 V. 08.0.5:
 	- Fixed bug for rename from file where it would rename also with the "\n"
 	- Fixed bug for replace where it would just hang
