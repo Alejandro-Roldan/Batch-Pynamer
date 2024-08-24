@@ -1,6 +1,9 @@
 import logging
 import os
 
+from PIL import Image as PillowImage
+from PIL import ExifTags
+
 from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.flac import FLAC
@@ -11,19 +14,21 @@ from mutagen.mp3 import MP3
 import batchpynamer.data as bpn_data
 
 
-def meta_img_actual_image_get(file):
-    """Returns the metadata from an image file"""
-    if file.endswith(".jpg"):
-        metadata_dict = JPG(file)
-
-
 def JPG(file):
-    with open(file, "rb") as input_file:
-        img = ExifImage(img_file)
+    pillow_img = PillowImage.open(file)
+    img_exif = pillow_img.getexif()
 
-        for tag in EXIF_TAGS:
-            value = img.get(tag)
-            print("{}: {}".format(tag, value))
+    metadata = {}
+    for tag in ExifTags.TAGS:
+        try:
+            english_tag = ExifTags.TAGS[tag]
+            value = img_exif[tag]
+            # metadata[english_tag] = value
+            metadata[english_tag] = [str(value)]
+        except:
+            continue
+
+    return metadata
 
 
 def meta_audio_get(file):
@@ -34,6 +39,8 @@ def meta_audio_get(file):
         meta_audio = MP3(file, ID3=EasyID3)
     elif file.endswith(".mp4"):
         meta_audio = EasyMP4(file)
+    elif file.endswith(".jpg"):
+        meta_audio = JPG(file)
     else:
         meta_audio = None
 
@@ -101,6 +108,12 @@ def meta_audio_save(meta_audio, new_metadata_dict: dict):
 
     meta_audio.save()
     logging.debug(f"Metadata dict:\n{meta_audio}")
+
+
+def save_exif(meta_audio, new_metadata_dict: dict):
+    for tag in new_metadata_dict:
+        meta_audio[tag] = new_metadata_dict[tag])
+    pillow_img.save(output_file, exif=img_exif)
 
 
 def meta_img_create(img_path):

@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 import tkinter as tk
 from tkinter import ttk
 
@@ -10,7 +11,10 @@ from batchpynamer.gui.basewidgets import (
     BpnStrVar,
     VerticalScrolledFrame,
 )
-from batchpynamer.gui.notebook.metadata.utils import no_duplicate_list
+from batchpynamer.gui.notebook.metadata.utils import (
+    no_duplicate_list,
+    all_same_checker,
+)
 
 
 class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
@@ -45,7 +49,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
             self,
             textvariable=self.new_tag_name,
         )
-        self.new_tag_name_entry.grid(column=1, row=1, sticky="w" + "e")
+        self.new_tag_name_entry.grid(column=1, row=1, sticky="we")
 
         # Add new tag, button
         self.add_field_button = ttk.Button(
@@ -55,7 +59,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
 
         self.metadata_entries_create()
 
-    def metadata_fields_reset(self):
+    def metadata_fields_reset(self, mime_type="audio"):
         try:
             del self.fields
         except AttributeError:
@@ -64,7 +68,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
         self.fields = self.Fields(
             **{
                 field: BpnStrVar("")
-                for field in bpn_data.DEFAULT_METADATA_FIELDS
+                for field in bpn_data.DEFAULT_METADATA_FIELDS[mime_type]
             }
         )
 
@@ -121,14 +125,40 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
         Error handling for when the selected items don't have metadata.
         """
 
+        def mime_type_get(file):
+            """Extract mime type from file"""
+
+            mime = mimetypes.guess_type(file, strict=True)[0]
+            if mime:
+                return mime.split("/")[0]
+            # No mime type
+            else:
+                return "audio"
+
         def meta_values_list_to_str(list_):
             """Transforms a list into a string separating values with ";" """
             return "; ".join(list_)
 
-        meta_dict = {field: [] for field in bpn_data.DEFAULT_METADATA_FIELDS}
+        # Reset to clear entry fields contents
         self.metadata_fields_reset()
+
+        # Check all selected files are the same file type
+        try:
+            mime_type = all_same_checker(selection, func_=mime_type_get)
+        except (IndexError, ValueError):
+            return
+
+        # Reset to create the proper mime type list of fields
+        self.metadata_fields_reset(mime_type)
+        # And init the same list for the data dict
+        meta_dict = {
+            field: [] for field in bpn_data.DEFAULT_METADATA_FIELDS[mime_type]
+        }
+
+        # Extract metadata from them
         try:
             for file in selection:
+
                 meta_audio = metadata_data_tools.meta_audio_get(file)
 
                 for meta_item in meta_audio:
@@ -148,6 +178,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
                 # Add new fields to self.fields
                 self.fields.__dict__[key] = BpnStrVar(str_value)
 
+        # No metadata in field
         except TypeError:
             pass
 

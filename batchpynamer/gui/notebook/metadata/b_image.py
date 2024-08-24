@@ -9,6 +9,7 @@ import PIL.ImageTk
 import batchpynamer.gui as bpn_gui
 from batchpynamer.data import metadata_data_tools
 from batchpynamer.gui.basewidgets import BaseFieldsWidget, BpnStrVar
+from batchpynamer.gui.notebook.metadata.utils import all_same_checker
 
 IMG_DISPLAY_SIZE = 310  # Max size before it makes the window bigger
 
@@ -81,22 +82,20 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
             Also does nothing if the file doesnt have an image attached.
             """
             try:
-                if not selection:
-                    raise IndexError
-                # Load images into a set (they cant have duplicate items) to
-                # check all images are the same
-                pic_set = set()
-                for file in selection:
-                    # IndexError raises if no image for flac
-                    # or AttributeError raises if no image in mp3
-                    pic_set.add(metadata_data_tools.meta_img_get(file))
-                    # As soon as there are more, exit
-                    if len(pic_set) > 1:
-                        return None, "Different images"
+                # From our checker:
+                # IndexError raises if no selection
+                # ValueError raises if different extracted items
+                # From func_:
+                # IndexError raises if no image for flac
+                # AttributeError raises if no image in mp3
+                picture1 = all_same_checker(
+                    selection, func_=metadata_data_tools.meta_img_get
+                )
+            except ValueError:
+                return None, "Different images"
             except (IndexError, AttributeError):
                 return None, "No image"
             else:
-                picture1 = pic_set.pop()
                 if picture1 == "not valid":
                     return None, "Not a valid file"
                 else:
