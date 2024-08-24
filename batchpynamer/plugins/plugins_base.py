@@ -1,5 +1,5 @@
 import ast
-import imp
+import importlib.util
 import logging
 
 from scandirrecursive.scandirrecursive import scandir_recursive_sorted
@@ -135,8 +135,26 @@ class PluginsDictStruct:
                     self.module_classes[name] = instance_
 
         def import_module(self):
-            """Import the module"""
-            return imp.load_source(self.module_name, self.module_path)
+            """Import the module
+
+            Used to use "imp" module, but it has since been deprecated.
+            The method used to be this single line:
+                return imp.load_source(self.module_name, self.module_path)
+
+            Now using importlib
+            """
+
+            # No idea what a module "spec" is but its the first thing we need to create
+            spec = importlib.util.spec_from_file_location(
+                self.module_name,
+                self.module_path,
+            )
+            # Then the module object itself
+            module = importlib.util.module_from_spec(spec)
+            # And finally load the module
+            spec.loader.exec_module(module)
+
+            return module
 
         def imported_class(self, class_):
             """Get the imported class"""

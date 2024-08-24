@@ -1,5 +1,9 @@
-V. 08.1.0:
+V. 08.2.0:
 	- Added image  metadata handling
+
+V. 08.1.0:
+	- Updated for python 3.12, where imp module has been deprecated and importlib is now used
+	- Fixed requirements.txt for specific versions
 
 V. 08.0.5:
 	- Fixed bug for rename from file where it would rename also with the "\n"
