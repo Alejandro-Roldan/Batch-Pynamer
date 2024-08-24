@@ -139,7 +139,7 @@ class PluginsDictStruct:
 
             Used to use "imp" module, but it has since been deprecated.
             The method used to be this single line:
-                return imp.load_module(self.module_name, self.module_path)
+                return imp.load_source(self.module_name, self.module_path)
 
             Now using importlib
             """
