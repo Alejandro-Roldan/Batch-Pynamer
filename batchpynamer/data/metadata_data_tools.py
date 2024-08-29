@@ -14,21 +14,41 @@ from mutagen.mp3 import MP3
 import batchpynamer.data as bpn_data
 
 
-def JPG(file):
-    pillow_img = PillowImage.open(file)
-    img_exif = pillow_img.getexif()
+class EXIF:
+    def __init__(self, path):
+        self.path = path
+        self.image = PillowImage.open(self.path)
+        self.exif = self.image.getexif()
 
-    metadata = {}
-    for tag in ExifTags.TAGS:
-        try:
-            english_tag = ExifTags.TAGS[tag]
-            value = img_exif[tag]
-            # metadata[english_tag] = value
-            metadata[english_tag] = [str(value)]
-        except:
-            continue
+        for tag in ExifTags.TAGS:
+            try:
+                tag_name = ExifTags.TAGS[tag]
+                value = self.exif[tag]
+                self.__dict__[tag_name] = [str(value)]
+            except:
+                continue
 
-    return metadata
+    def save(new_metadata_dict: dict):
+        for tag in new_metadata_dict:
+            self.__dict__[tag] = new_metadata_dict[tag]
+        self.image.save(self.path, exif=self.exif)
+
+
+# def JPG(file):
+# pillow_img = PillowImage.open(file)
+# img_exif = pillow_img.getexif()
+#
+# metadata = {}
+# for tag in ExifTags.TAGS:
+# try:
+# english_tag = ExifTags.TAGS[tag]
+# value = img_exif[tag]
+# # metadata[english_tag] = value
+# metadata[english_tag] = [str(value)]
+# except:
+# continue
+#
+# return metadata
 
 
 def meta_audio_get(file):
@@ -40,7 +60,7 @@ def meta_audio_get(file):
     elif file.endswith(".mp4"):
         meta_audio = EasyMP4(file)
     elif file.endswith(".jpg"):
-        meta_audio = JPG(file)
+        meta_audio = EXIF(file)
     else:
         meta_audio = None
 
@@ -108,12 +128,6 @@ def meta_audio_save(meta_audio, new_metadata_dict: dict):
 
     meta_audio.save()
     logging.debug(f"Metadata dict:\n{meta_audio}")
-
-
-def save_exif(meta_audio, new_metadata_dict: dict):
-    for tag in new_metadata_dict:
-        meta_audio[tag] = new_metadata_dict[tag])
-    pillow_img.save(output_file, exif=img_exif)
 
 
 def meta_img_create(img_path):
