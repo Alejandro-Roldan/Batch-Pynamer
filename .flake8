@@ -1,0 +1,19 @@
+[flake8]
+ignore = E266, E501, W503, F401
+exclude =
+    .git,
+	*.pyc,
+    __pycache__,
+    docs/source/conf.py,
+    old,
+    build,
+    dist
+max-line-length = 79
+max-doc-length = 79
+indent-size = 4
+output-file = flake8.log
+tee = True
+max-complexity = 15
+count = True
+doctest = True
+hang-closing = False

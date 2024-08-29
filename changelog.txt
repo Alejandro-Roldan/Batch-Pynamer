@@ -1,6 +1,12 @@
 V. 08.2.0:
 	- Added image  metadata handling
 
+V. 08.1.2 - 29/08/2024:
+	- (SETUPTOOLS) Updated setuptools system to modern standards and
+	pyprojet.toml usage
+	- (REQUIREMENTS) Updated requirements and requirements files to use
+	pyproject.toml
+
 V. 08.1.0:
 	- Updated for python 3.12, where imp module has been deprecated and importlib is now used
 	- Fixed requirements.txt for specific versions

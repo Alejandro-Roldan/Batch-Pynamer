@@ -1,4 +1,0 @@
-Pillow >= 10.0.0
-mutagen >= 1.47.0
-exif >= 1.6.0
-scandirRecursive @ git+https://github.com/Alejandro-Roldan/scandirRecursive.git

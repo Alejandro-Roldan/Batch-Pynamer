@@ -1,4 +1,67 @@
 # pyproject.toml
+
+[build-system]
+requires = ["setuptools >= 64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Batch-Pynamer"
+description = "A purely python batch file renamer (and metadata editor) specially made to work on linux"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE"}
+authors = [
+  {name = "Alejandro Roldán", email = "alej_roldan@disr.it"}
+]
+maintainers = [
+  {name = "Alejandro Roldán", email = "alej_roldan@disr.it"}
+]
+
+requires-python = ">=3.12"
+dependencies = [
+	"Pillow >= 10.0.0",
+	"mutagen >= 1.47.0",
+	"scandirRecursive @ git+https://github.com/Alejandro-Roldan/scandirRecursive.git"
+]
+
+dynamic = ["version", "urls"]
+
+[project.optional-dependencies]
+lint = [
+	"black >= 24.8.0",
+	"flake8 >= 7.1.0"
+]
+dev = [
+	"Batch-Pynamer[lint]"
+]
+
+[project.scripts]
+batchpynamer = "batchpynamer.batchpynamer:_gui_run"
+
+[project.gui-scripts]
+batchpynamer = "batchpynamer.batchpynamer:_gui_run"
+
+[tool.setuptools.dynamic]
+version = {attr = "batchpynamer.__version__"}
+urls.Repository = {attr = "batchpynamer.__url__"}
+urls.Homepage = {attr = "batchpynamer.__url__"}
+urls.Documentation = {attr = "batchpynamer.WIKI_URL"}
+
 [tool.black]
 line-length = 79
 include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | \.env
+  | _build
+  | buck-out
+  | build
+  | dist
+  | blib2to3
+  | tests/data
+)/
+'''
