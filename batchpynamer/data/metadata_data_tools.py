@@ -1,21 +1,27 @@
 import logging
 import os
 
-from PIL import Image as PillowImage
-from PIL import ExifTags
-
+from mutagen._file import FileType
 from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.flac import FLAC
 from mutagen.flac import Picture as FlacPicture
 from mutagen.id3 import APIC, ID3
 from mutagen.mp3 import MP3
+from PIL import ExifTags
+from PIL import Image as PillowImage
 
 import batchpynamer.data as bpn_data
 
 
-class EXIF:
-    def __init__(self, path):
+class EXIF(FileType):
+    _mimes = ["image/jpeg"]
+
+    tags = None
+
+    def load(self, filething):
+        self.tags = []
+
         self.path = path
         self.image = PillowImage.open(self.path)
         self.exif = self.image.getexif()
@@ -24,7 +30,7 @@ class EXIF:
             try:
                 tag_name = ExifTags.TAGS[tag]
                 value = self.exif[tag]
-                self.__dict__[tag_name] = [str(value)]
+                self.tags[tag_name] = [str(value)]
             except:
                 continue
 
@@ -32,23 +38,6 @@ class EXIF:
         for tag in new_metadata_dict:
             self.__dict__[tag] = new_metadata_dict[tag]
         self.image.save(self.path, exif=self.exif)
-
-
-# def JPG(file):
-# pillow_img = PillowImage.open(file)
-# img_exif = pillow_img.getexif()
-#
-# metadata = {}
-# for tag in ExifTags.TAGS:
-# try:
-# english_tag = ExifTags.TAGS[tag]
-# value = img_exif[tag]
-# # metadata[english_tag] = value
-# metadata[english_tag] = [str(value)]
-# except:
-# continue
-#
-# return metadata
 
 
 def meta_audio_get(file):

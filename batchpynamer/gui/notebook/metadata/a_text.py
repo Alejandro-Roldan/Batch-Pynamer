@@ -12,8 +12,8 @@ from batchpynamer.gui.basewidgets import (
     VerticalScrolledFrame,
 )
 from batchpynamer.gui.notebook.metadata.utils import (
-    no_duplicate_list,
     all_same_checker,
+    no_duplicate_list,
 )
 
 
