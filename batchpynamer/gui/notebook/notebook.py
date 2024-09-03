@@ -74,9 +74,7 @@ class ChangesNotebook(BaseWidget, ttk.Notebook):
 
         # Bottom Frame for Filters and Rename buttons
         self.nb_bottom_frame = ttk.Frame(master)
-        self.nb_bottom_frame.grid(
-            column=0, row=3, columnspan=6, sticky="w" + "e"
-        )
+        self.nb_bottom_frame.grid(column=0, row=3, columnspan=6, sticky="w" + "e")
         self.nb_bottom_frame.columnconfigure(0, weight=1)
         # Filters
         bpn_gui.filters_widget.tk_init(self.nb_bottom_frame)

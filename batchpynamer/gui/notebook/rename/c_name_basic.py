@@ -1,10 +1,6 @@
 from tkinter import ttk
 
-from batchpynamer.gui.basewidgets import (
-    BaseNamingWidget,
-    BpnComboVar,
-    BpnStrVar,
-)
+from batchpynamer.gui.basewidgets import BaseNamingWidget, BpnComboVar, BpnStrVar
 
 
 class NameBasic(BaseNamingWidget, ttk.LabelFrame):  # (2)
@@ -22,9 +18,7 @@ class NameBasic(BaseNamingWidget, ttk.LabelFrame):  # (2)
 
     def __init__(self):
         self.fields = self.Fields(
-            name_basic_name_opt=BpnComboVar(
-                ("Keep", "Remove", "Reverse", "Fixed")
-            ),
+            name_basic_name_opt=BpnComboVar(("Keep", "Remove", "Reverse", "Fixed")),
             name_basic_fixed_name=BpnStrVar(""),
         )
 

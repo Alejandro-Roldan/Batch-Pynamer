@@ -28,6 +28,7 @@ dynamic = ["version", "urls"]
 [project.optional-dependencies]
 lint = [
 	"black >= 24.8.0",
+	"isort >= 5.13.0",
 	"flake8 >= 7.1.0"
 ]
 dev = [
@@ -47,7 +48,7 @@ urls.Homepage = {attr = "batchpynamer.__url__"}
 urls.Documentation = {attr = "batchpynamer.WIKI_URL"}
 
 [tool.black]
-line-length = 79
+line-length = 88
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -65,3 +66,7 @@ exclude = '''
   | tests/data
 )/
 '''
+
+[tool.isort]
+profile = "black"
+skip_gitignore = true

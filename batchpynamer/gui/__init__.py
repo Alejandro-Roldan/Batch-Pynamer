@@ -32,9 +32,7 @@ def tk_init_post_hook():
     from batchpynamer.gui.notebook.rename.f_remove import Remove
     from batchpynamer.gui.notebook.rename.g_move import MoveParts
     from batchpynamer.gui.notebook.rename.h_add_to_str import AddToStr
-    from batchpynamer.gui.notebook.rename.i_add_folder_name import (
-        AddFolderName,
-    )
+    from batchpynamer.gui.notebook.rename.i_add_folder_name import AddFolderName
     from batchpynamer.gui.notebook.rename.j_numbering import Numbering
     from batchpynamer.gui.notebook.rename.k_ext_replace import ExtReplace
     from batchpynamer.gui.notebook.rename.rename import LastRename

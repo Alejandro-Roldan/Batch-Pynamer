@@ -38,9 +38,7 @@ class BaseFieldsWidget(BaseWidget):
             self.__dict__.update(fields)
 
         def get_all(self):
-            return {
-                field: self.__dict__[field].get() for field in self.__dict__
-            }
+            return {field: self.__dict__[field].get() for field in self.__dict__}
 
         def reset_all(self):
             for field in self.__dict__:

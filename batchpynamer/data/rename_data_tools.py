@@ -16,9 +16,7 @@ def rename_system_rename(old_path, new_path):
 
     # Only rename if the old name is different from the new name
     if old_path == new_path:
-        logging.debug(
-            f'"{old_path}" New name is the same as old name. Skipped'
-        )
+        logging.debug(f'"{old_path}" New name is the same as old name. Skipped')
         return None
 
     if not os.path.exists(new_path):
@@ -139,8 +137,7 @@ def rename_from_file_action(name, idx, fields_dict):
                     pass
         except IsADirectoryError:
             logging.warning(
-                f'rename_from_file_file: "{rename_from_file_file}" is a direct'
-                "ory"
+                f'rename_from_file_file: "{rename_from_file_file}" is a direct' "ory"
             )
 
     return name
@@ -221,9 +218,7 @@ def rename_replace_action(name, fields_dict):
         idx = 0
         # Find at what position what we want to replace is (all lowercase)
         # If find returns a -1 it means it didn't find it and we can break
-        while (
-            idx := name.lower().find(replace_replace_this.lower(), idx)
-        ) != -1:
+        while (idx := name.lower().find(replace_replace_this.lower(), idx)) != -1:
             # Create the new name
             name = (
                 name[:idx]
@@ -256,7 +251,7 @@ def rename_case_change_action(name, fields_dict):
     return name
 
 
-def rename_remove_action(name, fields_dict):
+def rename_remove_action(name, fields_dict):  # noqa: C901
     """Main remove function. It's been broken down into simpler parts"""
 
     def _remove_n_chars(name):
@@ -301,9 +296,7 @@ def rename_remove_action(name, fields_dict):
             # create an output list with the words that are Not inside the
             # remove_rm_words list, then join the list into a str with
             # spaces inbetween
-            name = " ".join(
-                [word for word in name_list if word not in remove_rm_words]
-            )
+            name = " ".join([word for word in name_list if word not in remove_rm_words])
 
         # Removes every apparition of all chars in the str by themselves
         for chara in remove_rm_chars:
@@ -357,9 +350,7 @@ def rename_remove_action(name, fields_dict):
         if remove_accents:
             # Not sure how this thing works (from stackoverflow)
             nfkd_form = unicodedata.normalize("NFKD", name)
-            name = "".join(
-                [c for c in nfkd_form if not unicodedata.combining(c)]
-            )
+            name = "".join([c for c in nfkd_form if not unicodedata.combining(c)])
         if remove_chars:
             for char in string.ascii_letters:
                 name = name.replace(char, "")
@@ -399,11 +390,7 @@ def rename_move_copy_text_action(name, fields_dict):
 
     if move_parts_ori_pos == "Start":
         if move_parts_end_pos == "End":
-            name = (
-                name[move_parts_ori_n:]
-                + move_parts_sep
-                + name[:move_parts_ori_n]
-            )
+            name = name[move_parts_ori_n:] + move_parts_sep + name[:move_parts_ori_n]
 
         elif move_parts_end_pos == "Position":
             name = (
@@ -416,11 +403,7 @@ def rename_move_copy_text_action(name, fields_dict):
 
     elif move_parts_ori_pos == "End":
         if move_parts_end_pos == "Start":
-            name = (
-                name[-move_parts_ori_n:]
-                + move_parts_sep
-                + name[:-move_parts_ori_n]
-            )
+            name = name[-move_parts_ori_n:] + move_parts_sep + name[:-move_parts_ori_n]
 
         elif move_parts_end_pos == "Position":
             name = (
@@ -457,16 +440,12 @@ def rename_add_action(name, fields_dict):
         name = name + add_to_str_insert_this
     elif add_to_str_at_pos > 0:
         name = (
-            name[:add_to_str_at_pos]
-            + add_to_str_insert_this
-            + name[add_to_str_at_pos:]
+            name[:add_to_str_at_pos] + add_to_str_insert_this + name[add_to_str_at_pos:]
         )
     elif add_to_str_at_pos < -1:
         add_to_str_at_pos += 1
         name = (
-            name[:add_to_str_at_pos]
-            + add_to_str_insert_this
-            + name[add_to_str_at_pos:]
+            name[:add_to_str_at_pos] + add_to_str_insert_this + name[add_to_str_at_pos:]
         )
 
     # Add suffix
@@ -538,7 +517,7 @@ def rename_add_folder_rename_action(name, path, fields_dict):
     return name
 
 
-def rename_numbering_action(name, idx, fields_dict):
+def rename_numbering_action(name, idx, fields_dict):  # noqa: C901
     """Calls to create the numbering and then sets it up inplace"""
 
     def _numbering_create(n, base, padding):

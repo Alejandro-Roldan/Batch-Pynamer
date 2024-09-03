@@ -42,18 +42,14 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
         super().__init__(master, column=1, row=0, sticky="nsew")
 
         # Path to new image, entry
-        self.image_path_entry = ttk.Entry(
-            self, textvariable=self.fields.image_path
-        )
+        self.image_path_entry = ttk.Entry(self, textvariable=self.fields.image_path)
         self.image_path_entry.grid(column=0, row=0, sticky="ew")
 
         self.reset_path_button = ttk.Button(
             self,
             width=2,
             text="X",
-            command=lambda: self.fields.image_path.set(
-                self.fields.image_path.default
-            ),
+            command=lambda: self.fields.image_path.set(self.fields.image_path.default),
         )
         self.reset_path_button.grid(column=1, row=0, sticky="w")
 
@@ -103,9 +99,7 @@ class MetadataImg(BaseFieldsWidget, ttk.Frame):
                     # PIL to get image size and resize
                     picture1 = PIL.Image.open(BytesIO(picture1))
                     im_width, im_height = map(str, picture1.size)
-                    picture1 = picture1.resize(
-                        self.img_display_h_w, PIL.Image.LANCZOS
-                    )
+                    picture1 = picture1.resize(self.img_display_h_w, PIL.Image.LANCZOS)
                     # Create a Tkinter usable image from PIL object
                     picture1 = PIL.ImageTk.PhotoImage(picture1)
 

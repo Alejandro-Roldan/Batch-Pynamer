@@ -71,28 +71,20 @@ class RenameFromRegExp(BaseNamingWidget, ttk.LabelFrame):  # (1)
         self.ex_w_frame.attributes("-type", "dialog")
 
         # Extended Match, text
-        ttk.Label(self.ex_w_frame, text="Match").grid(
-            column=0, row=0, sticky="w"
-        )
+        ttk.Label(self.ex_w_frame, text="Match").grid(column=0, row=0, sticky="w")
         self.ex_match_reg_text = tk.Text(
             self.ex_w_frame, bg="white", fg="black", relief="sunken"
         )
         self.ex_match_reg_text.grid(column=0, row=1, sticky="ew")
-        self.ex_match_reg_text.insert(
-            "end", self.fields.reg_exp_match_reg.get()
-        )
+        self.ex_match_reg_text.insert("end", self.fields.reg_exp_match_reg.get())
 
         # Extended Replace, text
-        ttk.Label(self.ex_w_frame, text="Replace").grid(
-            column=0, row=2, sticky="w"
-        )
+        ttk.Label(self.ex_w_frame, text="Replace").grid(column=0, row=2, sticky="w")
         self.ex_replace_with_text = tk.Text(
             self.ex_w_frame, bg="white", fg="black", relief="sunken"
         )
         self.ex_replace_with_text.grid(column=0, row=3, sticky="ew")
-        self.ex_replace_with_text.insert(
-            "end", self.fields.reg_exp_replace_with.get()
-        )
+        self.ex_replace_with_text.insert("end", self.fields.reg_exp_replace_with.get())
 
         # Close window, button
         self.done_button = ttk.Button(

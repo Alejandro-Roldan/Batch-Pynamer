@@ -39,9 +39,7 @@ class DirectoryNavigator(BaseWidget, ttk.Frame):
         xsb_tree_nav = ttk.Scrollbar(
             self, orient="horizontal", command=self.tree_nav.xview
         )
-        self.tree_nav.configure(
-            yscroll=ysb_tree_nav.set, xscroll=xsb_tree_nav.set
-        )
+        self.tree_nav.configure(yscroll=ysb_tree_nav.set, xscroll=xsb_tree_nav.set)
         # Title of the Treeview
         self.tree_nav.heading("#0", text="Directory Browser", anchor="w")
         self.tree_nav.column("#0", width=280)
@@ -78,9 +76,7 @@ class DirectoryNavigator(BaseWidget, ttk.Frame):
         # the index instead of doing a for loop
         return self.tree_nav.focus()
 
-    def refresh_full_tree_call(
-        self, event=None, var=None, index=None, mode=None
-    ):
+    def refresh_full_tree_call(self, event=None, var=None, index=None, mode=None):
         self.refresh_node(self.path)
 
     def update_active_node_call(self, event=None):

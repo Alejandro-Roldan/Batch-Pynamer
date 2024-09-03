@@ -31,9 +31,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
         self.columnconfigure(1, weight=1)
 
         self.field_frame = VerticalScrolledFrame(self)
-        self.field_frame.grid(
-            column=0, row=0, columnspan=3, pady=3, sticky="nsw"
-        )
+        self.field_frame.grid(column=0, row=0, columnspan=3, pady=3, sticky="nsw")
 
         self.new_tag_name = tk.StringVar()
 
@@ -62,10 +60,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
             pass
 
         self.fields = self.Fields(
-            **{
-                field: BpnStrVar("")
-                for field in bpn_data.DEFAULT_METADATA_FIELDS
-            }
+            **{field: BpnStrVar("") for field in bpn_data.DEFAULT_METADATA_FIELDS}
         )
 
     def add_new_tag_to_entries(self):
@@ -135,9 +130,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
                     meta_value = meta_audio.get(meta_item)
 
                     # Adds to each key the value for this selected item
-                    meta_dict[meta_item] = (
-                        meta_dict.get(meta_item, list()) + meta_value
-                    )
+                    meta_dict[meta_item] = meta_dict.get(meta_item, list()) + meta_value
 
             for key in meta_dict:
                 # Remove duplicates
@@ -162,9 +155,9 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
     def metadata_entries_create(self, *args, **kwargs):
         """Create the metadata list entries with their values"""
         for n, key in enumerate(self.fields.__dict__):
-            ttk.Label(
-                self.field_frame.interior, text=key, width=25, anchor="e"
-            ).grid(column=0, row=n)
+            ttk.Label(self.field_frame.interior, text=key, width=25, anchor="e").grid(
+                column=0, row=n
+            )
 
             ttk.Entry(
                 self.field_frame.interior,

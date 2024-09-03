@@ -1,10 +1,6 @@
 from tkinter import ttk
 
-from batchpynamer.gui.basewidgets import (
-    BaseNamingWidget,
-    BpnBoolVar,
-    BpnStrVar,
-)
+from batchpynamer.gui.basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
 class Replace(BaseNamingWidget, ttk.LabelFrame):  # (3)

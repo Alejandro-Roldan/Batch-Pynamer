@@ -1,11 +1,7 @@
 from tkinter import ttk
 
 import batchpynamer.gui as bpn_gui
-from batchpynamer.gui.basewidgets import (
-    BaseNamingWidget,
-    BpnBoolVar,
-    BpnStrVar,
-)
+from batchpynamer.gui.basewidgets import BaseNamingWidget, BpnBoolVar, BpnStrVar
 
 
 class RenameFromFile(BaseNamingWidget, ttk.LabelFrame):  # (0)

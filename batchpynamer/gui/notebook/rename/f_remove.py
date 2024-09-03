@@ -199,6 +199,4 @@ class Remove(BaseNamingWidget, ttk.LabelFrame):  # (5)
 
     def limit_to_n(self, var=None, index=None, mode=None):
         """Limits remove_to_n (b) with from_n (a)"""
-        spin_box_lower_limit_update(
-            self.fields.remove_from_n, self.fields.remove_to_n
-        )
+        spin_box_lower_limit_update(self.fields.remove_from_n, self.fields.remove_to_n)

@@ -94,9 +94,7 @@ def meta_img_create(img_path):
     type and its description. Then loads the selected img and returns
     the Picture object both for flacs and mp3s.
     """
-    if not img_path.lower().endswith(bpn_data.IMG_EXTS) or not os.path.isfile(
-        img_path
-    ):
+    if not img_path.lower().endswith(bpn_data.IMG_EXTS) or not os.path.isfile(img_path):
         return None, None
 
     # Set the corresponding mime type
