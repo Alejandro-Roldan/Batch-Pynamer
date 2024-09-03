@@ -43,9 +43,7 @@ class TopMenu(tk.Menu):
         """File Menu Dropdown"""
 
         # Create the menu
-        self.file_menu = tk.Menu(
-            self, tearoff=0, bg="gray75", foreground="black"
-        )
+        self.file_menu = tk.Menu(self, tearoff=0, bg="gray75", foreground="black")
 
         # Rename
         self.file_menu.add_command(
@@ -162,9 +160,7 @@ class TopMenu(tk.Menu):
         """Selection Menu Dropdown"""
 
         # Create the menu
-        self.selection_menu = tk.Menu(
-            self, tearoff=0, bg="gray75", foreground="black"
-        )
+        self.selection_menu = tk.Menu(self, tearoff=0, bg="gray75", foreground="black")
 
         # Select All
         self.selection_menu.add_command(
@@ -194,9 +190,7 @@ class TopMenu(tk.Menu):
         self.selected_command = tk.StringVar(value="DEFAULT")
 
         # Create the menu
-        self.command_menu = tk.Menu(
-            self, tearoff=0, bg="gray75", foreground="black"
-        )
+        self.command_menu = tk.Menu(self, tearoff=0, bg="gray75", foreground="black")
 
         # Save current variable values entries as command
         self.command_menu.add_command(
@@ -291,9 +285,7 @@ class TopMenu(tk.Menu):
             return _traverse(parent, plugins_dict.nested_dict)
 
         # Cretae the plugin abse menu
-        self.plugins_menu = tk.Menu(
-            self, tearoff=0, bg="gray75", foreground="black"
-        )
+        self.plugins_menu = tk.Menu(self, tearoff=0, bg="gray75", foreground="black")
         # And fill it dinamically
         plugins_dict = plugins_base._extract_plugins()
         generate_plugin_menu(self.plugins_menu, plugins_dict)
@@ -310,9 +302,7 @@ class TopMenu(tk.Menu):
             webbrowser.open(bpn.WIKI_URL)
 
         # Create the menu
-        self.about_menu = tk.Menu(
-            self, tearoff=0, bg="gray75", foreground="black"
-        )
+        self.about_menu = tk.Menu(self, tearoff=0, bg="gray75", foreground="black")
 
         # GitHub
         self.about_menu.add_command(label="Project", command=_open_project_url)

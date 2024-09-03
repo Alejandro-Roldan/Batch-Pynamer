@@ -22,7 +22,7 @@ class EXIF(FileType):
     def load(self, filething):
         self.tags = []
 
-        self.path = path
+        self.path = filething
         self.image = PillowImage.open(self.path)
         self.exif = self.image.getexif()
 
@@ -31,10 +31,10 @@ class EXIF(FileType):
                 tag_name = ExifTags.TAGS[tag]
                 value = self.exif[tag]
                 self.tags[tag_name] = [str(value)]
-            except:
+            except ValueError:
                 continue
 
-    def save(new_metadata_dict: dict):
+    def save(self, new_metadata_dict: dict):
         for tag in new_metadata_dict:
             self.__dict__[tag] = new_metadata_dict[tag]
         self.image.save(self.path, exif=self.exif)
@@ -125,9 +125,7 @@ def meta_img_create(img_path):
     type and its description. Then loads the selected img and returns
     the Picture object both for flacs and mp3s.
     """
-    if not img_path.lower().endswith(bpn_data.IMG_EXTS) or not os.path.isfile(
-        img_path
-    ):
+    if not img_path.lower().endswith(bpn_data.IMG_EXTS) or not os.path.isfile(img_path):
         return None, None
 
     # Set the corresponding mime type

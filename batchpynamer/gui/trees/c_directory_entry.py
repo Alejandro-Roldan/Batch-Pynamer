@@ -36,9 +36,7 @@ class DirectoryEntryFrame(BaseFieldsWidget, ttk.Frame):
         self.folder_nav_refresh_button.grid(column=0, row=0, sticky="w")
 
         # Folder path, entry
-        self.folder_dir_entry = ttk.Entry(
-            self, textvariable=self.fields.active_path
-        )
+        self.folder_dir_entry = ttk.Entry(self, textvariable=self.fields.active_path)
         self.folder_dir_entry.grid(column=1, row=0, sticky="w" + "e")
 
         self.bindings()

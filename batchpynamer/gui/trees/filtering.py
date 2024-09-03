@@ -51,16 +51,12 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
 
         # Regular expression mask, entry
         ttk.Label(self, text="Mask").grid(column=0, row=0, sticky="e")
-        self.mask_entry = ttk.Entry(
-            self, width=10, textvariable=self.fields.mask
-        )
+        self.mask_entry = ttk.Entry(self, width=10, textvariable=self.fields.mask)
         self.mask_entry.grid(column=1, row=0, sticky="w")
 
         # Extension list, entry
         ttk.Label(self, text="Ext(s)").grid(column=0, row=1, sticky="e")
-        self.ext_entry = ttk.Entry(
-            self, width=10, textvariable=self.fields.ext
-        )
+        self.ext_entry = ttk.Entry(self, width=10, textvariable=self.fields.ext)
         self.ext_entry.grid(column=1, row=1, sticky="w")
 
         # Folders, checkbutton
@@ -101,14 +97,10 @@ class FiltersWidget(BaseNamingWidget, ttk.LabelFrame):
             text="Files before Dirs",
             variable=self.fields.files_before_dirs,
         )
-        self.files_before_dirs_check.grid(
-            column=4, row=1, columnspan=2, sticky="w"
-        )
+        self.files_before_dirs_check.grid(column=4, row=1, columnspan=2, sticky="w")
 
         # Recursive depth levels, spinbox
-        ttk.Label(self, text="Recursive Levels").grid(
-            column=4, row=0, sticky="ew"
-        )
+        ttk.Label(self, text="Recursive Levels").grid(column=4, row=0, sticky="ew")
         self.depth_spin = ttk.Spinbox(
             self,
             width=3,

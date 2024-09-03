@@ -55,9 +55,7 @@ class BasePlugin:
         self.selection_return = self.selection()
         if not self.allow_no_selection and not self.selection_return:
             # And handle empty selection
-            raise NoSelectionError(
-                "This plugin needs selected items to execute"
-            )
+            raise NoSelectionError("This plugin needs selected items to execute")
         elif self.allow_no_selection and not self.selection_return:
             # Run just once without item
             self.run_return = self.run()

@@ -21,9 +21,7 @@ class AddFolderName(BaseNamingWidget, ttk.LabelFrame):  # (8)
 
     def __init__(self):
         self.fields = self.Fields(
-            add_folder_name_name_pos=BpnComboVar(
-                ("Prefix", "Suffix", "Position")
-            ),
+            add_folder_name_name_pos=BpnComboVar(("Prefix", "Suffix", "Position")),
             add_folder_name_pos=BpnIntVar(0),
             add_folder_name_sep=BpnStrVar(""),
             add_folder_name_levels=BpnIntVar(0),

@@ -35,9 +35,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
         self.columnconfigure(1, weight=1)
 
         self.field_frame = VerticalScrolledFrame(self)
-        self.field_frame.grid(
-            column=0, row=0, columnspan=3, pady=3, sticky="nsw"
-        )
+        self.field_frame.grid(column=0, row=0, columnspan=3, pady=3, sticky="nsw")
 
         self.new_tag_name = tk.StringVar()
 
@@ -151,9 +149,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
         # Reset to create the proper mime type list of fields
         self.metadata_fields_reset(mime_type)
         # And init the same list for the data dict
-        meta_dict = {
-            field: [] for field in bpn_data.DEFAULT_METADATA_FIELDS[mime_type]
-        }
+        meta_dict = {field: [] for field in bpn_data.DEFAULT_METADATA_FIELDS[mime_type]}
 
         # Extract metadata from them
         try:
@@ -165,9 +161,7 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
                     meta_value = meta_audio.get(meta_item)
 
                     # Adds to each key the value for this selected item
-                    meta_dict[meta_item] = (
-                        meta_dict.get(meta_item, list()) + meta_value
-                    )
+                    meta_dict[meta_item] = meta_dict.get(meta_item, list()) + meta_value
 
             for key in meta_dict:
                 # Remove duplicates
@@ -193,9 +187,9 @@ class MetadataListEntries(BaseFieldsWidget, ttk.Frame):
     def metadata_entries_create(self, *args, **kwargs):
         """Create the metadata list entries with their values"""
         for n, key in enumerate(self.fields.__dict__):
-            ttk.Label(
-                self.field_frame.interior, text=key, width=25, anchor="e"
-            ).grid(column=0, row=n)
+            ttk.Label(self.field_frame.interior, text=key, width=25, anchor="e").grid(
+                column=0, row=n
+            )
 
             ttk.Entry(
                 self.field_frame.interior,

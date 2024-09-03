@@ -34,9 +34,7 @@ class LastRename:
 
     def last_name_list_get(self):
         """Return the old name in the last rename"""
-        last_name_list = list(
-            last_name[0] for last_name in self.last_rename_list
-        )
+        last_name_list = list(last_name[0] for last_name in self.last_rename_list)
         return last_name_list
 
     def new_name_list_get(self):
@@ -70,9 +68,7 @@ class Rename(basewidgets.BaseWidget, ttk.Frame):
             text="Command",
             command=commands.command_gui_apply_command_call,
         )
-        self.load_command_button.grid(
-            column=0, row=1, padx=1, pady=1, sticky="e"
-        )
+        self.load_command_button.grid(column=0, row=1, padx=1, pady=1, sticky="e")
         # Disable the button if no path to where commands are stored
         # TODO add also disable if no command selected
         if not bpn_config.config_folder_path:

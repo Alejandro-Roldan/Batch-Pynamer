@@ -38,12 +38,8 @@ class SaveCommandWindow(PopUpWindow, BaseFieldsWidget):
 
         # Extended Replace, entry
         txt = "Choose a Name for The New Command"
-        ttk.Label(self, text=txt).grid(
-            column=0, row=0, columnspan=2, sticky="w"
-        )
-        self.name_entry = ttk.Entry(
-            self, textvariable=self.fields.command_name
-        )
+        ttk.Label(self, text=txt).grid(column=0, row=0, columnspan=2, sticky="w")
+        self.name_entry = ttk.Entry(self, textvariable=self.fields.command_name)
         self.name_entry.grid(column=0, row=1, columnspan=2, sticky="ew")
         self.name_entry.focus()
 
@@ -60,15 +56,11 @@ class SaveCommandWindow(PopUpWindow, BaseFieldsWidget):
         self.steps_combo.grid(column=1, row=2, sticky="ew")
 
         # Cancel, button
-        self.cancel_button = ttk.Button(
-            self, text="Cancel", command=self.destroy
-        )
+        self.cancel_button = ttk.Button(self, text="Cancel", command=self.destroy)
         self.cancel_button.grid(column=0, row=3)
 
         # Save and exit Window, Button
-        self.save_button = ttk.Button(
-            self, text="Save", command=self.save_and_exit
-        )
+        self.save_button = ttk.Button(self, text="Save", command=self.save_and_exit)
         self.save_button.grid(column=1, row=3)
 
         for child in self.winfo_children():
@@ -129,9 +121,7 @@ def command_gui_load_command_call(event=None):
     # If the selected command isn't the default loads the dictionary from the
     # configuration file
     if command_name != "DEFAULT":
-        fields_dict = bpn_config.command_conf.command_conf_fields_get(
-            command_name
-        )
+        fields_dict = bpn_config.command_conf.command_conf_fields_get(command_name)
 
         # Call to set the dictionary
         set_command_action(fields_dict)
@@ -183,9 +173,7 @@ def command_gui_generate_name_action(
     # the selected command name
     fields_dict = bpn_config.command_conf.command_conf_fields_get(command_name)
 
-    new_name = rename_create_new_name_action(
-        old_name, idx, old_path, fields_dict
-    )
+    new_name = rename_create_new_name_action(old_name, idx, old_path, fields_dict)
 
     # Get the next_step call recursevely
     next_step = fields_dict["next_step"]
