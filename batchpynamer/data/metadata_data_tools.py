@@ -1,43 +1,15 @@
 import logging
 import os
 
-from mutagen._file import FileType
 from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.flac import FLAC
 from mutagen.flac import Picture as FlacPicture
 from mutagen.id3 import APIC, ID3
 from mutagen.mp3 import MP3
-from PIL import ExifTags
-from PIL import Image as PillowImage
 
 import batchpynamer.data as bpn_data
-
-
-class EXIF(FileType):
-    _mimes = ["image/jpeg"]
-
-    tags = None
-
-    def load(self, filething):
-        self.tags = []
-
-        self.path = filething
-        self.image = PillowImage.open(self.path)
-        self.exif = self.image.getexif()
-
-        for tag in ExifTags.TAGS:
-            try:
-                tag_name = ExifTags.TAGS[tag]
-                value = self.exif[tag]
-                self.tags[tag_name] = [str(value)]
-            except ValueError:
-                continue
-
-    def save(self, new_metadata_dict: dict):
-        for tag in new_metadata_dict:
-            self.__dict__[tag] = new_metadata_dict[tag]
-        self.image.save(self.path, exif=self.exif)
+from batchpynamer.data.exif import EXIF
 
 
 def meta_audio_get(file):

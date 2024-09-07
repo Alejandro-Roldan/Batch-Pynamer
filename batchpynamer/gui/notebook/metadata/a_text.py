@@ -11,10 +11,7 @@ from batchpynamer.gui.basewidgets import (
     BpnStrVar,
     VerticalScrolledFrame,
 )
-from batchpynamer.gui.notebook.metadata.utils import (
-    all_same_checker,
-    no_duplicate_list,
-)
+from batchpynamer.gui.notebook.metadata.utils import all_same_checker, no_duplicate_list
 
 
 class MetadataListEntries(BaseFieldsWidget, ttk.Frame):

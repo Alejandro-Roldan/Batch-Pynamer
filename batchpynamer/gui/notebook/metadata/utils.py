@@ -12,7 +12,7 @@ def all_same_checker(list_, func_):
     """Checker function that extracted items (from list_ with func_) are all the same.
 
     Uses sets not being able to have repeated items. So if at some point the set has
-    more than one iten they arent all the same.
+    more than one item they arent all the same.
 
     Raises IndexError if list_ is empty.
     And Value Error when multiple extracted items.
