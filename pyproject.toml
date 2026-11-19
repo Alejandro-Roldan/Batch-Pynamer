@@ -43,9 +43,9 @@ batchpynamer = "batchpynamer.batchpynamer:_gui_run"
 
 [tool.setuptools.dynamic]
 version = {attr = "batchpynamer.__version__"}
-urls.Repository = {attr = "batchpynamer.__url__"}
-urls.Homepage = {attr = "batchpynamer.__url__"}
-urls.Documentation = {attr = "batchpynamer.WIKI_URL"}
+#urls.Repository = {attr = "batchpynamer.__url__"}
+#urls.Homepage = {attr = "batchpynamer.__url__"}
+#urls.Documentation = {attr = "batchpynamer.WIKI_URL"}
 
 [tool.black]
 line-length = 88
